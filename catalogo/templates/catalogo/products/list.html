@@ -20,7 +20,7 @@
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 class="m-0 fw-bold text-success">
             <i class="bi bi-box me-2"></i>
-            Todos os Produtos ({{ products.count }})
+            Produtos Acrílicos ({{ products.count }})
         </h6>
         <div class="btn-group">
             <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
@@ -35,11 +35,11 @@
                 <table class="table table-hover">
                     <thead class="table-light">
                         <tr>
+                            <th style="width: 80px;">Foto</th>
                             <th>SKU</th>
                             <th>Produto</th>
                             <th>Categoria</th>
-                            <th>Preço</th>
-                            <th>Espessura</th>
+                            <th>Detalhes</th>
                             <th>Status</th>
                             {% if is_supervisor %}
                             <th class="text-end">Ações</th>
@@ -50,14 +50,26 @@
                         {% for product in products %}
                         <tr>
                             <td>
-                                <span class="badge bg-secondary">{{ product.sku }}</span>
+                                {% if product.photo %}
+                                <img src="{{ product.photo.url }}" 
+                                     alt="{{ product.name }}" 
+                                     class="img-thumbnail" 
+                                     style="width: 60px; height: 60px; object-fit: cover;">
+                                {% else %}
+                                <div class="text-center text-muted">
+                                    <i class="bi bi-image" style="font-size: 2rem;"></i>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-dark">{{ product.sku }}</span>
                             </td>
                             <td>
                                 <strong>{{ product.name }}</strong>
                                 {% if product.description %}
                                 <br>
                                 <small class="text-muted">
-                                    {{ product.description|truncatechars:50 }}
+                                    {{ product.description|truncatechars:60 }}
                                 </small>
                                 {% endif %}
                             </td>
@@ -67,24 +79,21 @@
                                 </span>
                             </td>
                             <td>
-                                {% if product.base_price %}
-                                <strong class="text-success">R$ {{ product.base_price }}</strong>
-                                {% else %}
-                                <span class="badge bg-secondary">Não vendável</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="badge bg-primary">{{ product.get_thickness_mm_display }}</span>
+                                <div class="small">
+                                    <div><strong>Espessura:</strong> {{ product.get_thickness_mm_display }}</div>
+                                    {% if product.acrylic_color %}
+                                    <div><strong>Cor:</strong> {{ product.get_acrylic_color_display }}</div>
+                                    {% endif %}
+                                    {% if product.base_price %}
+                                    <div><strong>Preço:</strong> R$ {{ product.base_price }}</div>
+                                    {% endif %}
+                                </div>
                             </td>
                             <td>
                                 {% if product.is_active %}
-                                <span class="badge bg-success">
-                                    <i class="bi bi-check-circle"></i> Ativo
-                                </span>
+                                <span class="badge bg-success">Ativo</span>
                                 {% else %}
-                                <span class="badge bg-secondary">
-                                    <i class="bi bi-x-circle"></i> Inativo
-                                </span>
+                                <span class="badge bg-secondary">Inativo</span>
                                 {% endif %}
                                 <br>
                                 <small>
@@ -94,6 +103,10 @@
                                     <span class="badge bg-warning">Não vendável</span>
                                     {% endif %}
                                 </small>
+                                {% if product.has_electrical_component %}
+                                <br>
+                                <span class="badge bg-danger mt-1">Elétrico</span>
+                                {% endif %}
                             </td>
                             {% if is_supervisor %}
                             <td class="text-end">
@@ -103,29 +116,37 @@
                                         {% csrf_token %}
                                         {% if product.is_active %}
                                         <button type="submit" class="btn btn-outline-warning" 
-                                                title="Desativar" data-bs-toggle="tooltip">
+                                                title="Desativar">
                                             <i class="bi bi-toggle-off"></i>
                                         </button>
                                         {% else %}
                                         <button type="submit" class="btn btn-outline-success" 
-                                                title="Ativar" data-bs-toggle="tooltip">
+                                                title="Ativar">
                                             <i class="bi bi-toggle-on"></i>
                                         </button>
                                         {% endif %}
                                     </form>
                                     
+                                    <!-- View Details Button -->
+                                    <button type="button" class="btn btn-outline-info btn-view-details"
+                                            data-product-id="{{ product.id }}"
+                                            data-product-name="{{ product.name }}"
+                                            title="Ver detalhes">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    
                                     <!-- Edit Button -->
-                                    <button type="button" class="btn btn-outline-primary" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#editProductModal{{ product.pk }}"
+                                    <button type="button" class="btn btn-outline-primary btn-edit-product"
+                                            data-product-id="{{ product.id }}"
                                             title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     
                                     <!-- Delete Button -->
-                                    <button type="button" class="btn btn-outline-danger" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#deleteProductModal{{ product.pk }}"
+                                    <button type="button" class="btn btn-outline-danger btn-delete-product"
+                                            data-product-id="{{ product.id }}"
+                                            data-product-name="{{ product.name }}"
+                                            data-product-sku="{{ product.sku }}"
                                             title="Excluir">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -152,9 +173,11 @@
     </div>
 </div>
 
-<!-- MODAL PARA CRIAR PRODUTO (SIMPLIFICADO POR ENQUANTO) -->
+<!-- ============================================= -->
+<!-- MODAL: CRIAR NOVO PRODUTO -->
+<!-- ============================================= -->
 <div class="modal fade" id="createProductModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
@@ -163,74 +186,251 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form method="post" action="{% url 'product_create' %}">
+            <form method="post" action="{% url 'product_create' %}" enctype="multipart/form-data" id="createProductForm">
                 {% csrf_token %}
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">SKU*</label>
-                            <input type="text" class="form-control" name="sku" required
-                                   placeholder="001 ou 001-ABC">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Nome*</label>
-                            <input type="text" class="form-control" name="name" required
-                                   placeholder="Nome do produto">
-                        </div>
-                    </div>
+                    <!-- Abas de navegação -->
+                    <ul class="nav nav-tabs mb-4" id="createTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="basic-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#basic-pane" type="button">
+                                <i class="bi bi-info-circle"></i> Básico
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="measurements-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#measurements-pane" type="button">
+                                <i class="bi bi-rulers"></i> Medidas
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="material-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#material-pane" type="button">
+                                <i class="bi bi-palette"></i> Material
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="electrical-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#electrical-pane" type="button">
+                                <i class="bi bi-lightning-charge"></i> Elétrica
+                            </button>
+                        </li>
+                    </ul>
                     
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Categoria*</label>
-                            <select class="form-select" name="category" required>
-                                <option value="">Selecione...</option>
-                                {% for category in categories %}
-                                <option value="{{ category.pk }}">{{ category.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Espessura*</label>
-                            <select class="form-select" name="thickness_mm" required>
-                                <option value="2">2 mm</option>
-                                <option value="3" selected>3 mm</option>
-                                <option value="4">4 mm</option>
-                                <option value="6">6 mm</option>
-                                <option value="8">8 mm</option>
-                                <option value="10">10 mm</option>
-                                <option value="12">12 mm</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Descrição</label>
-                        <textarea class="form-control" name="description" rows="2"></textarea>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                    <div class="tab-content">
+                        <!-- ABA 1: Dados Básicos -->
+                        <div class="tab-pane fade show active" id="basic-pane">
+                            <div class="row mb-4">
+                                <div class="col-md-4 text-center">
+                                    <div class="mb-3">
+                                        <label class="form-label">Foto do Produto</label>
+                                        <input type="file" class="form-control" name="photo" 
+                                               accept="image/*" id="photoInput"
+                                               onchange="previewCreateImage(event)">
+                                        <small class="text-muted">Opcional</small>
+                                    </div>
+                                    <div id="imagePreviewCreate" style="display: none;">
+                                        <img id="previewImageCreate" class="img-thumbnail" style="max-height: 150px;">
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">SKU*</label>
+                                            <input type="text" class="form-control" name="sku" required
+                                                   placeholder="001 ou 001-ABC"
+                                                   oninput="this.value = this.value.toUpperCase()">
+                                            <small class="form-text text-muted">Código único do produto</small>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Nome*</label>
+                                            <input type="text" class="form-control" name="name" required
+                                                   placeholder="Nome do produto">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Categoria*</label>
+                                            <select class="form-select" name="category" required>
+                                                <option value="">Selecione...</option>
+                                                {% for category in categories %}
+                                                <option value="{{ category.pk }}">{{ category.name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label">Espessura*</label>
+                                            <select class="form-select" name="thickness_mm" required>
+                                                <option value="2">2 mm</option>
+                                                <option value="3" selected>3 mm</option>
+                                                <option value="4">4 mm</option>
+                                                <option value="6">6 mm</option>
+                                                <option value="8">8 mm</option>
+                                                <option value="10">10 mm</option>
+                                                <option value="12">12 mm</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Descrição</label>
+                                <textarea class="form-control" name="description" rows="3"
+                                          placeholder="Descreva o produto..."></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" 
+                                               name="is_sellable" id="is_sellable_create" checked
+                                               onchange="togglePriceFieldCreate(this)">
+                                        <label class="form-check-label" for="is_sellable_create">
+                                            <strong>Produto Vendável</strong>
+                                        </label>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Se não for vendável, não aparecerá no catálogo
+                                    </small>
+                                </div>
+                                <div class="col-md-6 mb-3" id="priceFieldCreate">
+                                    <label class="form-label">Preço Base (R$)*</label>
+                                    <input type="number" class="form-control" name="base_price" 
+                                           step="0.01" min="0" placeholder="0.00" required>
+                                </div>
+                            </div>
+                            
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" 
-                                       name="is_sellable" id="is_sellable" checked>
-                                <label class="form-check-label" for="is_sellable">
-                                    Produto vendável?
+                                       name="is_active" id="is_active_create" checked>
+                                <label class="form-check-label" for="is_active_create">
+                                    Produto Ativo
                                 </label>
                             </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Preço (R$)</label>
-                            <input type="number" class="form-control" name="base_price"
-                                   step="0.01" min="0" placeholder="0.00">
+                        
+                        <!-- ABA 2: Medidas -->
+                        <div class="tab-pane fade" id="measurements-pane">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Preencha apenas as medidas que se aplicam ao produto.
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Altura (cm)</label>
+                                    <input type="number" class="form-control" name="height_cm" 
+                                           step="0.01" min="0" placeholder="0.00">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Largura (cm)</label>
+                                    <input type="number" class="form-control" name="width_cm" 
+                                           step="0.01" min="0" placeholder="0.00">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Comprimento (cm)</label>
+                                    <input type="number" class="form-control" name="length_cm" 
+                                           step="0.01" min="0" placeholder="0.00">
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Diâmetro (cm)</label>
+                                    <input type="number" class="form-control" name="diameter_cm" 
+                                           step="0.01" min="0" placeholder="0.00">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Profundidade (cm)</label>
+                                    <input type="number" class="form-control" name="depth_cm" 
+                                           step="0.01" min="0" placeholder="0.00">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Curvatura (cm)</label>
+                                    <input type="number" class="form-control" name="curvature_cm" 
+                                           step="0.01" min="0" placeholder="0.00">
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" 
-                               name="is_active" id="is_active" checked>
-                        <label class="form-check-label" for="is_active">
-                            Produto ativo
-                        </label>
+                        
+                        <!-- ABA 3: Material -->
+                        <div class="tab-pane fade" id="material-pane">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Cor do Acrílico</label>
+                                    <select class="form-select" name="acrylic_color">
+                                        <option value="">Selecione...</option>
+                                        <option value="CRISTAL">Cristal</option>
+                                        <option value="BRANCO">Branco</option>
+                                        <option value="PRETO">Preto</option>
+                                        <option value="ROSA">Rosa</option>
+                                        <option value="ROSA_BEBE">Rosa Bebê</option>
+                                        <option value="AZUL">Azul</option>
+                                        <option value="AZUL_BEBE">Azul Bebê</option>
+                                        <option value="ESPELHADO">Espelhado</option>
+                                        <option value="ESPELHADO_TRANSPARENTE">Espelhado Transparente</option>
+                                        <option value="COLORIDO">Colorido</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Observação de Cor</label>
+                                <input type="text" class="form-control" name="color_observation"
+                                       placeholder="Ex: Transparente fosco, Colorido personalizado...">
+                            </div>
+                        </div>
+                        
+                        <!-- ABA 4: Elétrica -->
+                        <div class="tab-pane fade" id="electrical-pane">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" 
+                                               name="has_electrical_component" 
+                                               id="has_electrical_create"
+                                               onchange="toggleElectricalFieldsCreate(this)">
+                                        <label class="form-check-label" for="has_electrical_create">
+                                            <strong>Possui Componente Elétrico?</strong>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row" id="electricalFieldsCreate" style="display: none;">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Tensão*</label>
+                                    <select class="form-select" name="voltage">
+                                        <option value="">Selecione...</option>
+                                        <option value="127">127V</option>
+                                        <option value="BIVOLT">Bivolt</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" 
+                                               name="has_led" id="has_led_create"
+                                               onchange="toggleLEDFieldCreate(this)">
+                                        <label class="form-check-label" for="has_led_create">
+                                            Possui LED?
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row" id="ledFieldsCreate" style="display: none;">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Tipo de LED*</label>
+                                    <select class="form-select" name="led_type">
+                                        <option value="">Selecione...</option>
+                                        <option value="QUENTE">Quente</option>
+                                        <option value="FRIO">Frio</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -242,20 +442,318 @@
     </div>
 </div>
 
+<!-- ============================================= -->
+<!-- MODAL: VER DETALHES DO PRODUTO (Dinâmico) -->
+<!-- ============================================= -->
+<div class="modal fade" id="viewProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Detalhes do Produto
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="viewProductModalBody">
+                <!-- Conteúdo será carregado via JavaScript -->
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2">Carregando detalhes do produto...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================= -->
+<!-- MODAL: EDITAR PRODUTO (Dinâmico) -->
+<!-- ============================================= -->
+<div class="modal fade" id="editProductModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-pencil me-2"></i>
+                    Editar Produto
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="editProductModalBody">
+                <!-- Conteúdo será carregado via JavaScript -->
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Carregando...</span>
+                    </div>
+                    <p class="mt-2">Carregando formulário de edição...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================= -->
+<!-- MODAL: CONFIRMAR EXCLUSÃO -->
+<!-- ============================================= -->
+<div class="modal fade" id="deleteProductModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o produto:</p>
+                <div class="alert alert-warning" id="deleteProductInfo">
+                    <!-- Informações serão preenchidas via JavaScript -->
+                </div>
+                <p class="text-danger">
+                    <i class="bi bi-info-circle"></i> 
+                    Esta ação não pode ser desfeita.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="deleteProductForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Excluir Produto</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-// Auto-uppercase para SKU
+// =============================================
+// FUNÇÕES PARA MANIPULAR PRODUTOS
+// =============================================
+
+function loadProductDetails(productId) {
+    console.log(`Carregando detalhes do produto ${productId}...`);
+    
+    fetch(`/produtos/${productId}/detalhes/`)
+        .then(response => {
+            if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+            return response.text();
+        })
+        .then(html => {
+            document.getElementById('viewProductModalBody').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('viewProductModal')).show();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            document.getElementById('viewProductModalBody').innerHTML = 
+                `<div class="alert alert-danger">Erro: ${error.message}</div>`;
+            new bootstrap.Modal(document.getElementById('viewProductModal')).show();
+        });
+}
+
+function loadProductEditForm(productId) {
+    console.log(`Carregando edição do produto ${productId}...`);
+    
+    fetch(`/produtos/${productId}/editar/modal/`)
+        .then(response => {
+            if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+            return response.text();
+        })
+        .then(html => {
+            document.getElementById('editProductModalBody').innerHTML = html;
+            const modal = new bootstrap.Modal(document.getElementById('editProductModal'));
+            modal.show();
+            
+            // Inicializar eventos do formulário
+            initFormEvents();
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            document.getElementById('editProductModalBody').innerHTML = 
+                `<div class="alert alert-danger">Erro: ${error.message}</div>`;
+            new bootstrap.Modal(document.getElementById('editProductModal')).show();
+        });
+}
+
+function setupDeleteModal(productId, productName, productSku) {
+    document.getElementById('deleteProductInfo').innerHTML = `
+        <h5 class="alert-heading">${productName}</h5>
+        <p class="mb-1"><strong>SKU:</strong> ${productSku}</p>
+    `;
+    
+    const form = document.getElementById('deleteProductForm');
+    form.action = `/produtos/${productId}/excluir/`;
+    
+    new bootstrap.Modal(document.getElementById('deleteProductModal')).show();
+}
+
+// =============================================
+// EVENT LISTENERS PARA BOTÕES
+// =============================================
+
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página carregada, configurando eventos...');
+    
+    // Evento para botões "Ver Detalhes"
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-view-details')) {
+            const button = e.target.closest('.btn-view-details');
+            const productId = button.getAttribute('data-product-id');
+            console.log('Clicou em Ver Detalhes:', productId);
+            loadProductDetails(productId);
+        }
+    });
+    
+    // Evento para botões "Editar"
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-edit-product')) {
+            const button = e.target.closest('.btn-edit-product');
+            const productId = button.getAttribute('data-product-id');
+            console.log('Clicou em Editar:', productId);
+            loadProductEditForm(productId);
+        }
+    });
+    
+    // Evento para botões "Excluir"
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-delete-product')) {
+            const button = e.target.closest('.btn-delete-product');
+            const productId = button.getAttribute('data-product-id');
+            const productName = button.getAttribute('data-product-name');
+            const productSku = button.getAttribute('data-product-sku');
+            console.log('Clicou em Excluir:', productId, productName);
+            setupDeleteModal(productId, productName, productSku);
+        }
+    });
+    
+    // Inicializar eventos de formulário
+    initFormEvents();
+    
+    // Debug
+    console.log(`Botões encontrados: 
+        Ver Detalhes: ${document.querySelectorAll('.btn-view-details').length}
+        Editar: ${document.querySelectorAll('.btn-edit-product').length}
+        Excluir: ${document.querySelectorAll('.btn-delete-product').length}`);
+});
+
+// =============================================
+// FUNÇÕES PARA FORMULÁRIOS CONDICIONAIS
+// =============================================
+
+function togglePriceFieldCreate(checkbox) {
+    const priceField = document.getElementById('priceFieldCreate');
+    const priceInput = priceField.querySelector('input[name="base_price"]');
+    
+    if (checkbox.checked) {
+        priceInput.required = true;
+        priceField.style.display = 'block';
+    } else {
+        priceInput.required = false;
+        priceField.style.display = 'none';
+        priceInput.value = '';
+    }
+}
+
+function toggleElectricalFieldsCreate(checkbox) {
+    const electricalFields = document.getElementById('electricalFieldsCreate');
+    const voltageSelect = electricalFields.querySelector('select[name="voltage"]');
+    
+    if (checkbox.checked) {
+        electricalFields.style.display = 'flex';
+        voltageSelect.required = true;
+    } else {
+        electricalFields.style.display = 'none';
+        voltageSelect.required = false;
+        voltageSelect.value = '';
+        
+        // Desativar LED também
+        const ledCheckbox = document.getElementById('has_led_create');
+        if (ledCheckbox) {
+            ledCheckbox.checked = false;
+            toggleLEDFieldCreate(ledCheckbox);
+        }
+    }
+}
+
+function toggleLEDFieldCreate(checkbox) {
+    const ledFields = document.getElementById('ledFieldsCreate');
+    const ledTypeSelect = ledFields.querySelector('select[name="led_type"]');
+    
+    if (checkbox.checked) {
+        ledFields.style.display = 'flex';
+        ledTypeSelect.required = true;
+    } else {
+        ledFields.style.display = 'none';
+        ledTypeSelect.required = false;
+        ledTypeSelect.value = '';
+    }
+}
+
+function initFormEvents() {
+    // Auto-uppercase para SKU
     document.querySelectorAll('input[name="sku"]').forEach(input => {
         input.addEventListener('input', function() {
             this.value = this.value.toUpperCase();
         });
     });
     
-    // Inicializar tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
+    // Fechar modais após submit
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function() {
+            setTimeout(() => {
+                const modal = this.closest('.modal');
+                if (modal) {
+                    const bsModal = bootstrap.Modal.getInstance(modal);
+                    if (bsModal) bsModal.hide();
+                    
+                    // Recarregar após 1 segundo para ver mudanças
+                    setTimeout(() => {
+                        if (this.action.includes('/excluir/') || 
+                            this.action.includes('/editar/') ||
+                            this.action.includes('/novo/')) {
+                            location.reload();
+                        }
+                    }, 1000);
+                }
+            }, 1500);
+        });
     });
-});
+}
+
+// =============================================
+// FUNÇÕES AUXILIARES
+// =============================================
+
+function previewCreateImage(event) {
+    const input = event.target;
+    const previewContainer = document.getElementById('imagePreviewCreate');
+    const preview = document.getElementById('previewImageCreate');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            previewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        previewContainer.style.display = 'none';
+        preview.src = '';
+    }
+}
+
+// =============================================
+// TESTE MANUAL (use no console se necessário)
+// =============================================
+
+// Para testar manualmente no console do navegador:
+// window.testDetails = (id) => loadProductDetails(id);
+// window.testEdit = (id) => loadProductEditForm(id);
+// window.testDelete = (id, name, sku) => setupDeleteModal(id, name, sku);
 </script>
 {% endblock %}

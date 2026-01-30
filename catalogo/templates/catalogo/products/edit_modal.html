@@ -1,265 +1,325 @@
-{% extends 'catalogo/base.html' %}
-
-{% block title %}Produtos - Decorcril System{% endblock %}
-{% block page_title %}Produtos{% endblock %}
-
-{% block breadcrumb %}
-<li class="breadcrumb-item active" aria-current="page">Produtos</li>
-{% endblock %}
-
-{% block page_actions %}
-{% if is_supervisor %}
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProductModal">
-    <i class="bi bi-plus-circle me-1"></i> Novo Produto
-</button>
-{% endif %}
-{% endblock %}
-
-{% block content %}
-<div class="card shadow">
-    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-        <h6 class="m-0 fw-bold text-success">
-            <i class="bi bi-box me-2"></i>
-            Todos os Produtos ({{ products.count }})
-        </h6>
-        <div class="btn-group">
-            <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
-                <i class="bi bi-arrow-clockwise"></i>
+<form method="post" action="{% url 'product_update' product.pk %}" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <!-- Abas de navegação -->
+    <ul class="nav nav-tabs mb-4" id="editTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="basic-edit-tab" data-bs-toggle="tab" 
+                    data-bs-target="#basic-edit-pane" type="button">
+                <i class="bi bi-info-circle"></i> Básico
             </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="measurements-edit-tab" data-bs-toggle="tab" 
+                    data-bs-target="#measurements-edit-pane" type="button">
+                <i class="bi bi-rulers"></i> Medidas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="material-edit-tab" data-bs-toggle="tab" 
+                    data-bs-target="#material-edit-pane" type="button">
+                <i class="bi bi-palette"></i> Material
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="electrical-edit-tab" data-bs-toggle="tab" 
+                    data-bs-target="#electrical-edit-pane" type="button">
+                <i class="bi bi-lightning-charge"></i> Elétrica
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content">
+        <!-- ABA 1: Dados Básicos -->
+        <div class="tab-pane fade show active" id="basic-edit-pane">
+            <div class="row mb-4">
+                <div class="col-md-4 text-center">
+                    {% if product.photo %}
+                    <img src="{{ product.photo.url }}" 
+                         class="img-thumbnail mb-3" 
+                         style="max-height: 200px;">
+                    {% endif %}
+                    <div class="mb-3">
+                        <label class="form-label">Alterar Foto</label>
+                        <input type="file" class="form-control" name="photo" 
+                               accept="image/*">
+                        <small class="text-muted">Deixe em branco para manter a foto atual</small>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">SKU*</label>
+                            <input type="text" class="form-control" name="sku" 
+                                   value="{{ product.sku }}" required
+                                   oninput="this.value = this.value.toUpperCase()">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nome*</label>
+                            <input type="text" class="form-control" name="name" 
+                                   value="{{ product.name }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Categoria*</label>
+                            <select class="form-select" name="category" required>
+                                {% for category in categories %}
+                                <option value="{{ category.pk }}" 
+                                        {% if category.pk == product.category.pk %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Espessura*</label>
+                            <select class="form-select" name="thickness_mm" required>
+                                {% for value, label in thickness_choices %}
+                                <option value="{{ value }}" 
+                                        {% if value == product.thickness_mm %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Descrição</label>
+                <textarea class="form-control" name="description" rows="3">{{ product.description|default:'' }}</textarea>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" 
+                               name="is_sellable" id="is_sellable_edit" 
+                               {% if product.is_sellable %}checked{% endif %}
+                               onchange="togglePriceFieldEdit(this)">
+                        <label class="form-check-label" for="is_sellable_edit">
+                            <strong>Produto Vendável</strong>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3" id="priceFieldEdit">
+                    <label class="form-label">Preço Base (R$)</label>
+                    <input type="number" class="form-control" name="base_price" 
+                           value="{{ product.base_price|default:'' }}"
+                           step="0.01" min="0" placeholder="0.00"
+                           {% if product.is_sellable %}required{% endif %}>
+                </div>
+            </div>
+            
+            <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" 
+                       name="is_active" id="is_active_edit"
+                       {% if product.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="is_active_edit">
+                    Produto Ativo
+                </label>
+            </div>
+        </div>
+        
+        <!-- ABA 2: Medidas -->
+        <div class="tab-pane fade" id="measurements-edit-pane">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Preencha apenas as medidas que se aplicam ao produto.
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Altura (cm)</label>
+                    <input type="number" class="form-control" name="height_cm" 
+                           value="{{ product.height_cm|default:'' }}"
+                           step="0.01" min="0">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Largura (cm)</label>
+                    <input type="number" class="form-control" name="width_cm" 
+                           value="{{ product.width_cm|default:'' }}"
+                           step="0.01" min="0">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Comprimento (cm)</label>
+                    <input type="number" class="form-control" name="length_cm" 
+                           value="{{ product.length_cm|default:'' }}"
+                           step="0.01" min="0">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Diâmetro (cm)</label>
+                    <input type="number" class="form-control" name="diameter_cm" 
+                           value="{{ product.diameter_cm|default:'' }}"
+                           step="0.01" min="0">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Profundidade (cm)</label>
+                    <input type="number" class="form-control" name="depth_cm" 
+                           value="{{ product.depth_cm|default:'' }}"
+                           step="0.01" min="0">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Curvatura (cm)</label>
+                    <input type="number" class="form-control" name="curvature_cm" 
+                           value="{{ product.curvature_cm|default:'' }}"
+                           step="0.01" min="0">
+                </div>
+            </div>
+        </div>
+        
+        <!-- ABA 3: Material -->
+        <div class="tab-pane fade" id="material-edit-pane">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Cor do Acrílico</label>
+                    <select class="form-select" name="acrylic_color">
+                        <option value="">Selecione...</option>
+                        {% for value, label in color_choices %}
+                        <option value="{{ value }}" 
+                                {% if value == product.acrylic_color %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Observação de Cor</label>
+                <input type="text" class="form-control" name="color_observation"
+                       value="{{ product.color_observation|default:'' }}"
+                       placeholder="Ex: Transparente fosco, Colorido personalizado...">
+            </div>
+        </div>
+        
+        <!-- ABA 4: Elétrica -->
+        <div class="tab-pane fade" id="electrical-edit-pane">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" 
+                               name="has_electrical_component" 
+                               id="has_electrical_edit"
+                               {% if product.has_electrical_component %}checked{% endif %}
+                               onchange="toggleElectricalFieldsEdit(this)">
+                        <label class="form-check-label" for="has_electrical_edit">
+                            <strong>Possui Componente Elétrico?</strong>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row" id="electricalFieldsEdit"
+                 {% if not product.has_electrical_component %}style="display: none;"{% endif %}>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Tensão</label>
+                    <select class="form-select" name="voltage">
+                        <option value="">Selecione...</option>
+                        <option value="127" {% if product.voltage == '127' %}selected{% endif %}>127V</option>
+                        <option value="BIVOLT" {% if product.voltage == 'BIVOLT' %}selected{% endif %}>Bivolt</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" 
+                               name="has_led" id="has_led_edit"
+                               {% if product.has_led %}checked{% endif %}
+                               onchange="toggleLEDFieldEdit(this)">
+                        <label class="form-check-label" for="has_led_edit">
+                            Possui LED?
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row" id="ledFieldsEdit"
+                 {% if not product.has_led %}style="display: none;"{% endif %}>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Tipo de LED</label>
+                    <select class="form-select" name="led_type">
+                        <option value="">Selecione...</option>
+                        <option value="QUENTE" {% if product.led_type == 'QUENTE' %}selected{% endif %}>Quente</option>
+                        <option value="FRIO" {% if product.led_type == 'FRIO' %}selected{% endif %}>Frio</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
     
-    <div class="card-body">
-        {% if products %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>SKU</th>
-                            <th>Nome</th>
-                            <th>Categoria</th>
-                            <th>Preço</th>
-                            <th>Status</th>
-                            <th>Criado em</th>
-                            {% if is_supervisor %}
-                            <th class="text-end">Ações</th>
-                            {% endif %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for product in products %}
-                        <tr>
-                            <td>
-                                <span class="badge bg-secondary">{{ product.sku }}</span>
-                            </td>
-                            <td>
-                                <strong>{{ product.name }}</strong>
-                                {% if product.description %}
-                                <br>
-                                <small class="text-muted">
-                                    {{ product.description|truncatechars:50 }}
-                                </small>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="badge bg-info">
-                                    {{ product.category.name }}
-                                </span>
-                            </td>
-                            <td>
-                                {% if product.is_sellable and product.base_price %}
-                                <strong class="text-success">R$ {{ product.base_price }}</strong>
-                                {% else %}
-                                <span class="badge bg-secondary">Não vendável</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if product.is_active %}
-                                <span class="badge bg-success">
-                                    <i class="bi bi-check-circle"></i> Ativo
-                                </span>
-                                {% else %}
-                                <span class="badge bg-secondary">
-                                    <i class="bi bi-x-circle"></i> Inativo
-                                </span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <small class="text-muted">
-                                    {{ product.created_at|date:"d/m/Y" }}
-                                </small>
-                            </td>
-                            {% if is_supervisor %}
-                            <td class="text-end">
-                                <div class="btn-group btn-group-sm">
-                                    <!-- Toggle Active/Inactive -->
-                                    <form method="post" action="{% url 'product_toggle' product.pk %}" class="d-inline">
-                                        {% csrf_token %}
-                                        {% if product.is_active %}
-                                        <button type="submit" class="btn btn-outline-warning" 
-                                                title="Desativar" data-bs-toggle="tooltip">
-                                            <i class="bi bi-toggle-off"></i>
-                                        </button>
-                                        {% else %}
-                                        <button type="submit" class="btn btn-outline-success" 
-                                                title="Ativar" data-bs-toggle="tooltip">
-                                            <i class="bi bi-toggle-on"></i>
-                                        </button>
-                                        {% endif %}
-                                    </form>
-                                    
-                                    <!-- Edit Button -->
-                                    <button type="button" class="btn btn-outline-primary" 
-                                            onclick="openEditModal('{{ product.pk }}')"
-                                            title="Editar">
-                                        <i class="bi bi-pencil"></i>
-                                    </button>
-                                    
-                                    <!-- Delete Button -->
-                                    <button type="button" class="btn btn-outline-danger" 
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#deleteProductModal{{ product.pk }}"
-                                            title="Excluir">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                            {% endif %}
-                        </tr>
-                        
-                        <!-- Delete Modal for each product -->
-                        {% if is_supervisor %}
-                        <div class="modal fade" id="deleteProductModal{{ product.pk }}" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header bg-danger text-white">
-                                        <h5 class="modal-title">
-                                            <i class="bi bi-exclamation-triangle me-2"></i>
-                                            Confirmar Exclusão
-                                        </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <form method="post" action="{% url 'product_delete' product.pk %}">
-                                        {% csrf_token %}
-                                        <div class="modal-body">
-                                            <p>Tem certeza que deseja excluir o produto:</p>
-                                            <div class="alert alert-warning">
-                                                <h5 class="alert-heading">{{ product.name }}</h5>
-                                                <p class="mb-0">SKU: {{ product.sku }}</p>
-                                                <p class="mb-0">Categoria: {{ product.category.name }}</p>
-                                            </div>
-                                            <p class="text-danger">
-                                                <i class="bi bi-info-circle"></i> 
-                                                Esta ação não pode ser desfeita.
-                                            </p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" 
-                                                    data-bs-dismiss="modal">Cancelar</button>
-                                            <button type="submit" class="btn btn-danger">Excluir Produto</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        {% endif %}
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div class="text-center py-5">
-                <i class="bi bi-box display-1 text-muted mb-3"></i>
-                <h4 class="text-muted">Nenhum produto cadastrado</h4>
-                {% if is_supervisor %}
-                <p class="mt-3">Comece criando seu primeiro produto</p>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProductModal">
-                    <i class="bi bi-plus-circle me-1"></i> Criar Primeiro Produto
-                </button>
-                {% endif %}
-            </div>
-        {% endif %}
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
     </div>
-</div>
-
-<!-- Create Product Modal (SIMPLE VERSION) -->
-<div class="modal fade" id="createProductModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-plus-circle me-2"></i>
-                    Novo Produto
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="post" action="{% url 'product_create' %}">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <!-- Campos básicos apenas -->
-                    <div class="mb-3">
-                        <label class="form-label">SKU*</label>
-                        <input type="text" class="form-control" name="sku" 
-                               placeholder="EX: ACB-001" required
-                               oninput="this.value = this.value.toUpperCase()">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Nome*</label>
-                        <input type="text" class="form-control" name="name" 
-                               placeholder="Nome do produto" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Categoria*</label>
-                        <select class="form-select" name="category" required>
-                            <option value="">Selecione...</option>
-                            {% for category in categories %}
-                            <option value="{{ category.id }}">{{ category.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Preço (R$)*</label>
-                        <input type="number" class="form-control" name="base_price" 
-                               step="0.01" min="0" placeholder="0.00" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Criar Produto</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Modal Container (será preenchido via AJAX) -->
-<div id="editModalContainer"></div>
+</form>
 
 <script>
-// Inicializar tooltips
-document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    });
-});
-
-// Função para abrir modal de edição via AJAX
-function openEditModal(productId) {
-    fetch(`/produtos/${productId}/editar/modal/`)
-        .then(response => response.text())
-        .then(html => {
-            document.getElementById('editModalContainer').innerHTML = html;
-            var editModal = new bootstrap.Modal(document.getElementById('editProductModal'));
-            editModal.show();
-        })
-        .catch(error => {
-            console.error('Erro ao carregar modal:', error);
-            alert('Erro ao carregar dados do produto.');
-        });
+// Funções específicas para o modal de edição
+function togglePriceFieldEdit(checkbox) {
+    const priceField = document.getElementById('priceFieldEdit');
+    const priceInput = priceField.querySelector('input[name="base_price"]');
+    
+    if (checkbox.checked) {
+        priceInput.required = true;
+        priceField.style.display = 'block';
+    } else {
+        priceInput.required = false;
+        priceField.style.display = 'none';
+        priceInput.value = '';
+    }
 }
+
+function toggleElectricalFieldsEdit(checkbox) {
+    const electricalFields = document.getElementById('electricalFieldsEdit');
+    const voltageSelect = electricalFields.querySelector('select[name="voltage"]');
+    
+    if (checkbox.checked) {
+        electricalFields.style.display = 'flex';
+        voltageSelect.required = true;
+    } else {
+        electricalFields.style.display = 'none';
+        voltageSelect.required = false;
+        voltageSelect.value = '';
+        
+        // Desativar LED também
+        const ledCheckbox = document.getElementById('has_led_edit');
+        if (ledCheckbox) {
+            ledCheckbox.checked = false;
+            toggleLEDFieldEdit(ledCheckbox);
+        }
+    }
+}
+
+function toggleLEDFieldEdit(checkbox) {
+    const ledFields = document.getElementById('ledFieldsEdit');
+    const ledTypeSelect = ledFields.querySelector('select[name="led_type"]');
+    
+    if (checkbox.checked) {
+        ledFields.style.display = 'flex';
+        ledTypeSelect.required = true;
+    } else {
+        ledFields.style.display = 'none';
+        ledTypeSelect.required = false;
+        ledTypeSelect.value = '';
+    }
+}
+
+// Inicializar funções quando o modal carregar
+document.addEventListener('DOMContentLoaded', function() {
+    // Disparar eventos para configurar estado inicial
+    const sellableCheckbox = document.getElementById('is_sellable_edit');
+    if (sellableCheckbox) sellableCheckbox.dispatchEvent(new Event('change'));
+    
+    const electricalCheckbox = document.getElementById('has_electrical_edit');
+    if (electricalCheckbox) electricalCheckbox.dispatchEvent(new Event('change'));
+    
+    const ledCheckbox = document.getElementById('has_led_edit');
+    if (ledCheckbox) ledCheckbox.dispatchEvent(new Event('change'));
+});
 </script>
-{% endblock %}

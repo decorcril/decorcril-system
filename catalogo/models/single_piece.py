@@ -12,6 +12,15 @@ class SinglePiece(models.Model):
         verbose_name="SKU (código interno)",
     )
 
+    # Adicione este campo na seção "Identidade" (logo após description):
+    photo = models.ImageField(
+        upload_to="products/single_pieces/",
+        blank=True,
+        null=True,
+        verbose_name="Foto do produto",
+    )
+
+# Atualize a lista de fields no Meta do formulário depois
     name = models.CharField(
         max_length=150,
         verbose_name="Nome",

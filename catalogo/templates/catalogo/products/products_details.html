@@ -1,0 +1,122 @@
+<div class="row">
+    {% if product.photo %}
+    <div class="col-md-4 text-center mb-4">
+        <img src="{{ product.photo.url }}" 
+             alt="{{ product.name }}" 
+             class="img-fluid rounded shadow">
+        <p class="mt-2 small text-muted">Foto do produto</p>
+    </div>
+    {% endif %}
+    
+    <div class="col-md-{% if product.photo %}8{% else %}12{% endif %}">
+        <h4>{{ product.name }}</h4>
+        <p class="text-muted">{{ product.description|default:"Sem descrição" }}</p>
+        
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h6><i class="bi bi-info-circle"></i> Informações Básicas</h6>
+                <table class="table table-sm">
+                    <tr>
+                        <td><strong>SKU:</strong></td>
+                        <td><span class="badge bg-dark">{{ product.sku }}</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Categoria:</strong></td>
+                        <td><span class="badge bg-info">{{ product.category.name }}</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Espessura:</strong></td>
+                        <td>{{ product.get_thickness_mm_display }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Status:</strong></td>
+                        <td>
+                            {% if product.is_active %}
+                            <span class="badge bg-success">Ativo</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inativo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Vendável:</strong></td>
+                        <td>
+                            {% if product.is_sellable %}
+                            <span class="badge bg-success">Sim</span>
+                            {% else %}
+                            <span class="badge bg-warning">Não</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="col-md-6">
+                <h6><i class="bi bi-rulers"></i> Medidas</h6>
+                <table class="table table-sm">
+                    {% if product.height_cm %}
+                    <tr><td><strong>Altura:</strong></td><td>{{ product.height_cm }} cm</td></tr>
+                    {% endif %}
+                    {% if product.width_cm %}
+                    <tr><td><strong>Largura:</strong></td><td>{{ product.width_cm }} cm</td></tr>
+                    {% endif %}
+                    {% if product.length_cm %}
+                    <tr><td><strong>Comprimento:</strong></td><td>{{ product.length_cm }} cm</td></tr>
+                    {% endif %}
+                    {% if product.diameter_cm %}
+                    <tr><td><strong>Diâmetro:</strong></td><td>{{ product.diameter_cm }} cm</td></tr>
+                    {% endif %}
+                    {% if product.depth_cm %}
+                    <tr><td><strong>Profundidade:</strong></td><td>{{ product.depth_cm }} cm</td></tr>
+                    {% endif %}
+                    {% if product.curvature_cm %}
+                    <tr><td><strong>Curvatura:</strong></td><td>{{ product.curvature_cm }} cm</td></tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <h6><i class="bi bi-palette"></i> Material</h6>
+                <table class="table table-sm">
+                    {% if product.acrylic_color %}
+                    <tr><td><strong>Cor:</strong></td><td>{{ product.get_acrylic_color_display }}</td></tr>
+                    {% endif %}
+                    {% if product.color_observation %}
+                    <tr><td><strong>Observação:</strong></td><td>{{ product.color_observation }}</td></tr>
+                    {% endif %}
+                </table>
+            </div>
+            
+            <div class="col-md-6">
+                <h6><i class="bi bi-currency-dollar"></i> Comercial</h6>
+                <table class="table table-sm">
+                    {% if product.base_price %}
+                    <tr><td><strong>Preço:</strong></td><td class="text-success fw-bold">R$ {{ product.base_price }}</td></tr>
+                    {% endif %}
+                    <tr><td><strong>Criado em:</strong></td><td>{{ product.created_at|date:"d/m/Y H:i" }}</td></tr>
+                    <tr><td><strong>Atualizado em:</strong></td><td>{{ product.updated_at|date:"d/m/Y H:i" }}</td></tr>
+                </table>
+            </div>
+        </div>
+        
+        {% if product.has_electrical_component %}
+        <div class="alert alert-warning mt-3">
+            <h6><i class="bi bi-lightning-charge"></i> Componentes Elétricos</h6>
+            <table class="table table-sm mb-0">
+                <tr>
+                    <td><strong>Tensão:</strong></td>
+                    <td>{{ product.get_voltage_display }}</td>
+                </tr>
+                {% if product.has_led %}
+                <tr>
+                    <td><strong>LED:</strong></td>
+                    <td>{{ product.get_led_type_display }}</td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</div>
