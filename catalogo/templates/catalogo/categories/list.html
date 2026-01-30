@@ -1,0 +1,229 @@
+{% extends 'catalogo/base.html' %}
+
+{% block title %}Categorias - Decorcril System{% endblock %}
+{% block page_title %}Categorias{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active" aria-current="page">Categorias</li>
+{% endblock %}
+
+{% block page_actions %}
+{% if is_supervisor %}
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+    <i class="bi bi-plus-circle me-1"></i> Nova Categoria
+</button>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 fw-bold text-primary">
+            <i class="bi bi-list-ul me-2"></i>
+            Todas as Categorias ({{ categories.count }})
+        </h6>
+        <div class="btn-group">
+            <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        {% if categories %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>Descrição</th>
+                            <th>Produtos</th>
+                            <th>Status</th>
+                            <th>Criada em</th>
+                            {% if is_supervisor %}
+                            <th class="text-end">Ações</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category in categories %}
+                        <tr>
+                            <td><strong>{{ category.name }}</strong></td>
+                            <td><small class="text-muted">{{ category.description|truncatechars:60|default:"-" }}</small></td>
+                            <td><span class="badge bg-primary rounded-pill">{{ category.products.count }}</span></td>
+                            <td>
+                                {% if category.is_active %}
+                                <span class="badge bg-success"><i class="bi bi-check-circle"></i> Ativa</span>
+                                {% else %}
+                                <span class="badge bg-secondary"><i class="bi bi-x-circle"></i> Inativa</span>
+                                {% endif %}
+                            </td>
+                            <td><small class="text-muted">{{ category.created_at|date:"d/m/Y" }}</small></td>
+                            
+                            {% if is_supervisor %}
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <!-- Toggle -->
+                                    <form method="post" action="{% url 'category_toggle' category.pk %}" class="d-inline">
+                                        {% csrf_token %}
+                                        {% if category.is_active %}
+                                        <button type="submit" class="btn btn-outline-warning" title="Desativar">
+                                            <i class="bi bi-toggle-off"></i>
+                                        </button>
+                                        {% else %}
+                                        <button type="submit" class="btn btn-outline-success" title="Ativar">
+                                            <i class="bi bi-toggle-on"></i>
+                                        </button>
+                                        {% endif %}
+                                    </form>
+                                    
+                                    <!-- Edit -->
+                                    <button type="button" class="btn btn-outline-primary" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editCategoryModal{{ category.pk }}"
+                                            title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    
+                                    <!-- Delete -->
+                                    {% if category.products.count == 0 %}
+                                    <button type="button" class="btn btn-outline-danger" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteCategoryModal{{ category.pk }}"
+                                            title="Excluir">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    {% else %}
+                                    <button type="button" class="btn btn-outline-secondary" disabled
+                                            title="Não pode excluir (tem produtos)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        
+                        <!-- Modais de edição/exclusão para cada categoria -->
+                        {% if is_supervisor %}
+                        <!-- Edit Modal -->
+                        <div class="modal fade" id="editCategoryModal{{ category.pk }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Editar Categoria</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form method="post" action="{% url 'category_update' category.pk %}">
+                                        {% csrf_token %}
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">Nome</label>
+                                                <input type="text" class="form-control" name="name" 
+                                                       value="{{ category.name }}" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Descrição</label>
+                                                <textarea class="form-control" name="description" 
+                                                          rows="3">{{ category.description|default:'' }}</textarea>
+                                            </div>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" 
+                                                       name="is_active" id="is_active{{ category.pk }}"
+                                                       {% if category.is_active %}checked{% endif %}>
+                                                <label class="form-check-label" for="is_active{{ category.pk }}">
+                                                    Ativa
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" 
+                                                    data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Salvar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Delete Modal -->
+                        {% if category.products.count == 0 %}
+                        <div class="modal fade" id="deleteCategoryModal{{ category.pk }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header bg-danger text-white">
+                                        <h5 class="modal-title">Confirmar Exclusão</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form method="post" action="{% url 'category_delete' category.pk %}">
+                                        {% csrf_token %}
+                                        <div class="modal-body">
+                                            <p>Tem certeza que deseja excluir a categoria:</p>
+                                            <div class="alert alert-warning">
+                                                <h5 class="alert-heading">{{ category.name }}</h5>
+                                            </div>
+                                            <p class="text-danger"><i class="bi bi-info-circle"></i> Esta ação não pode ser desfeita.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" 
+                                                    data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-danger">Excluir</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-list-ul display-1 text-muted mb-3"></i>
+                <h4 class="text-muted">Nenhuma categoria cadastrada</h4>
+                {% if is_supervisor %}
+                <p class="mt-3">Comece criando sua primeira categoria</p>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
+                    <i class="bi bi-plus-circle me-1"></i> Criar Primeira Categoria
+                </button>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Create Category Modal (mesmo do dashboard) -->
+<div class="modal fade" id="createCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nova Categoria</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'category_create' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nome*</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descrição</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="is_active" checked>
+                        <label class="form-check-label">Ativa</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

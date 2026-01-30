@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Decorcril System{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;  
+        }
+        
+        /* Sidebar styling */
+        #sidebar {
+            min-width: 250px;
+            max-width: 250px;
+            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+            color: #fff;
+            transition: all 0.3s;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        #sidebar .sidebar-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #sidebar ul.components {
+            padding: 20px 0;
+        }
+        
+        #sidebar ul li a {
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            display: block;
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        #sidebar ul li a:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid #3498db;
+        }
+        
+        #sidebar ul li.active > a {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 3px solid #3498db;
+        }
+        
+        #sidebar ul li a i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Content area */
+        #content {
+            width: calc(100% - 250px);
+            padding: 20px;
+            min-height: 100vh;
+            margin-left: 250px;
+            transition: all 0.3s;
+        }
+        
+        /* User info */
+        .user-info {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-info small {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            #sidebar {
+                margin-left: -250px;
+            }
+            #content {
+                width: 100%;
+                margin-left: 0;
+            }
+            #sidebar.active {
+                margin-left: 0;
+            }
+            #content.active {
+                margin-left: 250px;
+            }
+        }
+        
+        /* Toggle button */
+        #sidebarCollapse {
+            background: #3498db;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: white;
+        }
+        
+        /* Navbar top */
+        .navbar-top {
+            background: white;
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 20px;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <h3>
+                <i class="bi bi-box-seam"></i>
+                Decorcril
+            </h3>
+            <small class="text-muted">Sistema de Catálogo</small>
+        </div>
+        
+        <ul class="list-unstyled components">
+            <li class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                <a href="{% url 'dashboard' %}">
+                    <i class="bi bi-speedometer2"></i>
+                    Dashboard
+                </a>
+            </li>
+            
+            <li class="{% if 'categorias' in request.path %}active{% endif %}">
+                <a href="{% url 'category_list' %}">
+                    <i class="bi bi-list-ul"></i>
+                    Categorias
+                </a>
+            </li>
+            
+            <li class="{% if 'produtos' in request.path %}active{% endif %}">
+                <a href="{% url 'product_list' %}">
+                    <i class="bi bi-box"></i>
+                    Produtos
+                </a>
+            </li>
+            
+            <!-- Apenas para Supervisor -->
+            {% if user.groups.filter.name == 'Supervisor' or user.is_superuser %}
+            <li>
+                <a href="#adminSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                    <i class="bi bi-gear"></i>
+                    Administração
+                </a>
+                <ul class="collapse list-unstyled" id="adminSubmenu">
+                    <li>
+                        <a href="/admin/" target="_blank">
+                            <i class="bi bi-person-gear"></i>
+                            Admin Django
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="bi bi-people"></i>
+                            Usuários
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            {% endif %}
+            
+            <li>
+                <a href="{% url 'logout' %}">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Sair
+                </a>
+            </li>
+        </ul>
+        
+        <!-- User Info -->
+        <div class="user-info">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                    <i class="bi bi-person-circle fs-4"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <small>Logado como</small>
+                    <p class="mb-0 fw-bold">{{ user.username }}</p>
+                    <small>
+                        {% if user.groups.all %}
+                            {{ user.groups.first.name }}
+                        {% else %}
+                            Sem grupo
+                        {% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Page Content -->
+    <div id="content">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-top">
+            <div class="container-fluid">
+                <button type="button" id="sidebarCollapse" class="btn">
+                    <i class="bi bi-list"></i>
+                </button>
+                
+                <div class="navbar-nav ms-auto">
+                    <span class="navbar-text me-3">
+                        <i class="bi bi-calendar-check me-1"></i>
+                        {% now "d/m/Y" %}
+                    </span>
+                    <span class="navbar-text">
+                        <i class="bi bi-clock me-1"></i>
+                        {% now "H:i" %}
+                    </span>
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <div class="container-fluid mt-4">
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+            
+            <!-- Page Title -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-0">{% block page_title %}{% endblock %}</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+                            {% block breadcrumb %}{% endblock %}
+                        </ol>
+                    </nav>
+                </div>
+                {% block page_actions %}{% endblock %}
+            </div>
+            
+            <!-- Content Block -->
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    {% else %}
+        {% block auth_content %}{% endblock %}
+    {% endif %}
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery (para sidebar toggle) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <script>
+        // Sidebar Toggle
+        $(document).ready(function () {
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+            
+            // Ativar tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
