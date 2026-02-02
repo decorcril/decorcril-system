@@ -1,0 +1,19 @@
+<div class="table-responsive">
+    <table class="table table-hover">
+
+        <thead class="table-light">
+            <tr>
+                {% for col in columns %}
+                    <th class="{{ col.class|default:'' }}">
+                        {{ col.label }}
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+
+        <tbody>
+            {{ rows }}
+        </tbody>
+
+    </table>
+</div>

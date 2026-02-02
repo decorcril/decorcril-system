@@ -1,0 +1,40 @@
+<div class="modal fade"
+     id="deleteCategoryModal{{ category.pk }}"
+     tabindex="-1">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form method="post"
+                  action="{% url 'category_delete' category.pk %}">
+                {% csrf_token %}
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Excluir Categoria</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>Confirma excluir a categoria:</p>
+                    <strong>{{ category.name }}</strong>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="btn btn-danger">
+                        Excluir
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>

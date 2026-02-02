@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 import re
 
+
 class SinglePiece(models.Model):
     # =========================
     # Identidade
@@ -20,14 +21,14 @@ class SinglePiece(models.Model):
         verbose_name="Foto do produto",
     )
 
-# Atualize a lista de fields no Meta do formulário depois
+    # Atualize a lista de fields no Meta do formulário depois
     name = models.CharField(
         max_length=150,
         verbose_name="Nome",
     )
 
     category = models.ForeignKey(
-        'Category',
+        "Category",
         on_delete=models.PROTECT,
         related_name="products",
         verbose_name="Categoria",
@@ -69,53 +70,51 @@ class SinglePiece(models.Model):
     ]
 
     thickness_mm = models.PositiveSmallIntegerField(
-        choices=THICKNESS_CHOICES,
-        verbose_name="Espessura (mm)",
-        default=3
+        choices=THICKNESS_CHOICES, verbose_name="Espessura (mm)", default=3
     )
 
     # Dimensões (todas opcionais)
     height_cm = models.DecimalField(
-        max_digits=6, 
-        decimal_places=2, 
-        null=True, 
+        max_digits=6,
+        decimal_places=2,
+        null=True,
         blank=True,
-        verbose_name="Altura (cm)"
+        verbose_name="Altura (cm)",
     )
     width_cm = models.DecimalField(
-        max_digits=6, 
-        decimal_places=2, 
-        null=True, 
+        max_digits=6,
+        decimal_places=2,
+        null=True,
         blank=True,
-        verbose_name="Largura (cm)"
+        verbose_name="Largura (cm)",
     )
     length_cm = models.DecimalField(
-        max_digits=6, 
-        decimal_places=2, 
-        null=True, 
+        max_digits=6,
+        decimal_places=2,
+        null=True,
         blank=True,
-        verbose_name="Comprimento (cm)"
+        verbose_name="Comprimento (cm)",
     )
     diameter_cm = models.DecimalField(
-        max_digits=6, 
-        decimal_places=2, 
-        null=True, 
+        max_digits=6,
+        decimal_places=2,
+        null=True,
         blank=True,
-        verbose_name="Diâmetro (cm)"
+        verbose_name="Diâmetro (cm)",
     )
     depth_cm = models.DecimalField(
-        max_digits=6, 
-        decimal_places=2, 
-        null=True, 
+        max_digits=6,
+        decimal_places=2,
+        null=True,
         blank=True,
-        verbose_name="Profundidade (cm)"
+        verbose_name="Profundidade (cm)",
     )
     curvature_cm = models.DecimalField(
-        max_digits=6, 
-        decimal_places=2, 
-        null=True, 
+        max_digits=6,
+        decimal_places=2,
+        null=True,
         blank=True,
-        verbose_name="Curvatura (cm)"
+        verbose_name="Curvatura (cm)",
     )
 
     # =========================
@@ -197,7 +196,7 @@ class SinglePiece(models.Model):
     class Meta:
         verbose_name = "Produto Acrílico"
         verbose_name_plural = "Produtos Acrílicos"
-        ordering = ['sku']
+        ordering = ["sku"]
 
     # =========================
     # Regras de Domínio
@@ -240,7 +239,7 @@ class SinglePiece(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.sku})"
-    
+
     def get_measurements_display(self):
         """Retorna string formatada com medidas"""
         measurements = []
@@ -256,5 +255,5 @@ class SinglePiece(models.Model):
             measurements.append(f"Profundidade: {self.depth_cm}cm")
         if self.curvature_cm:
             measurements.append(f"Curvatura: {self.curvature_cm}cm")
-        
+
         return ", ".join(measurements) if measurements else "Sem medidas"
