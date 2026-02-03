@@ -1,0 +1,31 @@
+/* =====================
+   NAVBAR TOP
+===================== */
+
+/* Navbar superior */
+.navbar-top {
+    background: #fff;
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Botão de toggle do sidebar */
+#sidebarCollapse {
+    background: #3498db;
+    color: #fff;
+    border: none;
+    transition: background 0.3s ease;
+}
+
+#sidebarCollapse:hover {
+    background: #2980b9;
+}
+
+/* Ajustes de ícones e texto da navbar */
+.navbar-top .text-muted {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+}
+
+/* Responsividade para navbar já é gerenciada pelo Bootstrap */

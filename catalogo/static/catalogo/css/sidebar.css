@@ -1,0 +1,122 @@
+/* =====================
+   SIDEBAR
+===================== */
+#sidebar {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+    color: #fff;
+    transition: all 0.3s ease;
+    z-index: 1050;
+}
+
+/* Desktop: sidebar fechada por padrão */
+@media (min-width: 769px) {
+    #sidebar {
+        margin-left: -250px;
+    }
+
+    #sidebar.open {
+        margin-left: 0;
+    }
+
+    #content {
+        margin-left: 0;
+    }
+
+    #content.compressed {
+        margin-left: 250px;
+    }
+}
+
+/* Mobile: sidebar oculta por padrão */
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+    }
+
+    #sidebar.open {
+        margin-left: 0;
+    }
+
+    #content {
+        margin-left: 0;
+    }
+}
+
+/* Header do sidebar */
+.sidebar-header {
+    padding: 1rem;
+    background: rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.sidebar-close {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+/* Lista de links */
+#sidebar ul.components {
+    padding: 1rem 0;
+    list-style: none;
+}
+
+#sidebar ul li a {
+    padding: 12px 20px;
+    display: block;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    transition: 0.3s;
+    border-left: 3px solid transparent;
+}
+
+#sidebar ul li a:hover,
+#sidebar ul li.active > a {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    border-left: 3px solid #3498db;
+}
+
+/* =====================
+   USER INFO
+===================== */
+.user-info {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 1rem;
+    background: rgba(0,0,0,0.2);
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Overlay para mobile quando sidebar está aberta */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1040;
+}
+
+@media (max-width: 768px) {
+    .sidebar-overlay.show {
+        display: block;
+    }
+}

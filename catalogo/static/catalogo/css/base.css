@@ -1,0 +1,38 @@
+/* =====================
+   BASE GLOBAL
+===================== */
+
+/* Cor de fundo e tipografia global */
+body {
+    background-color: #f8f9fa;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Ajustes globais de links e textos */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Espaçamento padrão de container */
+.container-fluid {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Estilos globais para alerts (padrão Bootstrap) */
+.alert {
+    margin-bottom: 1rem;
+}
+
+/* Qualquer outro estilo global, como tipografia e cores do site */
+.text-muted {
+    color: #6c757d !important;
+}
