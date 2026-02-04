@@ -1,0 +1,438 @@
+{# ============================================= #}
+{# MODAL: CRIAR NOVO PRODUTO                      #}
+{# ============================================= #}
+
+<div class="modal fade" id="createProductModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Novo Produto Acrílico
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="post"
+                  action="{% url 'product_create' %}"
+                  enctype="multipart/form-data"
+                  id="createProductForm">
+                {% csrf_token %}
+
+                <div class="modal-body">
+
+                    <!-- Abas -->
+                    <ul class="nav nav-tabs mb-4" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" 
+                                    type="button"
+                                    data-bs-toggle="tab" 
+                                    data-bs-target="#basic-pane"
+                                    role="tab">
+                                <i class="bi bi-info-circle me-1"></i> Básico
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" 
+                                    type="button"
+                                    data-bs-toggle="tab" 
+                                    data-bs-target="#measurements-pane"
+                                    role="tab">
+                                <i class="bi bi-rulers me-1"></i> Medidas
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" 
+                                    type="button"
+                                    data-bs-toggle="tab" 
+                                    data-bs-target="#material-pane"
+                                    role="tab">
+                                <i class="bi bi-palette me-1"></i> Material
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" 
+                                    type="button"
+                                    data-bs-toggle="tab" 
+                                    data-bs-target="#electrical-pane"
+                                    role="tab">
+                                <i class="bi bi-lightning-charge me-1"></i> Elétrica
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content">
+
+                        <!-- ========================= -->
+                        <!-- ABA: BÁSICO               -->
+                        <!-- ========================= -->
+                        <div class="tab-pane fade show active" id="basic-pane" role="tabpanel">
+
+                            <div class="row mb-4">
+                                <div class="col-md-4 text-center">
+                                    <label class="form-label fw-bold">Foto do Produto</label>
+                                    <input type="file"
+                                           class="form-control"
+                                           name="photo"
+                                           accept="image/*"
+                                           onchange="previewCreateImage(event)">
+                                    <small class="text-muted">Opcional</small>
+
+                                    <div id="imagePreviewCreate" class="mt-3" style="display:none;">
+                                        <img id="previewImageCreate"
+                                             class="img-thumbnail"
+                                             style="max-height:150px;">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">SKU*</label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   name="sku"
+                                                   required
+                                                   oninput="this.value=this.value.toUpperCase()"
+                                                   placeholder="001 ou 001-ABC">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">Nome*</label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   name="name"
+                                                   required>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">Categoria*</label>
+                                            <select class="form-select" name="category" required>
+                                                <option value="">Selecione...</option>
+                                                {% for category in categories %}
+                                                <option value="{{ category.pk }}">
+                                                    {{ category.name }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">Espessura*</label>
+                                            <select class="form-select" name="thickness_mm" required>
+                                                <option value="2">2 mm</option>
+                                                <option value="3" selected>3 mm</option>
+                                                <option value="4">4 mm</option>
+                                                <option value="6">6 mm</option>
+                                                <option value="8">8 mm</option>
+                                                <option value="10">10 mm</option>
+                                                <option value="12">12 mm</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Descrição</label>
+                                <textarea class="form-control"
+                                          name="description"
+                                          rows="3"
+                                          placeholder="Descreva o produto..."></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input"
+                                               type="checkbox"
+                                               name="is_sellable"
+                                               id="is_sellable_create"
+                                               checked
+                                               onchange="togglePriceFieldCreate(this)">
+                                        <label class="form-check-label" for="is_sellable_create">
+                                            Produto Vendável
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3" id="priceFieldCreate">
+                                    <label class="form-label fw-bold">Preço Base (R$)*</label>
+                                    <input type="number"
+                                           class="form-control"
+                                           name="base_price"
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00"
+                                           required>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="is_active"
+                                       id="is_active_create"
+                                       checked>
+                                <label class="form-check-label" for="is_active_create">
+                                    Produto Ativo
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- ========================= -->
+                        <!-- ABA: MEDIDAS              -->
+                        <!-- ========================= -->
+                        <div class="tab-pane fade" id="measurements-pane" role="tabpanel">
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle me-2"></i>
+                                Preencha apenas as medidas aplicáveis ao produto.
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Altura (cm)</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           name="height_cm" 
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Largura (cm)</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           name="width_cm" 
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Comprimento (cm)</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           name="length_cm" 
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Diâmetro (cm)</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           name="diameter_cm" 
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Profundidade (cm)</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           name="depth_cm" 
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label fw-bold">Curvatura (cm)</label>
+                                    <input type="number" 
+                                           class="form-control" 
+                                           name="curvature_cm" 
+                                           step="0.01"
+                                           min="0"
+                                           placeholder="0.00">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================= -->
+                        <!-- ABA: MATERIAL             -->
+                        <!-- ========================= -->
+                        <div class="tab-pane fade" id="material-pane" role="tabpanel">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Cor do Acrílico</label>
+                                <select class="form-select" name="acrylic_color">
+                                    <option value="">Selecione...</option>
+                                    <option value="CRISTAL">Cristal</option>
+                                    <option value="BRANCO">Branco</option>
+                                    <option value="PRETO">Preto</option>
+                                    <option value="ROSA">Rosa</option>
+                                    <option value="ROSA_BEBE">Rosa Bebê</option>
+                                    <option value="AZUL">Azul</option>
+                                    <option value="AZUL_BEBE">Azul Bebê</option>
+                                    <option value="ESPELHADO">Espelhado</option>
+                                    <option value="ESPELHADO_TRANSPARENTE">Espelhado Transparente</option>
+                                    <option value="COLORIDO">Colorido</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Observação de Cor</label>
+                                <input type="text"
+                                       class="form-control"
+                                       name="color_observation"
+                                       placeholder="Ex: Tom pastel, transparente...">
+                            </div>
+                        </div>
+
+                        <!-- ========================= -->
+                        <!-- ABA: ELÉTRICA             -->
+                        <!-- ========================= -->
+                        <div class="tab-pane fade" id="electrical-pane" role="tabpanel">
+
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       name="has_electrical_component"
+                                       id="has_electrical_create"
+                                       onchange="toggleElectricalFieldsCreate(this)">
+                                <label class="form-check-label" for="has_electrical_create">
+                                    Possui Componente Elétrico?
+                                </label>
+                            </div>
+
+                            <div id="electricalFieldsCreate" style="display:none;">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Tensão</label>
+                                    <select class="form-select" name="voltage">
+                                        <option value="">Selecione...</option>
+                                        <option value="127">127V</option>
+                                        <option value="BIVOLT">Bivolt</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="has_led"
+                                           id="has_led_create"
+                                           onchange="toggleLEDFieldCreate(this)">
+                                    <label class="form-check-label" for="has_led_create">
+                                        Possui LED?
+                                    </label>
+                                </div>
+
+                                <div id="ledFieldsCreate" style="display:none;">
+                                    <label class="form-label fw-bold">Tipo de LED</label>
+                                    <select class="form-select" name="led_type">
+                                        <option value="">Selecione...</option>
+                                        <option value="QUENTE">Quente</option>
+                                        <option value="FRIO">Frio</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-1"></i>
+                        Criar Produto
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// Preview de imagem ao criar produto
+// ============================================
+function previewCreateImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImageCreate').src = e.target.result;
+            document.getElementById('imagePreviewCreate').style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+// ============================================
+// Controle do campo de preço (vendável)
+// ============================================
+function togglePriceFieldCreate(checkbox) {
+    const priceField = document.getElementById('priceFieldCreate');
+    const priceInput = priceField.querySelector('input[name="base_price"]');
+    
+    if (checkbox.checked) {
+        priceField.style.display = 'block';
+        priceInput.required = true;
+    } else {
+        priceField.style.display = 'none';
+        priceInput.required = false;
+        priceInput.value = '';
+    }
+}
+
+// ============================================
+// Controle dos campos elétricos
+// ============================================
+function toggleElectricalFieldsCreate(checkbox) {
+    const electricalFields = document.getElementById('electricalFieldsCreate');
+    const voltageSelect = electricalFields.querySelector('select[name="voltage"]');
+    const hasLedCheckbox = document.getElementById('has_led_create');
+    const ledFields = document.getElementById('ledFieldsCreate');
+    
+    if (checkbox.checked) {
+        electricalFields.style.display = 'block';
+    } else {
+        electricalFields.style.display = 'none';
+        // Limpar campos quando desabilitado
+        voltageSelect.value = '';
+        hasLedCheckbox.checked = false;
+        ledFields.style.display = 'none';
+        ledFields.querySelector('select[name="led_type"]').value = '';
+    }
+}
+
+// ============================================
+// Controle do campo tipo de LED
+// ============================================
+function toggleLEDFieldCreate(checkbox) {
+    const ledFields = document.getElementById('ledFieldsCreate');
+    const ledTypeSelect = ledFields.querySelector('select[name="led_type"]');
+    
+    if (checkbox.checked) {
+        ledFields.style.display = 'block';
+    } else {
+        ledFields.style.display = 'none';
+        ledTypeSelect.value = '';
+    }
+}
+
+// ============================================
+// Inicializar estado dos campos ao abrir modal
+// ============================================
+document.getElementById('createProductModal').addEventListener('show.bs.modal', function() {
+    // Resetar campos ao abrir
+    const form = document.getElementById('createProductForm');
+    if (form) {
+        form.reset();
+    }
+    
+    // Garantir estado inicial correto
+    document.getElementById('priceFieldCreate').style.display = 'block';
+    document.getElementById('electricalFieldsCreate').style.display = 'none';
+    document.getElementById('ledFieldsCreate').style.display = 'none';
+    document.getElementById('imagePreviewCreate').style.display = 'none';
+});
+</script>

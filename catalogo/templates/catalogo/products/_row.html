@@ -1,0 +1,103 @@
+<tr>
+    <!-- Foto -->
+    <td class="text-center">
+        {% if product.photo %}
+            <img src="{{ product.photo.url }}"
+                 class="img-thumbnail"
+                 style="width:60px;height:60px;object-fit:cover"
+                 alt="{{ product.name }}">
+        {% else %}
+            <i class="bi bi-image text-muted fs-4"></i>
+        {% endif %}
+    </td>
+
+    <!-- Nome e SKU -->
+    <td>
+        <div class="mb-1">
+            <span class="badge bg-dark me-2">{{ product.sku }}</span>
+            <strong>{{ product.name }}</strong>
+        </div>
+        
+        {% if product.description %}
+            <small class="text-muted">
+                {{ product.description|truncatechars:50 }}
+            </small>
+        {% endif %}
+    </td>
+
+    <!-- Categoria -->
+    <td class="text-center">
+        <span class="badge bg-info rounded-pill">
+            {{ product.category.name }}
+        </span>
+    </td>
+
+    <!-- Status -->
+    <td class="text-center">
+        {% if product.is_active %}
+            <span class="badge bg-success">
+                <i class="bi bi-check-circle me-1"></i> Ativo
+            </span>
+        {% else %}
+            <span class="badge bg-secondary">
+                <i class="bi bi-x-circle me-1"></i> Inativo
+            </span>
+        {% endif %}
+        
+        <br>
+        
+        {% if product.is_sellable %}
+            <span class="badge bg-success">
+                <i class="bi bi-cart-check me-1"></i> Vendável
+            </span>
+        {% else %}
+            <span class="badge bg-warning">
+                <i class="bi bi-cart-x me-1"></i> Não vendável
+            </span>
+        {% endif %}
+
+        {% if product.has_electrical_component %}
+            <br>
+            <span class="badge bg-danger">
+                <i class="bi bi-lightning me-1"></i> Elétrico
+            </span>
+        {% endif %}
+    </td>
+
+    <!-- Criado em -->
+    <td class="text-center">
+        <small class="text-muted">
+            {{ product.created_at|date:"d/m/Y" }}
+        </small>
+    </td>
+
+    {% if is_supervisor %}
+    <!-- Ações -->
+    <td class="text-end">
+        <div class="btn-group btn-group-sm">
+
+            <button class="btn btn-outline-info"
+                    data-bs-toggle="modal"
+                    data-bs-target="#viewProductModal{{ product.pk }}"
+                    title="Visualizar">
+                <i class="bi bi-eye"></i>
+            </button>
+
+            <button class="btn btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editProductModal{{ product.pk }}"
+                    title="Editar">
+                <i class="bi bi-pencil"></i>
+            </button>
+
+            <button class="btn btn-outline-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteProductModal{{ product.pk }}"
+                    title="Excluir">
+                <i class="bi bi-trash"></i>
+            </button>
+
+        </div>
+    </td>
+    {% endif %}
+</tr>
