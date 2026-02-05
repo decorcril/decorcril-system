@@ -9,12 +9,13 @@
                   action="{% url 'category_update' category.pk %}">
                 {% csrf_token %}
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar Categoria</h5>
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"></button>
-                </div>
+                <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-pencil me-2"></i>
+                    Editar Categoria: {{ category.name }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
 
                 <div class="modal-body">
 
