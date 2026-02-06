@@ -207,6 +207,22 @@ class SinglePieceForm(forms.ModelForm):
         if not is_sellable:
             cleaned_data["base_price"] = None
 
+        # Validação: Pelo menos uma medida deve ser preenchida
+        medidas = [
+            cleaned_data.get("height_cm"),
+            cleaned_data.get("width_cm"),
+            cleaned_data.get("length_cm"),
+            cleaned_data.get("diameter_cm"),
+            cleaned_data.get("depth_cm"),
+            cleaned_data.get("curvature_cm"),
+        ]
+        
+        if not any(medidas):
+            self.add_error(
+                None,
+                "Pelo menos uma medida deve ser preenchida (altura, largura, comprimento, diâmetro, profundidade ou curvatura)."
+            )
+
         # Validação: Se não tem componente elétrico, limpar campos relacionados
         if not has_electrical:
             cleaned_data["voltage"] = ""
