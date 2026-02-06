@@ -23,6 +23,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third party apps - ADICIONE ESTA LINHA
     # My apps
+    'django.contrib.humanize',  # <-- Adicione esta linha
+
     "catalogo",
 ]
 

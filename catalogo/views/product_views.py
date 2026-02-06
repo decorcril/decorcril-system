@@ -16,7 +16,12 @@ def product_list(request):
     # Filtro de pesquisa
     q = request.GET.get("q", "").strip()
     if q:
-        products = products.filter(name__icontains=q)
+        # Busca no nome, SKU e nome da categoria
+        products = (
+            products.filter(name__icontains=q) |
+            products.filter(sku__icontains=q) |
+            products.filter(category__name__icontains=q)
+        )
 
     form = SinglePieceForm()
 
@@ -25,7 +30,7 @@ def product_list(request):
         "categories": categories,
         "form": form,
         "is_supervisor": request.user.groups.filter(name="Supervisor").exists(),
-        "query": q,  # mantém o valor no input
+        "query": q,
     }
     return render(request, "catalogo/products/list.html", context)
 

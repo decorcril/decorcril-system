@@ -78,15 +78,7 @@
                                              class="img-thumbnail"
                                              style="max-height:150px;"
                                              alt="{{ product.name }}">
-                                        <div class="form-check mt-2">
-                                            <input class="form-check-input" 
-                                                   type="checkbox" 
-                                                   name="clear_photo" 
-                                                   id="clear_photo_{{ product.pk }}">
-                                            <label class="form-check-label text-danger small" for="clear_photo_{{ product.pk }}">
-                                                Remover foto atual
-                                            </label>
-                                        </div>
+                                        
                                     </div>
                                     {% endif %}
 
@@ -184,13 +176,15 @@
                                 <div class="col-md-6 mb-3" id="priceFieldEdit{{ product.pk }}" 
                                      {% if not product.is_sellable %}style="display:none;"{% endif %}>
                                     <label class="form-label fw-bold">Preço Base (R$)*</label>
-                                    <input type="number"
+                                    <input type="text"
                                            class="form-control"
-                                           name="base_price"
-                                           value="{{ product.base_price|default:'' }}"
-                                           step="0.01"
-                                           min="0"
-                                           placeholder="0.00"
+                                           id="base_price_display_edit_{{ product.pk }}"
+                                           placeholder="0,00"
+                                           inputmode="decimal"
+                                           autocomplete="off">
+                                    <input type="hidden" 
+                                           name="base_price" 
+                                           id="base_price_value_edit_{{ product.pk }}"
                                            {% if product.is_sellable %}required{% endif %}>
                                 </div>
                             </div>
@@ -219,66 +213,66 @@
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Altura (cm)</label>
-                                    <input type="number" 
-                                           class="form-control" 
-                                           name="height_cm"
-                                           value="{{ product.height_cm|default:'' }}"
-                                           step="0.01"
-                                           min="0"
-                                           placeholder="0.00">
+                                    <input type="text" 
+                                           class="form-control measurement-input" 
+                                           id="height_cm_display_edit_{{ product.pk }}"
+                                           placeholder="0,00"
+                                           inputmode="decimal"
+                                           autocomplete="off">
+                                    <input type="hidden" name="height_cm" id="height_cm_value_edit_{{ product.pk }}">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Largura (cm)</label>
-                                    <input type="number" 
-                                           class="form-control" 
-                                           name="width_cm"
-                                           value="{{ product.width_cm|default:'' }}"
-                                           step="0.01"
-                                           min="0"
-                                           placeholder="0.00">
+                                    <input type="text" 
+                                           class="form-control measurement-input" 
+                                           id="width_cm_display_edit_{{ product.pk }}"
+                                           placeholder="0,00"
+                                           inputmode="decimal"
+                                           autocomplete="off">
+                                    <input type="hidden" name="width_cm" id="width_cm_value_edit_{{ product.pk }}">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Comprimento (cm)</label>
-                                    <input type="number" 
-                                           class="form-control" 
-                                           name="length_cm"
-                                           value="{{ product.length_cm|default:'' }}"
-                                           step="0.01"
-                                           min="0"
-                                           placeholder="0.00">
+                                    <input type="text" 
+                                           class="form-control measurement-input" 
+                                           id="length_cm_display_edit_{{ product.pk }}"
+                                           placeholder="0,00"
+                                           inputmode="decimal"
+                                           autocomplete="off">
+                                    <input type="hidden" name="length_cm" id="length_cm_value_edit_{{ product.pk }}">
                                 </div>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Diâmetro (cm)</label>
-                                    <input type="number" 
-                                           class="form-control" 
-                                           name="diameter_cm"
-                                           value="{{ product.diameter_cm|default:'' }}"
-                                           step="0.01"
-                                           min="0"
-                                           placeholder="0.00">
+                                    <input type="text" 
+                                           class="form-control measurement-input" 
+                                           id="diameter_cm_display_edit_{{ product.pk }}"
+                                           placeholder="0,00"
+                                           inputmode="decimal"
+                                           autocomplete="off">
+                                    <input type="hidden" name="diameter_cm" id="diameter_cm_value_edit_{{ product.pk }}">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Profundidade (cm)</label>
-                                    <input type="number" 
-                                           class="form-control" 
-                                           name="depth_cm"
-                                           value="{{ product.depth_cm|default:'' }}"
-                                           step="0.01"
-                                           min="0"
-                                           placeholder="0.00">
+                                    <input type="text" 
+                                           class="form-control measurement-input" 
+                                           id="depth_cm_display_edit_{{ product.pk }}"
+                                           placeholder="0,00"
+                                           inputmode="decimal"
+                                           autocomplete="off">
+                                    <input type="hidden" name="depth_cm" id="depth_cm_value_edit_{{ product.pk }}">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Curvatura (cm)</label>
-                                    <input type="number" 
-                                           class="form-control" 
-                                           name="curvature_cm"
-                                           value="{{ product.curvature_cm|default:'' }}"
-                                           step="0.01"
-                                           min="0"
-                                           placeholder="0.00">
+                                    <input type="text" 
+                                           class="form-control measurement-input" 
+                                           id="curvature_cm_display_edit_{{ product.pk }}"
+                                           placeholder="0,00"
+                                           inputmode="decimal"
+                                           autocomplete="off">
+                                    <input type="hidden" name="curvature_cm" id="curvature_cm_value_edit_{{ product.pk }}">
                                 </div>
                             </div>
                         </div>
@@ -386,8 +380,99 @@
         </div>
     </div>
 </div>
+
 <script>
+// ============================================
+// MÁSCARAS DE VALOR - PADRÃO BRASILEIRO (EDIT)
+// ============================================
+
+/**
+ * Formata número para o padrão brasileiro (1.234,56)
+ */
+function formatBrazilianNumberEdit(value) {
+    if (!value) return '';
+    
+    // Remove tudo que não é número
+    let num = value.replace(/\D/g, '');
+    
+    // Se vazio, retorna vazio
+    if (num === '') return '';
+    
+    // Converte para número e divide por 100 para ter os centavos
+    num = (parseInt(num) / 100).toFixed(2);
+    
+    // Formata no padrão brasileiro
+    return num.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+/**
+ * Converte valor brasileiro para formato aceito pelo backend (1234.56)
+ */
+function parseBrazilianNumberEdit(value) {
+    if (!value) return '';
+    
+    // Remove pontos de milhar e substitui vírgula por ponto
+    return value.replace(/\./g, '').replace(',', '.');
+}
+
+/**
+ * Formata valor do backend (123.45) para exibição brasileira (123,45)
+ */
+function formatValueFromBackend(value) {
+    // Verifica se o valor é vazio ou inválido
+    if (!value || value === '' || value === 'None' || value === 'null' || value === 'undefined') {
+        return '';
+    }
+    
+    // Converte string para número
+    const num = parseFloat(value);
+    if (isNaN(num)) return '';
+    
+    // Formata com 2 casas decimais e substitui ponto por vírgula
+    return num.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+/**
+ * Aplica máscara de preço para edição
+ */
+function applyPriceMaskEdit(displayInput, hiddenInput) {
+    if (!displayInput || !hiddenInput) return;
+    
+    displayInput.addEventListener('input', function(e) {
+        const formatted = formatBrazilianNumberEdit(e.target.value);
+        e.target.value = formatted;
+        hiddenInput.value = parseBrazilianNumberEdit(formatted);
+    });
+    
+    displayInput.addEventListener('blur', function(e) {
+        if (e.target.value === '') {
+            hiddenInput.value = '';
+        }
+    });
+}
+
+/**
+ * Aplica máscara de medida para edição
+ */
+function applyMeasurementMaskEdit(displayInput, hiddenInput) {
+    if (!displayInput || !hiddenInput) return;
+    
+    displayInput.addEventListener('input', function(e) {
+        const formatted = formatBrazilianNumberEdit(e.target.value);
+        e.target.value = formatted;
+        hiddenInput.value = parseBrazilianNumberEdit(formatted);
+    });
+    
+    displayInput.addEventListener('blur', function(e) {
+        if (e.target.value === '') {
+            hiddenInput.value = '';
+        }
+    });
+}
+
+// ============================================
 // Funções genéricas para todos os modais de edição
+// ============================================
 function previewEditImage(event, productId) {
     const reader = new FileReader();
     reader.onload = function() {
@@ -406,16 +491,17 @@ function previewEditImage(event, productId) {
 function togglePriceFieldEdit(productId, isChecked) {
     const priceField = document.getElementById('priceFieldEdit' + productId);
     if (priceField) {
-        const priceInput = priceField.querySelector('input[name="base_price"]');
+        const priceInputHidden = document.getElementById('base_price_value_edit_' + productId);
+        const priceInputDisplay = document.getElementById('base_price_display_edit_' + productId);
+        
         if (isChecked) {
             priceField.style.display = 'block';
-            if (priceInput) priceInput.required = true;
+            if (priceInputHidden) priceInputHidden.required = true;
         } else {
             priceField.style.display = 'none';
-            if (priceInput) {
-                priceInput.required = false;
-                priceInput.value = '';
-            }
+            if (priceInputHidden) priceInputHidden.required = false;
+            if (priceInputDisplay) priceInputDisplay.value = '';
+            if (priceInputHidden) priceInputHidden.value = '';
         }
     }
 }
@@ -450,8 +536,118 @@ function toggleLEDFieldEdit(productId, isChecked) {
     }
 }
 
-// Inicialização quando o DOM estiver carregado
+// ============================================
+// Inicializar máscaras quando modal for aberto
+// ============================================
 document.addEventListener('DOMContentLoaded', function() {
-    // Você pode adicionar inicializações específicas aqui se necessário
+    // Para cada modal de edição que existir na página
+    document.querySelectorAll('[id^="editProductModal"]').forEach(function(modal) {
+        // Extrair o ID do produto do ID do modal
+        const productId = modal.id.replace('editProductModal', '');
+        
+        modal.addEventListener('show.bs.modal', function() {
+            
+            
+            // CAMPO DE PREÇO - Sempre começar vazio
+            const priceDisplay = document.getElementById('base_price_display_edit_' + productId);
+            const priceValue = document.getElementById('base_price_value_edit_' + productId);
+            
+            if (priceDisplay && priceValue) {
+                // Sempre começar vazio
+                priceDisplay.value = '';
+                priceValue.value = '';
+                
+                // Pegar valor do backend (se existir)
+                const originalPrice = parseFloat('{{ product.base_price|default:0 }}');
+                
+                // Se tiver valor válido (maior que 0), formatar e preencher
+                if (originalPrice && !isNaN(originalPrice) && originalPrice > 0) {
+                    const formattedPrice = formatValueFromBackend(originalPrice.toString());
+                    if (formattedPrice !== '') {
+                        priceDisplay.value = formattedPrice;
+                        priceValue.value = originalPrice.toString();
+                    }
+                }
+                
+                // Aplicar máscara
+                applyPriceMaskEdit(priceDisplay, priceValue);
+            }
+            
+            // CAMPOS DE MEDIDAS - Sempre começar vazios
+            const measurements = [
+                { field: 'height_cm', value: parseFloat('{{ product.height_cm|default:0 }}') },
+                { field: 'width_cm', value: parseFloat('{{ product.width_cm|default:0 }}') },
+                { field: 'length_cm', value: parseFloat('{{ product.length_cm|default:0 }}') },
+                { field: 'diameter_cm', value: parseFloat('{{ product.diameter_cm|default:0 }}') },
+                { field: 'depth_cm', value: parseFloat('{{ product.depth_cm|default:0 }}') },
+                { field: 'curvature_cm', value: parseFloat('{{ product.curvature_cm|default:0 }}') }
+            ];
+            
+            measurements.forEach(function(m) {
+                const displayInput = document.getElementById(m.field + '_display_edit_' + productId);
+                const hiddenInput = document.getElementById(m.field + '_value_edit_' + productId);
+                
+                if (displayInput && hiddenInput) {
+                    // Sempre começar vazio
+                    displayInput.value = '';
+                    hiddenInput.value = '';
+                    
+                    
+                    // Se tiver valor válido (maior que 0), formatar e preencher
+                    if (m.value && !isNaN(m.value) && m.value > 0) {
+                        const formattedValue = formatValueFromBackend(m.value.toString());
+                        if (formattedValue !== '') {
+                            displayInput.value = formattedValue;
+                            hiddenInput.value = m.value.toString();
+                        }
+                    }
+                    
+                    // Aplicar máscara
+                    applyMeasurementMaskEdit(displayInput, hiddenInput);
+                }
+            });
+        });
+        
+        // LIMPAR CAMPOS QUANDO O MODAL FOR FECHADO
+        modal.addEventListener('hidden.bs.modal', function() {
+            
+            // Limpar campo de preço
+            const priceDisplay = document.getElementById('base_price_display_edit_' + productId);
+            const priceValue = document.getElementById('base_price_value_edit_' + productId);
+            
+            if (priceDisplay && priceValue) {
+                priceDisplay.value = '';
+                priceValue.value = '';
+            }
+            
+            // Limpar campos de medidas
+            const measurementFields = [
+                'height_cm', 'width_cm', 'length_cm', 
+                'diameter_cm', 'depth_cm', 'curvature_cm'
+            ];
+            
+            measurementFields.forEach(function(field) {
+                const displayInput = document.getElementById(field + '_display_edit_' + productId);
+                const hiddenInput = document.getElementById(field + '_value_edit_' + productId);
+                
+                if (displayInput && hiddenInput) {
+                    displayInput.value = '';
+                    hiddenInput.value = '';
+                }
+            });
+            
+            // Limpar preview da imagem
+            const previewContainer = document.getElementById('imagePreviewEdit' + productId);
+            if (previewContainer) {
+                previewContainer.style.display = 'none';
+            }
+            
+            const previewImage = document.getElementById('previewImageEdit' + productId);
+            if (previewImage) {
+                previewImage.src = '';
+            }            
+                        
+        });
+    });
 });
 </script>

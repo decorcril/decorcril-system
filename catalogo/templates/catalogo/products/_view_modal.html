@@ -1,3 +1,9 @@
+{# ============================================= #}
+{# MODAL: VISUALIZAR PRODUTO                     #}
+{# ============================================= #}
+
+{% load humanize %}
+
 <div class="modal fade"
      id="viewProductModal{{ product.pk }}"
      tabindex="-1"
@@ -99,7 +105,7 @@
                     <div class="col-md-4">
                         <label class="fw-bold text-muted small">Preço Base</label>
                         <p class="mb-0 fs-5 text-success fw-bold">
-                            R$ {{ product.base_price }}
+                            R$ {{ product.base_price|intcomma }}
                         </p>
                     </div>
                     {% endif %}
@@ -157,42 +163,42 @@
                             {% if product.height_cm %}
                             <div class="col-md-4">
                                 <small class="text-muted">Altura:</small>
-                                <span class="fw-bold">{{ product.height_cm }} cm</span>
+                                <span class="fw-bold">{{ product.height_cm|intcomma }} cm</span>
                             </div>
                             {% endif %}
 
                             {% if product.width_cm %}
                             <div class="col-md-4">
                                 <small class="text-muted">Largura:</small>
-                                <span class="fw-bold">{{ product.width_cm }} cm</span>
+                                <span class="fw-bold">{{ product.width_cm|intcomma }} cm</span>
                             </div>
                             {% endif %}
 
                             {% if product.length_cm %}
                             <div class="col-md-4">
                                 <small class="text-muted">Comprimento:</small>
-                                <span class="fw-bold">{{ product.length_cm }} cm</span>
+                                <span class="fw-bold">{{ product.length_cm|intcomma }} cm</span>
                             </div>
                             {% endif %}
 
                             {% if product.diameter_cm %}
                             <div class="col-md-4">
                                 <small class="text-muted">Diâmetro:</small>
-                                <span class="fw-bold">{{ product.diameter_cm }} cm</span>
+                                <span class="fw-bold">{{ product.diameter_cm|intcomma }} cm</span>
                             </div>
                             {% endif %}
 
                             {% if product.depth_cm %}
                             <div class="col-md-4">
                                 <small class="text-muted">Profundidade:</small>
-                                <span class="fw-bold">{{ product.depth_cm }} cm</span>
+                                <span class="fw-bold">{{ product.depth_cm|intcomma }} cm</span>
                             </div>
                             {% endif %}
 
                             {% if product.curvature_cm %}
                             <div class="col-md-4">
                                 <small class="text-muted">Curvatura:</small>
-                                <span class="fw-bold">{{ product.curvature_cm }} cm</span>
+                                <span class="fw-bold">{{ product.curvature_cm|intcomma }} cm</span>
                             </div>
                             {% endif %}
                         </div>
@@ -269,17 +275,7 @@
             </div>
 
             <!-- FOOTER -->
-            <div class="modal-footer">
-                {% if is_supervisor %}
-                <button class="btn btn-primary"
-                        data-bs-dismiss="modal"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editProductModal{{ product.pk }}">
-                    <i class="bi bi-pencil me-1"></i>
-                    Editar Produto
-                </button>
-                {% endif %}
-                
+            <div class="modal-footer"> 
                 <button class="btn btn-secondary"
                         data-bs-dismiss="modal">
                     <i class="bi bi-x-circle me-1"></i>
