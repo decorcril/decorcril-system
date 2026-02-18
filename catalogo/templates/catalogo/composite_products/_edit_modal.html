@@ -1,0 +1,257 @@
+<div class="modal fade" id="editProductModalComposite{{ product.pk }}" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-pencil me-2"></i>
+                    Editar Produto Composto: {{ product.name }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="post"
+                  action="{% url 'composite_product_update' product.pk %}"
+                  enctype="multipart/form-data">
+                {% csrf_token %}
+
+                            <div class="alert alert-warning py-2">
+                                Para alterar os dados de um componente, edite o componente original ou altere os componentes na tela de composição.
+                            </div>
+                <div class="modal-body">
+                    <div class="tab-content">
+
+                        <!-- ABA BÁSICO -->
+                        <div class="tab-pane fade show active" id="basic-composite-{{ product.pk }}">
+
+                            <div class="row mb-4">
+                                <div class="col-md-4 text-center">
+
+                                    <label class="form-label fw-bold">Foto do Produto</label>
+
+                                    {% if product.photo %}
+                                    <div class="mb-2">
+                                        <img src="{{ product.photo.url }}"
+                                             class="img-thumbnail"
+                                             style="max-height:150px;"
+                                             alt="{{ product.name }}">
+                                    </div>
+                                    {% endif %}
+
+                                    <input type="file"
+                                           name="photo"
+                                           class="form-control mt-2"
+                                           accept="image/*"
+                                           onchange="previewCompositeImage(event, '{{ product.pk }}')">
+
+                                    <small class="text-muted">
+                                        {% if product.photo %}Alterar foto{% else %}Adicionar foto{% endif %}
+                                    </small>
+
+                                    <div id="imagePreviewComposite{{ product.pk }}"
+                                         class="mt-3"
+                                         style="display:none;">
+                                        <img id="previewImageComposite{{ product.pk }}"
+                                             class="img-thumbnail"
+                                             style="max-height:150px;">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-8">
+
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">Código do Produto*</label>
+                                            <input type="text"
+                                                   name="sku"
+                                                   value="{{ product.sku }}"
+                                                   class="form-control"
+                                                   required>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-bold">Nome*</label>
+                                            <input type="text"
+                                                   name="name"
+                                                   value="{{ product.name }}"
+                                                   class="form-control"
+                                                   required>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Categoria*</label>
+                                        <select name="category" class="form-select" required>
+                                            {% for category in categories %}
+                                            <option value="{{ category.pk }}"
+                                                {% if category.pk == product.category.pk %}selected{% endif %}>
+                                                {{ category.name }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <!-- PREÇO COM MÁSCARA -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Preço Base*</label>
+
+                                        <!-- Campo visível apenas para máscara -->
+                                        <input type="text"
+                                               class="form-control"
+                                               id="base_price_display_composite_{{ product.pk }}"
+                                               placeholder="0,00"
+                                               inputmode="decimal"
+                                               autocomplete="off">
+
+                                        <!-- Campo enviado ao backend -->
+                                        <input type="hidden"
+                                               name="base_price"
+                                               id="base_price_value_composite_{{ product.pk }}"
+                                               value="{{ product.base_price|default:'' }}"
+                                               required>
+                                    </div>
+
+                                    <div class="form-check form-switch">
+                                        <input type="checkbox"
+                                               name="is_active"
+                                               class="form-check-input"
+                                               {% if product.is_active %}checked{% endif %}>
+                                        <label class="form-check-label">
+                                            Produto Ativo
+                                        </label>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Descrição</label>
+                                <textarea name="description"
+                                          class="form-control"
+                                          rows="3">{{ product.description }}</textarea>
+                            </div>
+
+
+                            
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info">Salvar Alterações</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+function formatBrazilianNumber(value) {
+    if (!value) return '';
+
+    let num = value.replace(/\D/g, '');
+    if (!num) return '';
+
+    num = (parseInt(num, 10) / 100).toFixed(2);
+
+    return num
+        .replace('.', ',')
+        .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function normalizeFromDisplay(value) {
+    // Garante que sempre envia formato brasileiro padronizado
+    if (!value) return '';
+    return value;
+}
+
+function formatValueFromBackend(value) {
+    if (!value) return '';
+
+    const num = parseFloat(value);
+    if (isNaN(num)) return '';
+
+    return num
+        .toFixed(2)
+        .replace('.', ',')
+        .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function applyMoneyMask(displayInput, hiddenInput) {
+    if (!displayInput || !hiddenInput) return;
+
+    if (displayInput.dataset.maskApplied === "true") return;
+    displayInput.dataset.maskApplied = "true";
+
+    displayInput.addEventListener('input', function(e) {
+        const formatted = formatBrazilianNumber(e.target.value);
+        e.target.value = formatted;
+        hiddenInput.value = normalizeFromDisplay(formatted);
+    });
+
+    // 🔹 SINCRONIZA AO ABRIR (evita hidden vazio)
+    if (hiddenInput.value) {
+        displayInput.value = formatValueFromBackend(hiddenInput.value);
+        hiddenInput.value = displayInput.value;
+    }
+
+    // 🔹 GARANTE SINCRONIZAÇÃO ANTES DO SUBMIT
+    const form = displayInput.closest("form");
+    if (form) {
+        form.addEventListener("submit", function() {
+            hiddenInput.value = normalizeFromDisplay(displayInput.value);
+        });
+    }
+}
+
+function previewCompositeImage(event, productId) {
+    const reader = new FileReader();
+
+    reader.onload = function() {
+        const preview = document.getElementById('previewImageComposite' + productId);
+        const container = document.getElementById('imagePreviewComposite' + productId);
+
+        if (preview && container) {
+            preview.src = reader.result;
+            container.style.display = 'block';
+        }
+    };
+
+    if (event.target.files && event.target.files[0]) {
+        reader.readAsDataURL(event.target.files[0]);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    /* CREATE */
+    const createDisplay = document.getElementById('base_price_display_composite_create');
+    const createHidden = document.getElementById('base_price_value_composite_create');
+    applyMoneyMask(createDisplay, createHidden);
+
+    /* EDIT */
+    document.querySelectorAll('[id^="editProductModalComposite"]').forEach(function(modal) {
+
+        const productId = modal.id.replace('editProductModalComposite', '');
+
+        modal.addEventListener('show.bs.modal', function() {
+            const priceDisplay = document.getElementById('base_price_display_composite_' + productId);
+            const priceHidden = document.getElementById('base_price_value_composite_' + productId);
+
+            applyMoneyMask(priceDisplay, priceHidden);
+        });
+
+        modal.addEventListener('hidden.bs.modal', function() {
+            const previewContainer = document.getElementById('imagePreviewComposite' + productId);
+            const previewImage = document.getElementById('previewImageComposite' + productId);
+
+            if (previewContainer) previewContainer.style.display = 'none';
+            if (previewImage) previewImage.src = '';
+        });
+    });
+});
+</script>

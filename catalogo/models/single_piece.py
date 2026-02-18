@@ -257,3 +257,11 @@ class SinglePiece(models.Model):
             measurements.append(f"Curvatura: {self.curvature_cm}cm")
 
         return ", ".join(measurements) if measurements else "Sem medidas"
+
+    @property
+    def is_composite(self):
+        """
+        Retorna True se este produto possuir componentes
+        cadastrados na tabela ProductComponent.
+        """
+        return self.components.exists()

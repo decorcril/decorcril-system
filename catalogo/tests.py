@@ -168,9 +168,7 @@ class ProductDeleteTestCase(TestCase):
     def test_delete_non_sellable_product(self):
         """Pode deletar produto não vendável"""
         self.client.login(username="supervisor", password="test123")
-        product = self.create_product(
-            "010", is_sellable=False, base_price=None
-        )
+        product = self.create_product("010", is_sellable=False, base_price=None)
 
         response = self.client.post(
             reverse("product_delete", kwargs={"pk": product.pk})

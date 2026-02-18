@@ -1,0 +1,264 @@
+<!-- ========================= -->
+<!-- MODAL: CRIAR PRODUTO COMPOSTO -->
+<!-- ========================= -->
+<div class="modal fade" id="createCompositeProductModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+
+            <form id="createCompositeProductForm" method="post" action="{% url 'composite_product_create' %}"
+                enctype="multipart/form-data">
+
+                {% csrf_token %}
+
+                <!-- HEADER -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Novo Produto Composto
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row mb-4">
+                        <!-- FOTO -->
+                        <div class="col-md-4 text-center">
+                            <label class="form-label fw-bold">Foto do Produto</label>
+                            <input type="file" class="form-control" name="photo" accept="image/*"
+                                onchange="previewCompositeImage(event)">
+                            <small class="text-muted">Opcional</small>
+                            <div id="imagePreviewComposite" class="mt-3" style="display:none;">
+                                <img id="previewImageComposite" class="img-thumbnail" style="max-height:150px;">
+                            </div>
+                        </div>
+
+                        <!-- DADOS -->
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Código*</label>
+                                    <input type="text" name="sku" class="form-control" required
+                                        oninput="this.value=this.value.toUpperCase()" placeholder="001 ou 001-ABC">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Nome*</label>
+                                    <input type="text" name="name" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Categoria*</label>
+                                    <select class="form-select" name="category" required>
+                                        <option value="">Selecione...</option>
+                                        {% for category in categories %}
+                                        <option value="{{ category.pk }}">{{ category.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold">Preço Base (R$)*</label>
+                                    <input type="text" class="form-control" id="base_price_display_composite"
+                                        placeholder="0,00" inputmode="decimal" autocomplete="off">
+                                    <input type="hidden" name="base_price" id="base_price_value_composite" required>
+                                </div>
+                            </div>
+
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_active"
+                                    id="is_active_composite" checked>
+                                <label class="form-check-label" for="is_active_composite">Produto Ativo</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Descrição</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <hr>
+
+                    <!-- COMPONENTES -->
+                    <h6 class="fw-bold mb-3">
+                        <i class="bi bi-puzzle me-2"></i>
+                        Componentes do Produto
+                    </h6>
+
+                    {% if single_pieces %}
+                    <div class="mb-3 d-flex justify-content-end gap-2">
+                        <input type="text" id="searchPiecesInput" class="form-control form-control-sm"
+                            placeholder="Pesquisar por nome ou código..." style="width:300px;">
+                        <button type="button" id="searchPiecesBtn" class="btn btn-sm btn-success">Buscar</button>
+                        <button type="button" id="clearSearchBtn" class="btn btn-sm btn-outline-secondary">Limpar</button>
+                    </div>
+
+                    <div class="alert alert-info">
+                        Selecione os produtos e defina as quantidades.
+                    </div>
+
+                    <!-- ALERTA COMPONENTE NÃO ENCONTRADO -->
+                    <div id="noComponentsAlert" class="alert alert-warning" style="display:none;">
+                        Nenhum componente encontrado.
+                    </div>
+
+                    <div id="piecesList" class="border rounded p-2" style="max-height:300px; overflow-y:auto;">
+                        {% for piece in single_pieces %}
+                        <div class="row align-items-center mb-2 p-2 piece-row border-bottom">
+                            <div class="col-md-8">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="components"
+                                        value="{{ piece.id }}">
+                                    <label class="form-check-label">
+                                        <strong>{{ piece.sku }}</strong> — {{ piece.name }}<br>
+                                        <small class="text-muted">{{ piece.category.name }} | {{ piece.thickness_mm }}mm</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" name="quantity_{{ piece.id }}" class="form-control form-control-sm"
+                                    min="1" value="1">
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        Nenhum produto simples cadastrado para compor o Produto Composto.
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-dark">Salvar Produto Composto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// Máscara de preço
+// ============================================
+
+function formatBrazilianNumber(value) {
+    if (!value) return '';
+    let num = value.replace(/\D/g, '');
+    if (num === '') return '';
+    num = (parseInt(num) / 100).toFixed(2);
+    return num.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function parseBrazilianNumber(value) {
+    if (!value) return '';
+    return value.replace(/\./g, '').replace(',', '.');
+}
+
+function applyPriceMask(displayInput, hiddenInput) {
+    displayInput.addEventListener('input', function (e) {
+        const formatted = formatBrazilianNumber(e.target.value);
+        e.target.value = formatted;
+        hiddenInput.value = parseBrazilianNumber(formatted);
+    });
+
+    displayInput.addEventListener('blur', function (e) {
+        if (e.target.value === '') hiddenInput.value = '';
+    });
+}
+
+// ============================================
+// Preview de imagem
+// ============================================
+
+function previewCompositeImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        document.getElementById('previewImageComposite').src = e.target.result;
+        document.getElementById('imagePreviewComposite').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+// ============================================
+// Busca de Componentes com alerta
+// ============================================
+
+function setupComponentSearch() {
+
+    const searchInput = document.getElementById('searchPiecesInput');
+    const searchBtn = document.getElementById('searchPiecesBtn');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    const rows = document.querySelectorAll('#piecesList .piece-row');
+    const alertDiv = document.getElementById('noComponentsAlert');
+
+    if (!searchInput) return;
+
+    function filterPieces() {
+        const term = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            if (text.includes(term)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Mostra alerta se nenhum componente visível
+        alertDiv.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    searchBtn?.addEventListener('click', filterPieces);
+
+    searchInput.addEventListener('keyup', function (e) {
+        if (e.key === 'Enter') filterPieces();
+    });
+
+    clearBtn?.addEventListener('click', function () {
+        searchInput.value = '';
+        rows.forEach(row => row.style.display = '');
+        alertDiv.style.display = 'none';
+    });
+}
+
+// ============================================
+// Inicialização geral
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function () {
+    const priceDisplay = document.getElementById('base_price_display_composite');
+    const priceHidden = document.getElementById('base_price_value_composite');
+
+    if (priceDisplay && priceHidden) applyPriceMask(priceDisplay, priceHidden);
+
+    setupComponentSearch();
+});
+
+// ============================================
+// Reset ao abrir modal
+// ============================================
+
+document.getElementById('createCompositeProductModal')?.addEventListener('show.bs.modal', function () {
+    const form = document.getElementById('createCompositeProductForm');
+    if (form) form.reset();
+
+    document.getElementById('base_price_display_composite').value = '';
+    document.getElementById('base_price_value_composite').value = '';
+    document.getElementById('imagePreviewComposite').style.display = 'none';
+
+    const rows = document.querySelectorAll('#piecesList .piece-row');
+    rows.forEach(row => row.style.display = '');
+
+    const alertDiv = document.getElementById('noComponentsAlert');
+    alertDiv.style.display = 'none';
+});
+</script>

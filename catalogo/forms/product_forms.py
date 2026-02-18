@@ -12,11 +12,9 @@ class SinglePieceForm(forms.ModelForm):
             "photo",
             "category",
             "description",
-
             # Comercial
             "is_sellable",
             "base_price",
-
             # Medidas
             "thickness_mm",
             "height_cm",
@@ -25,17 +23,14 @@ class SinglePieceForm(forms.ModelForm):
             "diameter_cm",
             "depth_cm",
             "curvature_cm",
-
             # Material
             "acrylic_color",
             "color_observation",
-
             # Elétrica
             "has_electrical_component",
             "voltage",
             "has_led",
             "led_type",
-
             # Controle
             "is_active",
         ]
@@ -71,7 +66,6 @@ class SinglePieceForm(forms.ModelForm):
                     "placeholder": "Descrição detalhada do produto...",
                 }
             ),
-
             # =========================
             # Comercial
             # =========================
@@ -88,7 +82,6 @@ class SinglePieceForm(forms.ModelForm):
                     "placeholder": "0.00",
                 }
             ),
-
             # =========================
             # Medidas
             # =========================
@@ -111,7 +104,6 @@ class SinglePieceForm(forms.ModelForm):
             "curvature_cm": forms.NumberInput(
                 attrs={"class": "form-control", "step": "0.01", "min": "0"}
             ),
-
             # =========================
             # Material
             # =========================
@@ -122,7 +114,6 @@ class SinglePieceForm(forms.ModelForm):
                     "placeholder": "Ex: Transparente fosco, colorido personalizado...",
                 }
             ),
-
             # =========================
             # Elétrica
             # =========================
@@ -130,11 +121,8 @@ class SinglePieceForm(forms.ModelForm):
                 attrs={"class": "form-check-input"}
             ),
             "voltage": forms.Select(attrs={"class": "form-select"}),
-            "has_led": forms.CheckboxInput(
-                attrs={"class": "form-check-input"}
-            ),
+            "has_led": forms.CheckboxInput(attrs={"class": "form-check-input"}),
             "led_type": forms.Select(attrs={"class": "form-select"}),
-
             # =========================
             # Controle
             # =========================
@@ -199,8 +187,7 @@ class SinglePieceForm(forms.ModelForm):
         # Validação: Preço obrigatório se vendável
         if is_sellable and not base_price:
             self.add_error(
-                "base_price",
-                "Preço base é obrigatório se o produto for vendável."
+                "base_price", "Preço base é obrigatório se o produto for vendável."
             )
 
         # Validação: Se não vendável, limpar preço
@@ -216,11 +203,11 @@ class SinglePieceForm(forms.ModelForm):
             cleaned_data.get("depth_cm"),
             cleaned_data.get("curvature_cm"),
         ]
-        
+
         if not any(medidas):
             self.add_error(
                 None,
-                "Pelo menos uma medida deve ser preenchida (altura, largura, comprimento, diâmetro, profundidade ou curvatura)."
+                "Pelo menos uma medida deve ser preenchida (altura, largura, comprimento, diâmetro, profundidade ou curvatura).",
             )
 
         # Validação: Se não tem componente elétrico, limpar campos relacionados
@@ -236,8 +223,7 @@ class SinglePieceForm(forms.ModelForm):
         # Validação: Se tem LED, deve ter tipo de LED
         if has_led and not led_type:
             self.add_error(
-                "led_type",
-                "Tipo de LED é obrigatório quando o produto possui LED."
+                "led_type", "Tipo de LED é obrigatório quando o produto possui LED."
             )
 
         return cleaned_data

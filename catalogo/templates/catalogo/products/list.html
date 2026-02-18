@@ -9,14 +9,24 @@
 
 {% block page_actions %}
 {% if is_supervisor %}
-<button class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#createProductModal">
-    <i class="bi bi-plus-circle me-1"></i>
-    Novo Produto
-</button>
+<div class="d-flex gap-2">
+    <button class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#createProductModal">
+        <i class="bi bi-plus-circle me-1"></i>
+        Novo Produto
+    </button>
+
+    <button class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#createCompositeProductModal">
+        <i class="bi bi-plus-circle me-1"></i>
+        Criar Produto Composto
+    </button>
+</div>
 {% endif %}
 {% endblock %}
+
 
 {% block content %}
 <div class="card shadow">
@@ -37,27 +47,28 @@
     <div class="card-body">
 
         <!-- Pesquisa -->
-        <div class="mb-3 d-flex justify-content-end gap-2">
-            <form method="get" class="d-flex gap-2">
-                <input type="text"
-                       name="q"
-                       value="{{ query|default:'' }}"
-                       class="form-control form-control-sm"
-                       placeholder="Pesquisar por nome, SKU ou categoria..."
-                       style="width: 300px;">
+        <div class="mb-3 d-flex flex-wrap justify-content-end gap-2">
+    <form method="get" class="d-flex flex-wrap gap-2 w-100 justify-content-end">
+        <input type="text"
+               name="q"
+               value="{{ query|default:'' }}"
+               class="form-control form-control-sm flex-grow-1 flex-shrink-1"
+               placeholder="Pesquisar por nome, Código do Produto ou categoria..."
+               style="min-width: 200px; max-width: 400px;">
 
-                <button type="submit" class="btn btn-sm btn-success">
-                    Buscar
-                </button>
+        <button type="submit" class="btn btn-sm btn-success flex-shrink-0">
+            Buscar
+        </button>
 
-                {% if query %}
-                <a href="{% url 'product_list' %}"
-                   class="btn btn-sm btn-outline-secondary">
-                    Limpar
-                </a>
-                {% endif %}
-            </form>
-        </div>
+        {% if query %}
+        <a href="{% url 'product_list' %}"
+           class="btn btn-sm btn-outline-secondary flex-shrink-0">
+            Limpar
+        </a>
+        {% endif %}
+    </form>
+</div>
+
 
         {% if products %}
             <div class="table-responsive">
@@ -78,13 +89,33 @@
                     <tbody>
                         {% for product in products %}
                             {% include "catalogo/products/_row.html" %}
-                            {% include "catalogo/products/_view_modal.html" %}
-                            {% include "catalogo/products/_edit_modal.html" %}
-                            {% include "catalogo/products/_delete_modal.html" %}
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+
+            {# ================= MODAIS FORA DA TABELA ================= #}
+           {% for product in products %}
+
+    {# ===== MODAL VISUALIZAÇÃO ===== #}
+    {% if product.is_composite %}
+        {% include "catalogo/composite_products/_view_modal.html" %}
+    {% else %}
+        {% include "catalogo/products/_view_modal.html" %}
+    {% endif %}
+
+    {# ===== MODAL EDIÇÃO ===== #}
+    {% if product.is_composite %}
+        {% include "catalogo/composite_products/_edit_modal.html" %}
+    {% else %}
+        {% include "catalogo/products/_edit_modal.html" %}
+    {% endif %}
+
+    {# ===== MODAL EXCLUSÃO ===== #}
+    {% include "catalogo/products/_delete_modal.html" %}
+
+{% endfor %}
+
 
         {% else %}
             {% if query %}
@@ -118,4 +149,6 @@
 </div>
 
 {% include "catalogo/products/_create_modal.html" %}
+{% include "catalogo/composite_products/_create_modal.html" %}
+
 {% endblock %}

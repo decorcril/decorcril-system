@@ -1,5 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.views.decorators.http import require_POST
+from django.db.models.deletion import ProtectedError
+from django.db.models import Count, Q
+
+from catalogo.models.product_component import ProductComponent
 from ..models import SinglePiece, Category
 from ..forms.product_forms import SinglePieceForm
 from ..decorators import group_required
@@ -10,20 +15,40 @@ from ..decorators import group_required
 # =========================
 @group_required("Supervisor", "Vendedor")
 def product_list(request):
-    products = SinglePiece.objects.all().order_by("sku")
+
+    # 🔹 Base queryset com contagem de uso em composições
+    products = (
+        SinglePiece.objects
+        .annotate(used_in_count=Count("used_in_compositions"))
+        .select_related("category")
+        .order_by("sku")
+    )
+
     categories = Category.objects.filter(is_active=True)
 
-    # Filtro de pesquisa
+    # 🔎 Filtro de pesquisa
     q = request.GET.get("q", "").strip()
     if q:
-        # Busca no nome, SKU e nome da categoria
-        products = (
-            products.filter(name__icontains=q) |
-            products.filter(sku__icontains=q) |
-            products.filter(category__name__icontains=q)
+        products = products.filter(
+            Q(name__icontains=q) |
+            Q(sku__icontains=q) |
+            Q(category__name__icontains=q)
         )
 
     form = SinglePieceForm()
+
+    # 🔹 Produtos disponíveis para serem componentes
+    available_products = (
+        SinglePiece.objects
+        .filter(is_active=True, components__isnull=True)
+        .order_by("sku")
+    )
+
+    # 🔹 Todas as estruturas já cadastradas
+    all_components = (
+        ProductComponent.objects
+        .select_related("component", "parent")
+    )
 
     context = {
         "products": products,
@@ -31,7 +56,11 @@ def product_list(request):
         "form": form,
         "is_supervisor": request.user.groups.filter(name="Supervisor").exists(),
         "query": q,
+        "single_pieces": SinglePiece.objects.filter(is_active=True).order_by("sku"),
+        "available_products": available_products,
+        "all_components": all_components,
     }
+
     return render(request, "catalogo/products/list.html", context)
 
 
@@ -56,13 +85,17 @@ def product_create(request):
 @group_required("Supervisor")
 def product_update(request, pk):
     product = get_object_or_404(SinglePiece, pk=pk)
+
     if request.method == "POST":
         form = SinglePieceForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             product = form.save()
-            messages.success(request, f'Produto "{product.name}" atualizado com sucesso!')
+            messages.success(
+                request, f'Produto "{product.name}" atualizado com sucesso!'
+            )
         else:
             messages.error(request, "Erro ao atualizar produto. Verifique os dados.")
+
     return redirect("product_list")
 
 
@@ -70,15 +103,26 @@ def product_update(request, pk):
 # Deletar Produto
 # =========================
 @group_required("Supervisor")
+@require_POST
 def product_delete(request, pk):
-    product = get_object_or_404(SinglePiece, pk=pk)
-    if request.method == "POST":
-        try:
-            name = product.name
-            product.delete()
-            messages.success(request, f'Produto "{name}" excluído com sucesso!')
-        except Exception as e:
-            messages.error(request, f"Erro ao excluir produto: {str(e)}")
+
+    product = SinglePiece.objects.filter(pk=pk).first()
+
+    if not product:
+        messages.warning(request, "Produto já removido.")
+        return redirect("product_list")
+
+    try:
+        name = product.name
+        product.delete()
+        messages.success(request, f'Produto "{name}" excluído com sucesso!')
+
+    except ProtectedError:
+        messages.error(
+            request,
+            "Este produto não pode ser excluído pois está sendo utilizado em um produto composto."
+        )
+
     return redirect("product_list")
 
 
@@ -88,6 +132,7 @@ def product_delete(request, pk):
 @group_required("Supervisor")
 def product_toggle(request, pk):
     product = get_object_or_404(SinglePiece, pk=pk)
+
     if request.method == "POST":
         try:
             product.is_active = not product.is_active
@@ -96,6 +141,7 @@ def product_toggle(request, pk):
             messages.success(request, f'Produto "{product.name}" {action}!')
         except Exception as e:
             messages.error(request, f"Erro ao alterar status: {str(e)}")
+
     return redirect("product_list")
 
 
@@ -104,7 +150,6 @@ def product_toggle(request, pk):
 # =========================
 @group_required("Supervisor", "Vendedor")
 def product_details(request, pk):
-    """Retorna HTML com detalhes do produto para o modal"""
     product = get_object_or_404(SinglePiece, pk=pk)
     return render(
         request,
@@ -115,7 +160,6 @@ def product_details(request, pk):
 
 @group_required("Supervisor")
 def product_edit_modal(request, pk):
-    """Retorna HTML do formulário de edição para o modal"""
     product = get_object_or_404(SinglePiece, pk=pk)
     categories = Category.objects.filter(is_active=True)
 

@@ -1,4 +1,9 @@
 from django.urls import path
+
+from catalogo.views.composite_product_views import (
+    composite_product_create,
+    composite_product_update,
+)
 from .views.auth_views import login_view, logout_view
 from .views.dashboard_views import dashboard
 from .views.category_views import (
@@ -42,4 +47,14 @@ urlpatterns = [
     path("produtos/<int:pk>/editar/", product_update, name="product_update"),
     path("produtos/<int:pk>/excluir/", product_delete, name="product_delete"),
     path("produtos/<int:pk>/toggle/", product_toggle, name="product_toggle"),
+    path(
+        "produtos/composto/novo/",
+        composite_product_create,
+        name="composite_product_create",
+    ),
+    path(
+        "produtos/composto/<int:pk>/editar/",
+        composite_product_update,
+        name="composite_product_update",
+    ),
 ]

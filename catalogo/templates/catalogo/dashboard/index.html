@@ -7,19 +7,6 @@
 <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
 {% endblock %}
 
-{% block page_actions %}
-{% if is_supervisor %}
-<div class="btn-group">
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
-        <i class="bi bi-plus-circle me-1"></i> Nova Categoria
-    </button>
-    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createProductModal">
-        <i class="bi bi-plus-circle me-1"></i> Novo Produto
-    </button>
-</div>
-{% endif %}
-{% endblock %}
-
 {% block content %}
 <!-- Cards de Estatísticas -->
 <div class="row mb-4">

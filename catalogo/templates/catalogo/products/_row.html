@@ -18,11 +18,7 @@
             <strong>{{ product.name }}</strong>
         </div>
         
-        {% if product.description %}
-            <small class="text-muted">
-                {{ product.description|truncatechars:50 }}
-            </small>
-        {% endif %}
+        
     </td>
 
     <!-- Categoria -->
@@ -46,22 +42,18 @@
         
         <br>
         
-        {% if product.is_sellable %}
-            <span class="badge bg-success">
-                <i class="bi bi-cart-check me-1"></i> Vendável
-            </span>
-        {% else %}
-            <span class="badge bg-warning">
-                <i class="bi bi-cart-x me-1"></i> Não vendável
-            </span>
-        {% endif %}
+        {% if product.is_composite %}
+    <div class="mt-1">
+        <span class="badge bg-primary">
+            <i class="bi bi-boxes me-1"></i> Produto Composto
+        </span>
+    </div>
+{% elif not product.is_sellable %}
+    <span class="badge bg-info">
+        <i class="bi bi-boxes me-1"></i> Componente
+    </span>
+{% endif %}
 
-        {% if product.has_electrical_component %}
-            <br>
-            <span class="badge bg-danger">
-                <i class="bi bi-lightning me-1"></i> Elétrico
-            </span>
-        {% endif %}
     </td>
 
     <!-- Criado em -->
@@ -76,26 +68,41 @@
     <td class="text-end">
         <div class="btn-group btn-group-sm">
 
+            <!-- Visualizar -->
             <button class="btn btn-outline-info"
                     data-bs-toggle="modal"
-                    data-bs-target="#viewProductModal{{ product.pk }}"
+                    data-bs-target="#viewProductModal{% if product.is_composite %}Composite{% endif %}{{ product.pk }}"
                     title="Visualizar">
                 <i class="bi bi-eye"></i>
             </button>
 
+            <!-- Editar -->
             <button class="btn btn-outline-primary"
                     data-bs-toggle="modal"
-                    data-bs-target="#editProductModal{{ product.pk }}"
+                    data-bs-target="#editProductModal{% if product.is_composite %}Composite{% endif %}{{ product.pk }}"
                     title="Editar">
                 <i class="bi bi-pencil"></i>
             </button>
 
-            <button class="btn btn-outline-danger"
-                    data-bs-toggle="modal"
-                    data-bs-target="#deleteProductModal{{ product.pk }}"
-                    title="Excluir">
-                <i class="bi bi-trash"></i>
-            </button>
+            <!-- Excluir -->
+            <!-- Excluir -->
+<!-- Excluir -->
+{% if product.used_in_count == 0 %}
+    <button class="btn btn-outline-danger"
+            data-bs-toggle="modal"
+            data-bs-target="#deleteProductModal{{ product.pk }}"
+            title="Excluir">
+        <i class="bi bi-trash"></i>
+    </button>
+{% else %}
+    <button class="btn btn-outline-secondary"
+            disabled
+            title="Este produto compõe outro produto">
+        <i class="bi bi-trash"></i>
+    </button>
+{% endif %}
+
+
 
         </div>
     </td>

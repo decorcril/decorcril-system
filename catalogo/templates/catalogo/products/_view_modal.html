@@ -48,7 +48,7 @@
 
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="fw-bold text-muted small">SKU</label>
+                                <label class="fw-bold text-muted small">Código do Produto</label>
                                 <p class="mb-0">
                                     <span class="badge bg-dark fs-6">{{ product.sku }}</span>
                                 </p>
@@ -87,19 +87,24 @@
 
                 <div class="row g-3 mb-4">
                     <div class="col-md-4">
-                        <label class="fw-bold text-muted small">Vendável</label>
-                        <p class="mb-0">
-                            {% if product.is_sellable %}
-                                <span class="badge bg-success">
-                                    <i class="bi bi-check-circle me-1"></i> Sim
-                                </span>
-                            {% else %}
-                                <span class="badge bg-warning">
-                                    <i class="bi bi-x-circle me-1"></i> Não
-                                </span>
-                            {% endif %}
-                        </p>
-                    </div>
+    <label class="fw-bold text-muted small">Faz parte de um Produto Composto?</label>
+    <p class="mb-0">
+        {% if product.is_composite %}
+            <span class="badge bg-primary">
+                <i class="bi bi-boxes me-1"></i> Produto Composto
+            </span>
+        {% elif product.is_sellable %}
+            <span class="badge bg-success">
+                <i class="bi bi-check-circle me-1"></i> Pode ser vendido separadamente
+            </span>
+        {% else %}
+            <span class="badge bg-warning text-dark">
+                <i class="bi bi-x-circle me-1"></i> Componente
+            </span>
+        {% endif %}
+    </p>
+</div>
+
 
                     {% if product.base_price %}
                     <div class="col-md-4">

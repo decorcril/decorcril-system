@@ -1,0 +1,272 @@
+{% load humanize %}
+
+<div class="modal fade"
+     id="viewProductModalComposite{{ product.pk }}"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-eye me-2"></i>
+                    Detalhes do Produto Composto
+                </h5>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body">
+
+                <div class="row g-4">
+
+                    <!-- FOTO -->
+                    <div class="col-md-4 text-center">
+                        {% if product.photo %}
+                            <img src="{{ product.photo.url }}"
+                                 class="img-fluid rounded shadow-sm"
+                                 style="max-height: 300px; object-fit: cover;"
+                                 alt="{{ product.name }}">
+                        {% else %}
+                            <div class="border rounded py-5 text-muted bg-light">
+                                <i class="bi bi-image fs-1"></i>
+                                <p class="mt-2 mb-0">Sem foto</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- DADOS PRINCIPAIS -->
+                    <div class="col-md-8">
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="fw-bold text-muted small">Código do Produto</label>
+                                <p class="mb-0">
+                                    <span class="badge bg-dark fs-6">{{ product.sku }}</span>
+                                </p>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="fw-bold text-muted small">Categoria</label>
+                                <p class="mb-0">
+                                    <span class="badge bg-info fs-6">{{ product.category.name }}</span>
+                                </p>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="fw-bold text-muted small">Nome do Produto</label>
+                                <p class="mb-0 fs-5">{{ product.name }}</p>
+                            </div>
+
+                            {% if product.description %}
+                            <div class="col-12">
+                                <label class="fw-bold text-muted small">Descrição</label>
+                                <p class="mb-0">{{ product.description }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- INFORMAÇÕES COMERCIAIS -->
+                <h6 class="fw-bold text-success mb-3">
+                    <i class="bi bi-cash-coin me-2"></i>
+                    Informações Comerciais
+                </h6>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="fw-bold text-muted small">Vendável</label>
+                        <p class="mb-0">
+                            {% if product.is_sellable %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i> Sim
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-x-circle me-1"></i> Não
+                                </span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    {% if product.base_price %}
+                    <div class="col-md-4">
+                        <label class="fw-bold text-muted small">Preço Base</label>
+                        <p class="mb-0 fs-5 text-success fw-bold">
+                            R$ {{ product.base_price|intcomma }}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <div class="col-md-4">
+                        <label class="fw-bold text-muted small">Status</label>
+                        <p class="mb-0">
+                            {% if product.is_active %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i> Ativo
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-x-circle me-1"></i> Inativo
+                                </span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- ESTRUTURA DO PRODUTO -->
+                <h6 class="fw-bold text-primary mb-3">
+                    <i class="bi bi-diagram-3 me-2"></i>
+                    Componentes do Produto
+                </h6>
+
+                <div class="table-responsive mb-4">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:70px;">Qtd</th>
+                                <th style="width:25%;">Componente</th>
+                                <th style="width:15%;">Cor</th>
+                                <th style="width:12%;">Espessura</th>
+                                <th>Medidas</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for item in product.components.all %}
+                            <tr>
+                                <!-- QUANTIDADE -->
+                                <td class="fw-semibold">
+                                    {{ item.quantity }}x
+                                </td>
+
+                                <!-- COMPONENTE -->
+                                <td>
+                                    <div class="fw-semibold">
+                                        {{ item.component.name }}
+                                    </div>
+
+                                    <small class="text-muted d-block">
+                                        Código: {{ item.component.sku }}
+                                    </small>
+                                </td>
+
+                                <!-- COR -->
+                                <td>
+                                    {% if item.component.acrylic_color %}
+                                        {{ item.component.get_acrylic_color_display }}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- ESPESSURA -->
+                                <td>
+                                    {% if item.component.thickness_mm %}
+                                        {{ item.component.get_thickness_mm_display }}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- MEDIDAS -->
+                                <td>
+                                    {% if item.component.height_cm or item.component.width_cm or item.component.length_cm or item.component.diameter_cm or item.component.depth_cm or item.component.curvature_cm %}
+                                        <div>
+                                            {% if item.component.height_cm %}
+                                                <div class="mb-1">
+                                                    <span class="fw-bold">Altura:</span> {{ item.component.height_cm|intcomma }} cm
+                                                </div>
+                                            {% endif %}
+                                            {% if item.component.width_cm %}
+                                                <div class="mb-1">
+                                                    <span class="fw-bold">Largura:</span> {{ item.component.width_cm|intcomma }} cm
+                                                </div>
+                                            {% endif %}
+                                            {% if item.component.length_cm %}
+                                                <div class="mb-1">
+                                                    <span class="fw-bold">Comprimento:</span> {{ item.component.length_cm|intcomma }} cm
+                                                </div>
+                                            {% endif %}
+                                            {% if item.component.diameter_cm %}
+                                                <div class="mb-1">
+                                                    <span class="fw-bold">Diâmetro:</span> {{ item.component.diameter_cm|intcomma }} cm
+                                                </div>
+                                            {% endif %}
+                                            {% if item.component.depth_cm %}
+                                                <div class="mb-1">
+                                                    <span class="fw-bold">Profundidade:</span> {{ item.component.depth_cm|intcomma }} cm
+                                                </div>
+                                            {% endif %}
+                                            {% if item.component.curvature_cm %}
+                                                <div>
+                                                    <span class="fw-bold">Curvatura:</span> {{ item.component.curvature_cm|intcomma }} cm
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    Nenhum componente cadastrado.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- INFORMAÇÕES DE CONTROLE -->
+                <h6 class="fw-bold text-secondary mb-3">
+                    <i class="bi bi-clock-history me-2"></i>
+                    Informações de Controle
+                </h6>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="fw-bold text-muted small">Criado em</label>
+                        <p class="mb-0">
+                            <i class="bi bi-calendar-plus me-1"></i>
+                            {{ product.created_at|date:"d/m/Y" }} às {{ product.created_at|date:"H:i" }}
+                        </p>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="fw-bold text-muted small">Última atualização</label>
+                        <p class="mb-0">
+                            <i class="bi bi-calendar-check me-1"></i>
+                            {{ product.updated_at|date:"d/m/Y" }} às {{ product.updated_at|date:"H:i" }}
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer"> 
+                <button class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>
+                    Fechar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
