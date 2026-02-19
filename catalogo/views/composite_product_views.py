@@ -11,6 +11,7 @@ from ..decorators import group_required
 from django.db import transaction
 from django.contrib import messages
 
+
 @group_required("Supervisor")
 def composite_product_create(request):
     if request.method == "POST":
@@ -23,8 +24,7 @@ def composite_product_create(request):
             # 🔴 Bloqueia se não houver componentes
             if not components:
                 messages.error(
-                    request,
-                    "Produto composto deve possuir pelo menos um componente."
+                    request, "Produto composto deve possuir pelo menos um componente."
                 )
                 return redirect("product_list")
 
@@ -56,14 +56,11 @@ def composite_product_create(request):
                     messages.success(
                         request,
                         f'Produto composto "{product.name}" criado com sucesso '
-                        f"com {len(components)} componente(s)!"
+                        f"com {len(components)} componente(s)!",
                     )
 
             except Exception as e:
-                messages.error(
-                    request,
-                    f"Erro ao criar produto composto: {str(e)}"
-                )
+                messages.error(request, f"Erro ao criar produto composto: {str(e)}")
 
         else:
             messages.error(
@@ -92,17 +89,10 @@ def composite_product_update(request, pk):
                     )
 
             except Exception as e:
-                messages.error(
-                    request,
-                    f"Erro ao atualizar produto composto: {str(e)}"
-                )
+                messages.error(request, f"Erro ao atualizar produto composto: {str(e)}")
         else:
             # 🔎 MOSTRAR ERROS REAIS
             print("ERROS DO FORM:", form.errors)
-            messages.error(
-                request,
-                f"Erro no formulário: {form.errors}"
-            )
+            messages.error(request, f"Erro no formulário: {form.errors}")
 
     return redirect("product_list")
-

@@ -18,8 +18,7 @@ def product_list(request):
 
     # 🔹 Base queryset com contagem de uso em composições
     products = (
-        SinglePiece.objects
-        .annotate(used_in_count=Count("used_in_compositions"))
+        SinglePiece.objects.annotate(used_in_count=Count("used_in_compositions"))
         .select_related("category")
         .order_by("sku")
     )
@@ -30,25 +29,18 @@ def product_list(request):
     q = request.GET.get("q", "").strip()
     if q:
         products = products.filter(
-            Q(name__icontains=q) |
-            Q(sku__icontains=q) |
-            Q(category__name__icontains=q)
+            Q(name__icontains=q) | Q(sku__icontains=q) | Q(category__name__icontains=q)
         )
 
     form = SinglePieceForm()
 
     # 🔹 Produtos disponíveis para serem componentes
-    available_products = (
-        SinglePiece.objects
-        .filter(is_active=True, components__isnull=True)
-        .order_by("sku")
-    )
+    available_products = SinglePiece.objects.filter(
+        is_active=True, components__isnull=True
+    ).order_by("sku")
 
     # 🔹 Todas as estruturas já cadastradas
-    all_components = (
-        ProductComponent.objects
-        .select_related("component", "parent")
-    )
+    all_components = ProductComponent.objects.select_related("component", "parent")
 
     context = {
         "products": products,
@@ -57,6 +49,9 @@ def product_list(request):
         "is_supervisor": request.user.groups.filter(name="Supervisor").exists(),
         "query": q,
         "single_pieces": SinglePiece.objects.filter(is_active=True).order_by("sku"),
+        "simple_and_composite_products": SinglePiece.objects.filter(
+            is_active=True
+        ).order_by("sku"),
         "available_products": available_products,
         "all_components": all_components,
     }
@@ -120,7 +115,7 @@ def product_delete(request, pk):
     except ProtectedError:
         messages.error(
             request,
-            "Este produto não pode ser excluído pois está sendo utilizado em um produto composto."
+            "Este produto não pode ser excluído pois está sendo utilizado em um produto composto.",
         )
 
     return redirect("product_list")

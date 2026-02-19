@@ -186,17 +186,19 @@ class SinglePiece(models.Model):
         verbose_name="Tipo de LED",
     )
 
-    # =========================
+        # =========================
     # Controle
     # =========================
     is_active = models.BooleanField(default=True, verbose_name="Ativo")
+
+    is_kit = models.BooleanField(
+        default=False,
+        verbose_name="É kit?",
+        help_text="Identifica se este produto é um kit",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "Produto Acrílico"
-        verbose_name_plural = "Produtos Acrílicos"
-        ordering = ["sku"]
 
     # =========================
     # Regras de Domínio
@@ -261,7 +263,8 @@ class SinglePiece(models.Model):
     @property
     def is_composite(self):
         """
-        Retorna True se este produto possuir componentes
-        cadastrados na tabela ProductComponent.
+        Produto é composto se tiver componentes
+        e NÃO for kit.
         """
-        return self.components.exists()
+        return not self.is_kit and self.components.exists()
+

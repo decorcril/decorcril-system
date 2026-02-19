@@ -2,12 +2,10 @@
     <!-- Foto -->
     <td class="text-center">
         {% if product.photo %}
-            <img src="{{ product.photo.url }}"
-                 class="img-thumbnail"
-                 style="width:60px;height:60px;object-fit:cover"
-                 alt="{{ product.name }}">
+        <img src="{{ product.photo.url }}" class="img-thumbnail" style="width:60px;height:60px;object-fit:cover"
+            alt="{{ product.name }}">
         {% else %}
-            <i class="bi bi-image text-muted fs-4"></i>
+        <i class="bi bi-image text-muted fs-4"></i>
         {% endif %}
     </td>
 
@@ -17,8 +15,6 @@
             <span class="badge bg-dark me-2">{{ product.sku }}</span>
             <strong>{{ product.name }}</strong>
         </div>
-        
-        
     </td>
 
     <!-- Categoria -->
@@ -29,32 +25,46 @@
     </td>
 
     <!-- Status -->
+    <!-- Status -->
     <td class="text-center">
         {% if product.is_active %}
-            <span class="badge bg-success">
-                <i class="bi bi-check-circle me-1"></i> Ativo
-            </span>
-        {% else %}
-            <span class="badge bg-secondary">
-                <i class="bi bi-x-circle me-1"></i> Inativo
-            </span>
-        {% endif %}
-        
-        <br>
-        
-        {% if product.is_composite %}
-    <div class="mt-1">
-        <span class="badge bg-primary">
-            <i class="bi bi-boxes me-1"></i> Produto Composto
+        <span class="badge bg-success">
+            <i class="bi bi-check-circle me-1"></i> Ativo
         </span>
-    </div>
-{% elif not product.is_sellable %}
-    <span class="badge bg-info">
-        <i class="bi bi-boxes me-1"></i> Componente
-    </span>
-{% endif %}
+        {% else %}
+        <span class="badge bg-secondary">
+            <i class="bi bi-x-circle me-1"></i> Inativo
+        </span>
+        {% endif %}
 
+        <br>
+
+        {% if product.is_kit %}
+        <div class="mt-1">
+            <span class="badge bg-warning text-dark">
+                <i class="bi bi-box-seam me-1"></i> Kit
+            </span>
+        </div>
+
+        {% elif product.is_composite %}
+        <div class="mt-1">
+            <span class="badge bg-primary">
+                <i class="bi bi-boxes me-1"></i> Produto Composto
+            </span>
+        </div>
+
+        {% elif not product.is_sellable %}
+        <span class="badge bg-info">
+            <i class="bi bi-box me-1"></i> Componente
+        </span>
+
+        {% else %}
+        <span class="badge bg-success text-dark">
+            <i class="bi bi-check2-circle me-1"></i> Produto Individual
+        </span>
+        {% endif %}
     </td>
+
 
     <!-- Criado em -->
     <td class="text-center">
@@ -69,40 +79,32 @@
         <div class="btn-group btn-group-sm">
 
             <!-- Visualizar -->
-            <button class="btn btn-outline-info"
-                    data-bs-toggle="modal"
-                    data-bs-target="#viewProductModal{% if product.is_composite %}Composite{% endif %}{{ product.pk }}"
-                    title="Visualizar">
+            <button class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#viewProductModal{% if product.is_composite or product.is_kit %}Composite{% endif %}{{ product.pk }}"
+                title="Visualizar">
                 <i class="bi bi-eye"></i>
             </button>
 
             <!-- Editar -->
-            <button class="btn btn-outline-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#editProductModal{% if product.is_composite %}Composite{% endif %}{{ product.pk }}"
-                    title="Editar">
+            <!-- Editar -->
+            <button class="btn btn-outline-primary" data-bs-toggle="modal"
+                data-bs-target="#editProductModal{% if product.is_composite or product.is_kit %}Composite{% endif %}{{ product.pk }}"
+                title="Editar">
                 <i class="bi bi-pencil"></i>
             </button>
 
-            <!-- Excluir -->
-            <!-- Excluir -->
-<!-- Excluir -->
-{% if product.used_in_count == 0 %}
-    <button class="btn btn-outline-danger"
-            data-bs-toggle="modal"
-            data-bs-target="#deleteProductModal{{ product.pk }}"
-            title="Excluir">
-        <i class="bi bi-trash"></i>
-    </button>
-{% else %}
-    <button class="btn btn-outline-secondary"
-            disabled
-            title="Este produto compõe outro produto">
-        <i class="bi bi-trash"></i>
-    </button>
-{% endif %}
 
-
+            <!-- Excluir -->
+            {% if product.used_in_count == 0 %}
+            <button class="btn btn-outline-danger" data-bs-toggle="modal"
+                data-bs-target="#deleteProductModal{{ product.pk }}" title="Excluir">
+                <i class="bi bi-trash"></i>
+            </button>
+            {% else %}
+            <button class="btn btn-outline-secondary" disabled title="Este produto compõe outro produto">
+                <i class="bi bi-trash"></i>
+            </button>
+            {% endif %}
 
         </div>
     </td>

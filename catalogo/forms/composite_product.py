@@ -14,10 +14,7 @@ class CompositeProductForm(forms.ModelForm):
     O backend normaliza tudo para Decimal corretamente.
     """
 
-    base_price = forms.CharField(
-        required=True,
-        widget=forms.HiddenInput()
-    )
+    base_price = forms.CharField(required=True, widget=forms.HiddenInput())
 
     class Meta:
         model = SinglePiece
@@ -35,17 +32,11 @@ class CompositeProductForm(forms.ModelForm):
             "sku": forms.TextInput(attrs={"class": "form-control"}),
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "category": forms.Select(attrs={"class": "form-select"}),
-            "photo": forms.FileInput(attrs={
-                "class": "form-control",
-                "accept": "image/*"
-            }),
-            "description": forms.Textarea(attrs={
-                "class": "form-control",
-                "rows": 3
-            }),
-            "is_active": forms.CheckboxInput(attrs={
-                "class": "form-check-input"
-            }),
+            "photo": forms.FileInput(
+                attrs={"class": "form-control", "accept": "image/*"}
+            ),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "is_active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }
 
     def clean_base_price(self):

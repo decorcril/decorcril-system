@@ -4,6 +4,7 @@ from catalogo.views.composite_product_views import (
     composite_product_create,
     composite_product_update,
 )
+from catalogo.views.kit_views import kit_create
 from .views.auth_views import login_view, logout_view
 from .views.dashboard_views import dashboard
 from .views.category_views import (
@@ -57,4 +58,5 @@ urlpatterns = [
         composite_product_update,
         name="composite_product_update",
     ),
+    path("kits/novo/", kit_create, name="kit_create"),
 ]

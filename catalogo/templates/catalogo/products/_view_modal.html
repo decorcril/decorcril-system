@@ -87,22 +87,32 @@
 
                 <div class="row g-3 mb-4">
                     <div class="col-md-4">
-    <label class="fw-bold text-muted small">Faz parte de um Produto Composto?</label>
-    <p class="mb-0">
-        {% if product.is_composite %}
-            <span class="badge bg-primary">
-                <i class="bi bi-boxes me-1"></i> Produto Composto
-            </span>
-        {% elif product.is_sellable %}
-            <span class="badge bg-success">
-                <i class="bi bi-check-circle me-1"></i> Pode ser vendido separadamente
-            </span>
-        {% else %}
-            <span class="badge bg-warning text-dark">
-                <i class="bi bi-x-circle me-1"></i> Componente
-            </span>
-        {% endif %}
-    </p>
+    <label class="fw-bold text-muted small">Classificação do Produto</label>
+<p class="mb-0">
+
+    {% if product.is_kit %}
+        <span class="badge bg-warning text-dark">
+            <i class="bi bi-box-seam me-1"></i> Kit
+        </span>
+
+    {% elif product.is_composite %}
+        <span class="badge bg-primary">
+            <i class="bi bi-boxes me-1"></i> Produto Composto
+        </span>
+
+    {% elif product.is_sellable %}
+        <span class="badge bg-success">
+            <i class="bi bi-check-circle me-1"></i> Produto Individual
+        </span>
+
+    {% else %}
+        <span class="badge bg-info">
+            <i class="bi bi-box me-1"></i> Componente
+        </span>
+    {% endif %}
+
+</p>
+
 </div>
 
 

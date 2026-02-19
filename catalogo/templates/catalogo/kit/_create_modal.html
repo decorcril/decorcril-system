@@ -1,0 +1,232 @@
+<!-- ========================= -->
+
+<!-- MODAL: CRIAR KIT DE PRODUTOS -->
+
+<!-- ========================= -->
+
+<div class="modal fade" id="createKitModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+
+        <form id="createKitForm" method="post" action="{% url 'kit_create' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- HEADER -->
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Novo Kit de Produtos
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row mb-4">
+                    <!-- FOTO -->
+                    <div class="col-md-4 text-center">
+                        <label class="form-label fw-bold">Foto do Kit</label>
+                        <input type="file" class="form-control" name="photo" accept="image/*" onchange="previewKitImage(event)">
+                        <small class="text-muted">Opcional</small>
+                        <div id="imagePreviewKit" class="mt-3" style="display:none;">
+                            <img id="previewImageKit" class="img-thumbnail" style="max-height:150px;">
+                        </div>
+                    </div>
+
+                    <!-- DADOS -->
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Código do Produto*</label>
+                                <input type="text" name="sku" class="form-control" required
+                                       oninput="this.value=this.value.toUpperCase()" placeholder="EX: KIT001">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Nome*</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Categoria*</label>
+                                <select class="form-select" name="category" required>
+                                    <option value="">Selecione...</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.pk }}">{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Preço Base (R$)*</label>
+                                <input type="text" class="form-control" id="base_price_display_kit"
+                                       placeholder="0,00" inputmode="decimal" autocomplete="off">
+                                <input type="hidden" name="base_price" id="base_price_value_kit" required>
+                            </div>
+                        </div>
+
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="is_active_kit" checked>
+                            <label class="form-check-label" for="is_active_kit">Kit Ativo</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Descrição</label>
+                    <textarea name="description" class="form-control" rows="3"></textarea>
+                </div>
+
+                <hr>
+
+                <!-- COMPONENTES -->
+                <h6 class="fw-bold mb-3">
+                    <i class="bi bi-puzzle me-2"></i>
+                    Componentes do Kit
+                </h6>
+
+                {% if simple_and_composite_products %}
+                <div class="mb-3 d-flex justify-content-end gap-2">
+                    <input type="text" id="searchKitComponentsInput" class="form-control form-control-sm"
+                           placeholder="Pesquisar por nome ou código..." style="width:300px;">
+                    <button type="button" id="searchKitComponentsBtn" class="btn btn-sm btn-success">Buscar</button>
+                    <button type="button" id="clearKitSearchBtn" class="btn btn-sm btn-outline-secondary">Limpar</button>
+                </div>
+
+                <div class="alert alert-info">
+                    Selecione os produtos e defina as quantidades.
+                </div>
+
+                <div id="noKitComponentsAlert" class="alert alert-warning" style="display:none;">
+                    Nenhum componente encontrado.
+                </div>
+
+                <div id="kitComponentsList" class="border rounded p-2" style="max-height:300px; overflow-y:auto;">
+                    {% for product in simple_and_composite_products %}
+                    <div class="row align-items-center mb-2 p-2 component-row border-bottom">
+                        <div class="col-md-8">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="components"
+                                       value="{{ product.pk }}">
+                                <label class="form-check-label">
+                                    <strong>{{ product.sku }}</strong> — {{ product.name }}<br>
+                                    <small class="text-muted">
+                                        {{ product.category.name|default:"Sem categoria" }}
+                                        {% if product.thickness_mm %} | {{ product.thickness_mm }}mm{% endif %}
+                                    </small>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="number" name="quantity_{{ product.pk }}" class="form-control form-control-sm"
+                                   min="1" value="1">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    Nenhum produto cadastrado para compor o Kit.
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-dark">Salvar Kit de Produtos</button>
+            </div>
+        </form>
+    </div>
+</div>
+```
+
+</div>
+
+<script>
+function formatBrazilianNumber(value) {
+    if (!value) return '';
+    let num = value.replace(/\D/g, '');
+    if (num === '') return '';
+    num = (parseInt(num) / 100).toFixed(2);
+    return num.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function parseBrazilianNumber(value) {
+    if (!value) return '';
+    return value.replace(/\./g, '').replace(',', '.');
+}
+
+function applyPriceMask(displayInput, hiddenInput) {
+    displayInput.addEventListener('input', function (e) {
+        const formatted = formatBrazilianNumber(e.target.value);
+        e.target.value = formatted;
+        hiddenInput.value = parseBrazilianNumber(formatted);
+    });
+}
+
+function previewKitImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        document.getElementById('previewImageKit').src = e.target.result;
+        document.getElementById('imagePreviewKit').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+function setupKitComponentSearch() {
+    const searchInput = document.getElementById('searchKitComponentsInput');
+    const searchBtn = document.getElementById('searchKitComponentsBtn');
+    const clearBtn = document.getElementById('clearKitSearchBtn');
+    const alertDiv = document.getElementById('noKitComponentsAlert');
+
+    if (!searchInput) return;
+
+    const rows = document.querySelectorAll('#kitComponentsList .component-row');
+
+    function filterComponents() {
+        const term = searchInput.value.toLowerCase().trim();
+        let visibleCount = 0;
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            if (text.includes(term)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        if (alertDiv) alertDiv.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+
+    searchBtn?.addEventListener('click', filterComponents);
+    clearBtn?.addEventListener('click', () => {
+        searchInput.value = '';
+        rows.forEach(row => row.style.display = '');
+        if (alertDiv) alertDiv.style.display = 'none';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const priceDisplay = document.getElementById('base_price_display_kit');
+    const priceHidden = document.getElementById('base_price_value_kit');
+    if (priceDisplay && priceHidden) applyPriceMask(priceDisplay, priceHidden);
+
+    setupKitComponentSearch();
+});
+
+document.getElementById('createKitModal')?.addEventListener('show.bs.modal', function () {
+    const form = document.getElementById('createKitForm');
+    if (form) form.reset();
+
+    const preview = document.getElementById('imagePreviewKit');
+    if (preview) preview.style.display = 'none';
+
+    const rows = document.querySelectorAll('#kitComponentsList .component-row');
+    rows.forEach(row => row.style.display = '');
+
+    const alertDiv = document.getElementById('noKitComponentsAlert');
+    if (alertDiv) alertDiv.style.display = 'none';
+});
+</script>
