@@ -47,6 +47,7 @@ def product_list(request):
         "categories": categories,
         "form": form,
         "is_supervisor": request.user.groups.filter(name="Supervisor").exists(),
+        "is_vendedor": request.user.groups.filter(name="Vendedor").exists(),
         "query": q,
         "single_pieces": SinglePiece.objects.filter(is_active=True).order_by("sku"),
         "simple_and_composite_products": SinglePiece.objects.filter(

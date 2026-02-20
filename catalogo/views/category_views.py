@@ -30,6 +30,7 @@ def category_list(request):
         "categories": categories,
         "form": form,
         "is_supervisor": request.user.groups.filter(name="Supervisor").exists(),
+        "is_vendedor": request.user.groups.filter(name="Vendedor").exists(),
         "query": q,  # para manter o valor no input
     }
 

@@ -68,7 +68,9 @@
                             <th class="text-center">Produtos</th>
                             <th class="text-center">Status</th>
                             <th class="text-center">Criada em</th>
-                            {% if is_supervisor %}
+
+                            <!-- ✅ Coluna agora para supervisor OU vendedor -->
+                            {% if is_supervisor or is_vendedor %}
                             <th class="text-end">Ações</th>
                             {% endif %}
                         </tr>
@@ -77,8 +79,13 @@
                         {% for category in categories %}
                             {% include "catalogo/categories/_row.html" %}
                             {% include "catalogo/categories/_view_modal.html" %}
-                            {% include "catalogo/categories/_edit_modal.html" %}
-                            {% include "catalogo/categories/_delete_modal.html" %}
+
+                            <!-- Modais apenas para supervisor -->
+                            {% if is_supervisor %}
+                                {% include "catalogo/categories/_edit_modal.html" %}
+                                {% include "catalogo/categories/_delete_modal.html" %}
+                            {% endif %}
+
                         {% endfor %}
                     </tbody>
                 </table>

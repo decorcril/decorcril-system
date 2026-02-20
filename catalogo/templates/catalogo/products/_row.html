@@ -25,7 +25,6 @@
     </td>
 
     <!-- Status -->
-    <!-- Status -->
     <td class="text-center">
         {% if product.is_active %}
         <span class="badge bg-success">
@@ -65,7 +64,6 @@
         {% endif %}
     </td>
 
-
     <!-- Criado em -->
     <td class="text-center">
         <small class="text-muted">
@@ -73,26 +71,25 @@
         </small>
     </td>
 
-    {% if is_supervisor %}
+    {% if is_supervisor or is_vendedor %}
     <!-- Ações -->
     <td class="text-end">
         <div class="btn-group btn-group-sm">
 
-            <!-- Visualizar -->
+            <!-- Visualizar (todos) -->
             <button class="btn btn-outline-info" data-bs-toggle="modal"
                 data-bs-target="#viewProductModal{% if product.is_composite or product.is_kit %}Composite{% endif %}{{ product.pk }}"
                 title="Visualizar">
                 <i class="bi bi-eye"></i>
             </button>
 
-            <!-- Editar -->
+            {% if is_supervisor %}
             <!-- Editar -->
             <button class="btn btn-outline-primary" data-bs-toggle="modal"
                 data-bs-target="#editProductModal{% if product.is_composite or product.is_kit %}Composite{% endif %}{{ product.pk }}"
                 title="Editar">
                 <i class="bi bi-pencil"></i>
             </button>
-
 
             <!-- Excluir -->
             {% if product.used_in_count == 0 %}
@@ -104,6 +101,7 @@
             <button class="btn btn-outline-secondary" disabled title="Este produto compõe outro produto">
                 <i class="bi bi-trash"></i>
             </button>
+            {% endif %}
             {% endif %}
 
         </div>
