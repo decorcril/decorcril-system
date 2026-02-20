@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from django.core.exceptions import ValidationError
 import re
@@ -13,7 +14,6 @@ class SinglePiece(models.Model):
         verbose_name="SKU (código interno)",
     )
 
-    # Adicione este campo na seção "Identidade" (logo após description):
     photo = models.ImageField(
         upload_to="products/single_pieces/",
         blank=True,
@@ -21,7 +21,6 @@ class SinglePiece(models.Model):
         verbose_name="Foto do produto",
     )
 
-    # Atualize a lista de fields no Meta do formulário depois
     name = models.CharField(
         max_length=150,
         verbose_name="Nome",
@@ -73,48 +72,23 @@ class SinglePiece(models.Model):
         choices=THICKNESS_CHOICES, verbose_name="Espessura (mm)", default=3
     )
 
-    # Dimensões (todas opcionais)
     height_cm = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Altura (cm)",
+        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Altura (cm)"
     )
     width_cm = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Largura (cm)",
+        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Largura (cm)"
     )
     length_cm = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Comprimento (cm)",
+        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Comprimento (cm)"
     )
     diameter_cm = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Diâmetro (cm)",
+        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Diâmetro (cm)"
     )
     depth_cm = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Profundidade (cm)",
+        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Profundidade (cm)"
     )
     curvature_cm = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Curvatura (cm)",
+        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Curvatura (cm)"
     )
 
     # =========================
@@ -168,10 +142,7 @@ class SinglePiece(models.Model):
         verbose_name="Tensão",
     )
 
-    has_led = models.BooleanField(
-        default=False,
-        verbose_name="Possui LED?",
-    )
+    has_led = models.BooleanField(default=False, verbose_name="Possui LED?")
 
     LED_TYPE_CHOICES = [
         ("", "Selecione..."),
@@ -179,23 +150,13 @@ class SinglePiece(models.Model):
         ("FRIO", "Frio"),
     ]
 
-    led_type = models.CharField(
-        max_length=10,
-        choices=LED_TYPE_CHOICES,
-        blank=True,
-        verbose_name="Tipo de LED",
-    )
+    led_type = models.CharField(max_length=10, choices=LED_TYPE_CHOICES, blank=True, verbose_name="Tipo de LED")
 
-        # =========================
+    # =========================
     # Controle
     # =========================
     is_active = models.BooleanField(default=True, verbose_name="Ativo")
-
-    is_kit = models.BooleanField(
-        default=False,
-        verbose_name="É kit?",
-        help_text="Identifica se este produto é um kit",
-    )
+    is_kit = models.BooleanField(default=False, verbose_name="É kit?", help_text="Identifica se este produto é um kit")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -205,8 +166,6 @@ class SinglePiece(models.Model):
     # =========================
     def clean(self):
         errors = {}
-
-        # Normalização
         if self.name:
             self.name = self.name.strip().title()
 
@@ -215,14 +174,12 @@ class SinglePiece(models.Model):
             if not re.match(r"^\d+(-[A-Z0-9]+)?$", self.sku):
                 errors["sku"] = "SKU inválido. Use formato: 123 ou 123-ABC"
 
-        # Comercial
         if self.is_sellable and self.base_price is None:
             errors["base_price"] = "Produto vendável precisa de preço."
 
         if not self.is_sellable and self.base_price is not None:
             errors["base_price"] = "Peça não vendável não deve ter preço."
 
-        # Elétrica
         if self.has_electrical_component and not self.voltage:
             errors["voltage"] = "Informe a tensão."
 
@@ -236,14 +193,26 @@ class SinglePiece(models.Model):
             raise ValidationError(errors)
 
     def save(self, *args, **kwargs):
+        # Remove a imagem antiga se estiver sendo substituída
+        if self.pk:
+            old_instance = SinglePiece.objects.filter(pk=self.pk).first()
+            if old_instance and old_instance.photo and old_instance.photo != self.photo:
+                if os.path.isfile(old_instance.photo.path):
+                    os.remove(old_instance.photo.path)
+
         self.full_clean()
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Remove a imagem ao deletar o produto
+        if self.photo and os.path.isfile(self.photo.path):
+            os.remove(self.photo.path)
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name} ({self.sku})"
 
     def get_measurements_display(self):
-        """Retorna string formatada com medidas"""
         measurements = []
         if self.height_cm:
             measurements.append(f"Altura: {self.height_cm}cm")
@@ -257,14 +226,8 @@ class SinglePiece(models.Model):
             measurements.append(f"Profundidade: {self.depth_cm}cm")
         if self.curvature_cm:
             measurements.append(f"Curvatura: {self.curvature_cm}cm")
-
         return ", ".join(measurements) if measurements else "Sem medidas"
 
     @property
     def is_composite(self):
-        """
-        Produto é composto se tiver componentes
-        e NÃO for kit.
-        """
         return not self.is_kit and self.components.exists()
-
