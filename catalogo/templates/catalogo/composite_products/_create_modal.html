@@ -39,10 +39,12 @@
                                     <label class="form-label fw-bold">Código do Produto*</label>
                                     <input type="text" name="sku" class="form-control" required
                                         oninput="this.value=this.value.toUpperCase()" placeholder="001 ou 001-ABC">
+                                        <small class="text-muted">Obrigatório</small>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-bold">Nome*</label>
                                     <input type="text" name="name" class="form-control" required>
+                                    <small class="text-muted">Obrigatório</small>
                                 </div>
                             </div>
 
@@ -55,6 +57,7 @@
                                         <option value="{{ category.pk }}">{{ category.name }}</option>
                                         {% endfor %}
                                     </select>
+                                    <small class="text-muted">Obrigatório</small>
                                 </div>
 
                                 <div class="col-md-6 mb-3">
@@ -62,6 +65,7 @@
                                     <input type="text" class="form-control" id="base_price_display_composite"
                                         placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="base_price" id="base_price_value_composite" required>
+                                    <small class="text-muted">Obrigatório</small>
                                 </div>
                             </div>
 
@@ -76,6 +80,7 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Descrição</label>
                         <textarea name="description" class="form-control" rows="3"></textarea>
+                        <small class="text-muted">Opcional</small>
                     </div>
 
                     <hr>
@@ -85,7 +90,7 @@
                         <i class="bi bi-puzzle me-2"></i>
                         Componentes do Produto
                     </h6>
-
+                    <small class="text-muted">Obrigatório</small>
                     {% if single_pieces %}
                     <div class="mb-3 d-flex justify-content-end gap-2">
                         <input type="text" id="searchPiecesInput" class="form-control form-control-sm"

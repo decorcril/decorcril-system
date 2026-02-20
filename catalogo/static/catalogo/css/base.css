@@ -32,7 +32,41 @@ h1, h2, h3, h4, h5, h6 {
     margin-bottom: 1rem;
 }
 
-/* Qualquer outro estilo global, como tipografia e cores do site */
+/* Tipografia auxiliar */
 .text-muted {
     color: #6c757d !important;
+}
+
+
+/* =====================
+   HEADER PAGE (mobile fix)
+===================== */
+@media (max-width: 768px) {
+
+    /* container do título + ações */
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px;
+    }
+
+    /* bloco título + breadcrumb */
+    .d-flex.justify-content-between.align-items-center.mb-4 > div:first-child {
+        margin-bottom: 2px;
+    }
+
+    /* breadcrumb com respiro */
+    .breadcrumb {
+         display: none !important;
+    }
+
+    /* ações (botões) ficam abaixo e com largura total */
+    .d-flex.justify-content-between.align-items-center.mb-4 > *:last-child {
+        width: 100%;
+    }
+
+    /* container dos botões */
+    .d-flex.justify-content-between.align-items-center.mb-4 > *:last-child .btn {
+        flex: 1 1 100%;
+    }
 }

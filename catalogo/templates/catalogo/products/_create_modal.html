@@ -1,5 +1,5 @@
 {# ============================================= #}
-{# MODAL: CRIAR NOVO PRODUTO                      #}
+{# MODAL: CRIAR NOVO PRODUTO #}
 {# ============================================= #}
 
 <div class="modal fade" id="createProductModal" tabindex="-1">
@@ -13,10 +13,8 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <form method="post"
-                  action="{% url 'product_create' %}"
-                  enctype="multipart/form-data"
-                  id="createProductForm">
+            <form method="post" action="{% url 'product_create' %}" enctype="multipart/form-data"
+                id="createProductForm">
                 {% csrf_token %}
 
                 <div class="modal-body">
@@ -24,38 +22,26 @@
                     <!-- Abas -->
                     <ul class="nav nav-tabs mb-4" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" 
-                                    type="button"
-                                    data-bs-toggle="tab" 
-                                    data-bs-target="#basic-pane"
-                                    role="tab">
+                            <button class="nav-link active" type="button" data-bs-toggle="tab"
+                                data-bs-target="#basic-pane" role="tab">
                                 <i class="bi bi-info-circle me-1"></i> Básico
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" 
-                                    type="button"
-                                    data-bs-toggle="tab" 
-                                    data-bs-target="#measurements-pane"
-                                    role="tab">
+                            <button class="nav-link" type="button" data-bs-toggle="tab"
+                                data-bs-target="#measurements-pane" role="tab">
                                 <i class="bi bi-rulers me-1"></i> Medidas
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" 
-                                    type="button"
-                                    data-bs-toggle="tab" 
-                                    data-bs-target="#material-pane"
-                                    role="tab">
+                            <button class="nav-link" type="button" data-bs-toggle="tab" data-bs-target="#material-pane"
+                                role="tab">
                                 <i class="bi bi-palette me-1"></i> Material
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" 
-                                    type="button"
-                                    data-bs-toggle="tab" 
-                                    data-bs-target="#electrical-pane"
-                                    role="tab">
+                            <button class="nav-link" type="button" data-bs-toggle="tab"
+                                data-bs-target="#electrical-pane" role="tab">
                                 <i class="bi bi-lightning-charge me-1"></i> Elétrica
                             </button>
                         </li>
@@ -71,17 +57,12 @@
                             <div class="row mb-4">
                                 <div class="col-md-4 text-center">
                                     <label class="form-label fw-bold">Foto do Produto</label>
-                                    <input type="file"
-                                           class="form-control"
-                                           name="photo"
-                                           accept="image/*"
-                                           onchange="previewCreateImage(event)">
+                                    <input type="file" class="form-control" name="photo" accept="image/*"
+                                        onchange="previewCreateImage(event)">
                                     <small class="text-muted">Opcional</small>
 
                                     <div id="imagePreviewCreate" class="mt-3" style="display:none;">
-                                        <img id="previewImageCreate"
-                                             class="img-thumbnail"
-                                             style="max-height:150px;">
+                                        <img id="previewImageCreate" class="img-thumbnail" style="max-height:150px;">
                                     </div>
                                 </div>
 
@@ -89,19 +70,16 @@
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label fw-bold">Código do Produto*</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   name="sku"
-                                                   required
-                                                   oninput="this.value=this.value.toUpperCase()"
-                                                   placeholder="001 ou 001-ABC">
+                                            <input type="text" class="form-control" name="sku" required
+                                                oninput="this.value=this.value.toUpperCase()"
+                                                placeholder="001 ou 001-ABC">
+                                            <small class="text-muted">Obrigatório</small>
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label fw-bold">Nome*</label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   name="name"
-                                                   required>
+                                            <input type="text" class="form-control" name="name" required>
+                                            <small class="text-muted">Obrigatório</small>
+
                                         </div>
                                     </div>
 
@@ -109,6 +87,7 @@
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label fw-bold">Categoria*</label>
                                             <select class="form-select" name="category" required>
+
                                                 <option value="">Selecione...</option>
                                                 {% for category in categories %}
                                                 <option value="{{ category.pk }}">
@@ -116,6 +95,7 @@
                                                 </option>
                                                 {% endfor %}
                                             </select>
+                                            <small class="text-muted">Obrigatório</small>
                                         </div>
 
                                         <div class="col-md-6 mb-3">
@@ -129,6 +109,7 @@
                                                 <option value="10">10 mm</option>
                                                 <option value="12">12 mm</option>
                                             </select>
+                                            <small class="text-muted">Obrigatório</small>
                                         </div>
                                     </div>
                                 </div>
@@ -136,21 +117,16 @@
 
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Descrição</label>
-                                <textarea class="form-control"
-                                          name="description"
-                                          rows="3"
-                                          placeholder="Descreva o produto..."></textarea>
+                                <textarea class="form-control" name="description" rows="3"
+                                    placeholder="Descreva o produto..."></textarea>
+                                <small class="text-muted">Opcional</small>
                             </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input"
-                                               type="checkbox"
-                                               name="is_sellable"
-                                               id="is_sellable_create"
-                                               checked
-                                               onchange="togglePriceFieldCreate(this)">
+                                        <input class="form-check-input" type="checkbox" name="is_sellable"
+                                            id="is_sellable_create" checked onchange="togglePriceFieldCreate(this)">
                                         <label class="form-check-label" for="is_sellable_create">
                                             Disponível para Venda
                                         </label>
@@ -159,22 +135,16 @@
 
                                 <div class="col-md-6 mb-3" id="priceFieldCreate">
                                     <label class="form-label fw-bold">Preço Base (R$)*</label>
-                                    <input type="text"
-                                           class="form-control"
-                                           id="base_price_display_create"
-                                           placeholder="0,00"
-                                           inputmode="decimal"
-                                           autocomplete="off">
+                                    <input type="text" class="form-control" id="base_price_display_create"
+                                        placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="base_price" id="base_price_value_create" required>
+                                    <small class="text-muted">Obrigatório</small>
                                 </div>
                             </div>
 
                             <div class="form-check form-switch">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       name="is_active"
-                                       id="is_active_create"
-                                       checked>
+                                <input class="form-check-input" type="checkbox" name="is_active" id="is_active_create"
+                                    checked>
                                 <label class="form-check-label" for="is_active_create">
                                     Produto Ativo
                                 </label>
@@ -193,32 +163,20 @@
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Altura (cm)</label>
-                                    <input type="text" 
-                                           class="form-control measurement-input" 
-                                           id="height_cm_display"
-                                           placeholder="0,00"
-                                           inputmode="decimal"
-                                           autocomplete="off">
+                                    <input type="text" class="form-control measurement-input" id="height_cm_display"
+                                        placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="height_cm" id="height_cm_value">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Largura (cm)</label>
-                                    <input type="text" 
-                                           class="form-control measurement-input" 
-                                           id="width_cm_display"
-                                           placeholder="0,00"
-                                           inputmode="decimal"
-                                           autocomplete="off">
+                                    <input type="text" class="form-control measurement-input" id="width_cm_display"
+                                        placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="width_cm" id="width_cm_value">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Comprimento (cm)</label>
-                                    <input type="text" 
-                                           class="form-control measurement-input" 
-                                           id="length_cm_display"
-                                           placeholder="0,00"
-                                           inputmode="decimal"
-                                           autocomplete="off">
+                                    <input type="text" class="form-control measurement-input" id="length_cm_display"
+                                        placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="length_cm" id="length_cm_value">
                                 </div>
                             </div>
@@ -226,32 +184,20 @@
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Diâmetro (cm)</label>
-                                    <input type="text" 
-                                           class="form-control measurement-input" 
-                                           id="diameter_cm_display"
-                                           placeholder="0,00"
-                                           inputmode="decimal"
-                                           autocomplete="off">
+                                    <input type="text" class="form-control measurement-input" id="diameter_cm_display"
+                                        placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="diameter_cm" id="diameter_cm_value">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Profundidade (cm)</label>
-                                    <input type="text" 
-                                           class="form-control measurement-input" 
-                                           id="depth_cm_display"
-                                           placeholder="0,00"
-                                           inputmode="decimal"
-                                           autocomplete="off">
+                                    <input type="text" class="form-control measurement-input" id="depth_cm_display"
+                                        placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="depth_cm" id="depth_cm_value">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Curvatura (cm)</label>
-                                    <input type="text" 
-                                           class="form-control measurement-input" 
-                                           id="curvature_cm_display"
-                                           placeholder="0,00"
-                                           inputmode="decimal"
-                                           autocomplete="off">
+                                    <input type="text" class="form-control measurement-input" id="curvature_cm_display"
+                                        placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="curvature_cm" id="curvature_cm_value">
                                 </div>
                             </div>
@@ -262,7 +208,7 @@
                         <!-- ========================= -->
                         <div class="tab-pane fade" id="material-pane" role="tabpanel">
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Cor do Acrílico</label>
+                                <label class="form-label fw-bold">Cor do Produto</label>
                                 <select class="form-select" name="acrylic_color">
                                     <option value="">Selecione...</option>
                                     <option value="CRISTAL">Cristal</option>
@@ -276,14 +222,14 @@
                                     <option value="ESPELHADO_TRANSPARENTE">Espelhado Transparente</option>
                                     <option value="COLORIDO">Colorido</option>
                                 </select>
+                                <small class="text-muted">Opcional</small>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Observação de Cor</label>
-                                <input type="text"
-                                       class="form-control"
-                                       name="color_observation"
-                                       placeholder="Ex: Tom pastel, transparente...">
+                                <label class="form-label fw-bold">Observação sobre Cor ou Material</label>
+                                <input type="text" class="form-control" name="color_observation"
+                                    placeholder="Ex: Tom pastel, transparente, Policarbonato">
+                                <small class="text-muted">Opcional</small>
                             </div>
                         </div>
 
@@ -293,11 +239,8 @@
                         <div class="tab-pane fade" id="electrical-pane" role="tabpanel">
 
                             <div class="form-check form-switch mb-3">
-                                <input class="form-check-input"
-                                       type="checkbox"
-                                       name="has_electrical_component"
-                                       id="has_electrical_create"
-                                       onchange="toggleElectricalFieldsCreate(this)">
+                                <input class="form-check-input" type="checkbox" name="has_electrical_component"
+                                    id="has_electrical_create" onchange="toggleElectricalFieldsCreate(this)">
                                 <label class="form-check-label" for="has_electrical_create">
                                     Possui Componente Elétrico?
                                 </label>
@@ -314,11 +257,8 @@
                                 </div>
 
                                 <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input"
-                                           type="checkbox"
-                                           name="has_led"
-                                           id="has_led_create"
-                                           onchange="toggleLEDFieldCreate(this)">
+                                    <input class="form-check-input" type="checkbox" name="has_led" id="has_led_create"
+                                        onchange="toggleLEDFieldCreate(this)">
                                     <label class="form-check-label" for="has_led_create">
                                         Possui LED?
                                     </label>
@@ -340,9 +280,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x-circle me-1"></i>
                         Cancelar
                     </button>
@@ -357,199 +295,199 @@
 </div>
 
 <script>
-// ============================================
-// MÁSCARAS DE VALOR - PADRÃO BRASILEIRO
-// ============================================
+    // ============================================
+    // MÁSCARAS DE VALOR - PADRÃO BRASILEIRO
+    // ============================================
 
-/**
- * Formata número para o padrão brasileiro (1.234,56)
- */
-function formatBrazilianNumber(value) {
-    if (!value) return '';
-    
-    // Remove tudo que não é número
-    let num = value.replace(/\D/g, '');
-    
-    // Se vazio, retorna vazio
-    if (num === '') return '';
-    
-    // Converte para número e divide por 100 para ter os centavos
-    num = (parseInt(num) / 100).toFixed(2);
-    
-    // Formata no padrão brasileiro
-    return num.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-}
+    /**
+     * Formata número para o padrão brasileiro (1.234,56)
+     */
+    function formatBrazilianNumber(value) {
+        if (!value) return '';
 
-/**
- * Converte valor brasileiro para formato aceito pelo backend (1234.56)
- */
-function parseBrazilianNumber(value) {
-    if (!value) return '';
-    
-    // Remove pontos de milhar e substitui vírgula por ponto
-    return value.replace(/\./g, '').replace(',', '.');
-}
+        // Remove tudo que não é número
+        let num = value.replace(/\D/g, '');
 
-/**
- * Aplica máscara de preço
- */
-function applyPriceMask(displayInput, hiddenInput) {
-    displayInput.addEventListener('input', function(e) {
-        const formatted = formatBrazilianNumber(e.target.value);
-        e.target.value = formatted;
-        hiddenInput.value = parseBrazilianNumber(formatted);
-    });
-    
-    displayInput.addEventListener('blur', function(e) {
-        if (e.target.value === '') {
-            hiddenInput.value = '';
+        // Se vazio, retorna vazio
+        if (num === '') return '';
+
+        // Converte para número e divide por 100 para ter os centavos
+        num = (parseInt(num) / 100).toFixed(2);
+
+        // Formata no padrão brasileiro
+        return num.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    /**
+     * Converte valor brasileiro para formato aceito pelo backend (1234.56)
+     */
+    function parseBrazilianNumber(value) {
+        if (!value) return '';
+
+        // Remove pontos de milhar e substitui vírgula por ponto
+        return value.replace(/\./g, '').replace(',', '.');
+    }
+
+    /**
+     * Aplica máscara de preço
+     */
+    function applyPriceMask(displayInput, hiddenInput) {
+        displayInput.addEventListener('input', function (e) {
+            const formatted = formatBrazilianNumber(e.target.value);
+            e.target.value = formatted;
+            hiddenInput.value = parseBrazilianNumber(formatted);
+        });
+
+        displayInput.addEventListener('blur', function (e) {
+            if (e.target.value === '') {
+                hiddenInput.value = '';
+            }
+        });
+    }
+
+    /**
+     * Aplica máscara de medida
+     */
+    function applyMeasurementMask(displayInput, hiddenInput) {
+        displayInput.addEventListener('input', function (e) {
+            const formatted = formatBrazilianNumber(e.target.value);
+            e.target.value = formatted;
+            hiddenInput.value = parseBrazilianNumber(formatted);
+        });
+
+        displayInput.addEventListener('blur', function (e) {
+            if (e.target.value === '') {
+                hiddenInput.value = '';
+            }
+        });
+    }
+
+    // ============================================
+    // Preview de imagem ao criar produto
+    // ============================================
+    function previewCreateImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('previewImageCreate').src = e.target.result;
+                document.getElementById('imagePreviewCreate').style.display = 'block';
+            }
+            reader.readAsDataURL(file);
         }
-    });
-}
+    }
 
-/**
- * Aplica máscara de medida
- */
-function applyMeasurementMask(displayInput, hiddenInput) {
-    displayInput.addEventListener('input', function(e) {
-        const formatted = formatBrazilianNumber(e.target.value);
-        e.target.value = formatted;
-        hiddenInput.value = parseBrazilianNumber(formatted);
-    });
-    
-    displayInput.addEventListener('blur', function(e) {
-        if (e.target.value === '') {
-            hiddenInput.value = '';
+    // ============================================
+    // Controle do campo de preço (vendável)
+    // ============================================
+    function togglePriceFieldCreate(checkbox) {
+        const priceField = document.getElementById('priceFieldCreate');
+        const priceInputHidden = document.getElementById('base_price_value_create');
+        const priceInputDisplay = document.getElementById('base_price_display_create');
+
+        if (checkbox.checked) {
+            priceField.style.display = 'block';
+            priceInputHidden.required = true;
+        } else {
+            priceField.style.display = 'none';
+            priceInputHidden.required = false;
+            priceInputDisplay.value = '';
+            priceInputHidden.value = '';
         }
-    });
-}
+    }
 
-// ============================================
-// Preview de imagem ao criar produto
-// ============================================
-function previewCreateImage(event) {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('previewImageCreate').src = e.target.result;
-            document.getElementById('imagePreviewCreate').style.display = 'block';
+    // ============================================
+    // Controle dos campos elétricos
+    // ============================================
+    function toggleElectricalFieldsCreate(checkbox) {
+        const electricalFields = document.getElementById('electricalFieldsCreate');
+        const voltageSelect = electricalFields.querySelector('select[name="voltage"]');
+        const hasLedCheckbox = document.getElementById('has_led_create');
+        const ledFields = document.getElementById('ledFieldsCreate');
+
+        if (checkbox.checked) {
+            electricalFields.style.display = 'block';
+        } else {
+            electricalFields.style.display = 'none';
+            // Limpar campos quando desabilitado
+            voltageSelect.value = '';
+            hasLedCheckbox.checked = false;
+            ledFields.style.display = 'none';
+            ledFields.querySelector('select[name="led_type"]').value = '';
         }
-        reader.readAsDataURL(file);
     }
-}
 
-// ============================================
-// Controle do campo de preço (vendável)
-// ============================================
-function togglePriceFieldCreate(checkbox) {
-    const priceField = document.getElementById('priceFieldCreate');
-    const priceInputHidden = document.getElementById('base_price_value_create');
-    const priceInputDisplay = document.getElementById('base_price_display_create');
-    
-    if (checkbox.checked) {
-        priceField.style.display = 'block';
-        priceInputHidden.required = true;
-    } else {
-        priceField.style.display = 'none';
-        priceInputHidden.required = false;
-        priceInputDisplay.value = '';
-        priceInputHidden.value = '';
-    }
-}
+    // ============================================
+    // Controle do campo tipo de LED
+    // ============================================
+    function toggleLEDFieldCreate(checkbox) {
+        const ledFields = document.getElementById('ledFieldsCreate');
+        const ledTypeSelect = ledFields.querySelector('select[name="led_type"]');
 
-// ============================================
-// Controle dos campos elétricos
-// ============================================
-function toggleElectricalFieldsCreate(checkbox) {
-    const electricalFields = document.getElementById('electricalFieldsCreate');
-    const voltageSelect = electricalFields.querySelector('select[name="voltage"]');
-    const hasLedCheckbox = document.getElementById('has_led_create');
-    const ledFields = document.getElementById('ledFieldsCreate');
-    
-    if (checkbox.checked) {
-        electricalFields.style.display = 'block';
-    } else {
-        electricalFields.style.display = 'none';
-        // Limpar campos quando desabilitado
-        voltageSelect.value = '';
-        hasLedCheckbox.checked = false;
-        ledFields.style.display = 'none';
-        ledFields.querySelector('select[name="led_type"]').value = '';
-    }
-}
-
-// ============================================
-// Controle do campo tipo de LED
-// ============================================
-function toggleLEDFieldCreate(checkbox) {
-    const ledFields = document.getElementById('ledFieldsCreate');
-    const ledTypeSelect = ledFields.querySelector('select[name="led_type"]');
-    
-    if (checkbox.checked) {
-        ledFields.style.display = 'block';
-    } else {
-        ledFields.style.display = 'none';
-        ledTypeSelect.value = '';
-    }
-}
-
-// ============================================
-// Inicializar máscaras e estado dos campos
-// ============================================
-document.addEventListener('DOMContentLoaded', function() {
-    // Aplicar máscara de preço
-    const priceDisplay = document.getElementById('base_price_display_create');
-    const priceValue = document.getElementById('base_price_value_create');
-    if (priceDisplay && priceValue) {
-        applyPriceMask(priceDisplay, priceValue);
-    }
-    
-    // Aplicar máscaras de medidas
-    const measurements = [
-        'height_cm',
-        'width_cm',
-        'length_cm',
-        'diameter_cm',
-        'depth_cm',
-        'curvature_cm'
-    ];
-    
-    measurements.forEach(function(fieldName) {
-        const displayInput = document.getElementById(fieldName + '_display');
-        const hiddenInput = document.getElementById(fieldName + '_value');
-        if (displayInput && hiddenInput) {
-            applyMeasurementMask(displayInput, hiddenInput);
+        if (checkbox.checked) {
+            ledFields.style.display = 'block';
+        } else {
+            ledFields.style.display = 'none';
+            ledTypeSelect.value = '';
         }
-    });
-});
-
-// ============================================
-// Reset ao abrir modal
-// ============================================
-document.getElementById('createProductModal').addEventListener('show.bs.modal', function() {
-    // Resetar formulário
-    const form = document.getElementById('createProductForm');
-    if (form) {
-        form.reset();
     }
-    
-    // Limpar campos hidden e display
-    document.getElementById('base_price_display_create').value = '';
-    document.getElementById('base_price_value_create').value = '';
-    
-    const measurements = ['height_cm', 'width_cm', 'length_cm', 'diameter_cm', 'depth_cm', 'curvature_cm'];
-    measurements.forEach(function(fieldName) {
-        const displayInput = document.getElementById(fieldName + '_display');
-        const hiddenInput = document.getElementById(fieldName + '_value');
-        if (displayInput) displayInput.value = '';
-        if (hiddenInput) hiddenInput.value = '';
+
+    // ============================================
+    // Inicializar máscaras e estado dos campos
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function () {
+        // Aplicar máscara de preço
+        const priceDisplay = document.getElementById('base_price_display_create');
+        const priceValue = document.getElementById('base_price_value_create');
+        if (priceDisplay && priceValue) {
+            applyPriceMask(priceDisplay, priceValue);
+        }
+
+        // Aplicar máscaras de medidas
+        const measurements = [
+            'height_cm',
+            'width_cm',
+            'length_cm',
+            'diameter_cm',
+            'depth_cm',
+            'curvature_cm'
+        ];
+
+        measurements.forEach(function (fieldName) {
+            const displayInput = document.getElementById(fieldName + '_display');
+            const hiddenInput = document.getElementById(fieldName + '_value');
+            if (displayInput && hiddenInput) {
+                applyMeasurementMask(displayInput, hiddenInput);
+            }
+        });
     });
-    
-    // Garantir estado inicial correto
-    document.getElementById('priceFieldCreate').style.display = 'block';
-    document.getElementById('electricalFieldsCreate').style.display = 'none';
-    document.getElementById('ledFieldsCreate').style.display = 'none';
-    document.getElementById('imagePreviewCreate').style.display = 'none';
-});
+
+    // ============================================
+    // Reset ao abrir modal
+    // ============================================
+    document.getElementById('createProductModal').addEventListener('show.bs.modal', function () {
+        // Resetar formulário
+        const form = document.getElementById('createProductForm');
+        if (form) {
+            form.reset();
+        }
+
+        // Limpar campos hidden e display
+        document.getElementById('base_price_display_create').value = '';
+        document.getElementById('base_price_value_create').value = '';
+
+        const measurements = ['height_cm', 'width_cm', 'length_cm', 'diameter_cm', 'depth_cm', 'curvature_cm'];
+        measurements.forEach(function (fieldName) {
+            const displayInput = document.getElementById(fieldName + '_display');
+            const hiddenInput = document.getElementById(fieldName + '_value');
+            if (displayInput) displayInput.value = '';
+            if (hiddenInput) hiddenInput.value = '';
+        });
+
+        // Garantir estado inicial correto
+        document.getElementById('priceFieldCreate').style.display = 'block';
+        document.getElementById('electricalFieldsCreate').style.display = 'none';
+        document.getElementById('ledFieldsCreate').style.display = 'none';
+        document.getElementById('imagePreviewCreate').style.display = 'none';
+    });
 </script>

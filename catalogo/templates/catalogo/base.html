@@ -96,16 +96,19 @@
             {% endfor %}
             {% endif %}
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <!-- HEADER RESPONSIVO -->
+            <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
                 <div>
                     <h1 class="h4 mb-0">{% block page_title %}{% endblock %}</h1>
-                    <nav>
+
+                    <!-- Breadcrumb escondido no mobile -->
+                    <nav class="d-none d-md-block">
                         <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
                             {% block breadcrumb %}{% endblock %}
                         </ol>
                     </nav>
                 </div>
+
                 {% block page_actions %}{% endblock %}
             </div>
 
@@ -137,7 +140,7 @@ $(function () {
         } else {
             $sidebarOverlay.addClass('show');
         }
-        $btnCollapse.hide(); // esconde botão quando aberto
+        $btnCollapse.hide();
     }
 
     function closeSidebar() {
@@ -147,7 +150,7 @@ $(function () {
         } else {
             $sidebarOverlay.removeClass('show');
         }
-        $btnCollapse.show(); // mostra botão quando fechado
+        $btnCollapse.show();
     }
 
     $btnCollapse.on('click', openSidebar);
@@ -155,14 +158,9 @@ $(function () {
     $sidebarOverlay.on('click', closeSidebar);
 
     $('#sidebar ul.components a').on('click', function () {
-        if (isMobile()) {
-            closeSidebar();
-        }
+        if (isMobile()) closeSidebar();
     });
 
-    // ================================
-    // Relógio ao vivo
-    // ================================
     function updateClock() {
         var now = new Date();
         var hours = now.getHours().toString().padStart(2,'0');
