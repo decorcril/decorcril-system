@@ -1,0 +1,13 @@
+#createClientModal .modal-dialog {
+    max-height: 90vh;       /* altura máxima do modal */
+    margin: 1.5rem auto;    /* centraliza verticalmente */
+}
+
+#createClientModal .modal-content {
+    max-height: 90vh;
+}
+
+#createClientModal .modal-body {
+    overflow-y: auto;       /* força scroll vertical */
+}
+

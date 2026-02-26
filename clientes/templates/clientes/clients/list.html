@@ -1,0 +1,136 @@
+{% extends 'catalogo/base.html' %}
+{% load static %}
+
+{% block title %}Clientes - Decorcril System{% endblock %}
+{% block page_title %}Clientes{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Clientes</li>
+{% endblock %}
+
+{% block page_actions %}
+{% if is_supervisor or is_vendedor %}
+<div class="d-flex gap-2 mb-2">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createClientModal">
+        <i class="bi bi-person-plus me-1"></i>
+        Novo Cliente
+    </button>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="card shadow">
+
+    <!-- HEADER -->
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 fw-bold text-success">
+            <i class="bi bi-people me-2"></i>
+            Todos os Clientes ({{ clients.count }})
+        </h6>
+
+        <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()" title="Atualizar">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="card-body p-0">
+
+        <!-- Pesquisa -->
+        <div class="px-3 pt-3 pb-2">
+            <form method="get" class="d-flex gap-2 justify-content-end">
+                <input type="text" name="q" value="{{ query|default:'' }}" class="form-control form-control-sm"
+                    placeholder="Pesquisar por Nome, Código ou Documento" style="max-width:400px;">
+
+                <button type="submit" class="btn btn-sm btn-success">
+                    <i class="bi bi-search me-1"></i>Buscar
+                </button>
+
+                {% if query %}
+                <a href="{% url 'clientes:clients_list' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-x me-1"></i>Limpar
+                </a>
+                {% endif %}
+            </form>
+        </div>
+
+        {% if clients %}
+        <div class="table-responsive">
+            <table class="table table-hover table-sm mb-0 align-middle clients-table">
+
+                <colgroup>
+                    <col style="width:80px">
+                    <col style="width:200px">
+                    <col style="width:260px">
+                    <col style="width:200px">
+                    <col style="width:140px">
+                    <col style="width:150px">
+                    <col style="width:110px">
+                    <col style="width:120px">
+                </colgroup>
+
+                <thead class="table-light border-top">
+                    <tr>
+                        <th class="text-center">Código</th>
+                        <th class="text-center">Cliente</th>
+                        <th class="text-center">CPF/CNPJ</th>
+                        <th class="text-center">Contato</th>
+                        <th class="text-center">Cidade - Estado</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Data Cadastro</th>
+                        <th class="text-center">Ações</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for client in clients %}
+                        {% include "clientes/clients/_row.html" %}
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+        {% else %}
+
+        {% if query %}
+        <div class="alert alert-warning text-center mx-3 mb-3">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Nenhum cliente encontrado para "<strong>{{ query }}</strong>".
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-people display-1 text-muted mb-3"></i>
+            <h4 class="text-muted">Nenhum cliente cadastrado</h4>
+
+            {% if is_supervisor or is_vendedor %}
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createClientModal">
+                <i class="bi bi-person-plus me-1"></i>
+                Criar Primeiro Cliente
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% endif %}
+
+    </div>
+</div>
+
+{# Modal de criação #}
+{% include "clientes/clients/_create_modal.html" %}
+
+{# Modais de visualização e edição — fora da tabela, num container com ID para o JS atualizar #}
+{% for client in clients %}
+<div id="client-modals-{{ client.pk }}">
+    {% include "clientes/clients/_view_modal.html" %}
+    {% include "clientes/clients/_edit_modal.html" %}
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/masks.js' %}"></script>
+<script src="{% static 'js/clients.js' %}"></script>
+{% endblock %}

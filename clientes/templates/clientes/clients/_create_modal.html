@@ -1,0 +1,199 @@
+<!-- ========================= -->
+<!-- MODAL: CRIAR CLIENTE -->
+<!-- ========================= -->
+<div class="modal fade" id="createClientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+
+            <form id="createClientForm" method="post" action="{% url 'clientes:clients_list' %}">
+                {% csrf_token %}
+
+                <!-- HEADER -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-person-plus me-2"></i>Novo Cliente
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- BODY -->
+                <div class="modal-body" style="overflow-y:auto; max-height:70vh;">
+
+                    <!-- Identificação -->
+                    <h6 class="text-primary fw-bold border-bottom pb-1 mb-3">
+                        <i class="bi bi-person-vcard me-1"></i> Identificação
+                    </h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Tipo de Pessoa <span class="text-danger">*</span>
+                            </label>
+                            <select name="person_type" id="id_person_type" class="form-select" required>
+                                <option value="">Selecione...</option>
+                                <option value="PF">Pessoa Física</option>
+                                <option value="PJ">Pessoa Jurídica</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-8">
+                            <!-- label dinâmico: Nome Completo / Razão Social -->
+                            <label class="form-label fw-semibold" id="label_name">
+                                Nome / Razão Social <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="name" id="id_name" class="form-control" required>
+                        </div>
+
+                        <!-- Nome Fantasia: visível apenas para PJ -->
+                        <div class="col-md-6" id="wrap_trade_name">
+                            <label class="form-label fw-semibold">Nome Fantasia</label>
+                            <input type="text" name="trade_name" id="id_trade_name" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <!-- label dinâmico: CPF / CNPJ -->
+                            <label class="form-label fw-semibold" id="label_document">
+                                CPF / CNPJ <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="document" id="id_document"
+                                   class="form-control"
+                                   placeholder="Selecione o tipo de pessoa"
+                                   required>
+                        </div>
+
+                        <!-- Inscrição Estadual: visível apenas para PJ -->
+                        <div class="col-md-6" id="wrap_state_registration">
+                            <label class="form-label fw-semibold">Inscrição Estadual</label>
+                            <input type="text" name="state_registration" id="id_state_registration" class="form-control">
+                        </div>
+
+                        <!-- Inscrição Municipal: visível apenas para PJ -->
+                        <div class="col-md-6" id="wrap_municipal_registration">
+                            <label class="form-label fw-semibold">Inscrição Municipal</label>
+                            <input type="text" name="municipal_registration" id="id_municipal_registration" class="form-control">
+                        </div>
+                    </div>
+
+                    <!-- Contato -->
+                    <h6 class="text-primary fw-bold border-bottom pb-1 mb-3">
+                        <i class="bi bi-telephone me-1"></i> Contato
+                    </h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Pessoa de Contato</label>
+                            <input type="text" name="contact_person" id="id_contact_person" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">E-mail</label>
+                            <input type="email" name="email" id="id_email" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Telefone</label>
+                            <input type="text" name="phone" id="id_phone"
+                                   class="form-control"
+                                   placeholder="(00) 0000-0000">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Celular</label>
+                            <input type="text" name="whatsapp" id="id_whatsapp"
+                                   class="form-control"
+                                   placeholder="(00) 00000-0000">
+                        </div>
+                    </div>
+
+                    <!-- Endereço -->
+                    <h6 class="text-primary fw-bold border-bottom pb-1 mb-3">
+                        <i class="bi bi-geo-alt me-1"></i> Endereço
+                    </h6>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">CEP</label>
+                            <input type="text" name="zip_code" id="id_zip_code"
+                                   class="form-control"
+                                   placeholder="00000-000">
+                        </div>
+
+                        <div class="col-md-7">
+                            <label class="form-label fw-semibold">Logradouro</label>
+                            <input type="text" name="street" id="id_street" class="form-control">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Número</label>
+                            <input type="text" name="number" id="id_number" class="form-control">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Complemento</label>
+                            <input type="text" name="complement" id="id_complement" class="form-control">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Bairro</label>
+                            <input type="text" name="neighborhood" id="id_neighborhood" class="form-control">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Cidade</label>
+                            <input type="text" name="city" id="id_city" class="form-control">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">UF</label>
+                            <select name="state" id="id_state" class="form-select">
+                                <option value="">--</option>
+                                <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+                                <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+                                <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+                                <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+                                <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                                <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+                                <option>SP</option><option>SE</option><option>TO</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Classificação -->
+                    <div class="row g-2">
+                        <div class="col-auto form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="id_is_active" checked>
+                            <label class="form-check-label">Ativo</label>
+                        </div>
+
+                        <div class="col-auto form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_supplier" id="id_is_supplier">
+                            <label class="form-check-label">Fornecedor</label>
+                        </div>
+
+                        <div class="col-auto form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_carrier" id="id_is_carrier">
+                            <label class="form-check-label">Transportadora</label>
+                        </div>
+
+                        <div class="col-auto form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_partner" id="id_is_partner">
+                            <label class="form-check-label">Parceiro</label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- FOOTER -->
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Salvar Cliente
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

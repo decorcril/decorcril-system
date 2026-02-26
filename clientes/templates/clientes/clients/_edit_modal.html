@@ -1,0 +1,255 @@
+<!-- ========================= -->
+<!-- MODAL: EDITAR CLIENTE    -->
+<!-- ========================= -->
+{% load client_filters %}
+<div class="modal fade" id="editClientModal{{ client.pk }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+
+            <form method="post"
+                  action="{% url 'clientes:client_update' client.pk %}"
+                  data-url="{% url 'clientes:client_update' client.pk %}">
+                {% csrf_token %}
+
+                <!-- HEADER -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil-square me-2"></i>Editar Cliente
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- BODY -->
+                <div class="modal-body" style="overflow-y:auto; max-height:70vh;">
+
+                    <!-- Identificação -->
+                    <h6 class="text-primary fw-bold border-bottom pb-1 mb-3">
+                        <i class="bi bi-person-vcard me-1"></i> Identificação
+                    </h6>
+
+                    <div class="row g-3 mb-4">
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">
+                                Tipo de Pessoa <span class="text-danger">*</span>
+                            </label>
+                            <select name="person_type" id="id_person_type" class="form-select" required>
+                                <option value="">Selecione...</option>
+                                <option value="PF" {% if client.person_type == "PF" %}selected{% endif %}>Pessoa Física</option>
+                                <option value="PJ" {% if client.person_type == "PJ" %}selected{% endif %}>Pessoa Jurídica</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold" id="label_name">
+                                {% if client.person_type == "PF" %}
+                                    Nome Completo
+                                {% else %}
+                                    Razão Social
+                                {% endif %}
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="name" id="id_name" class="form-control"
+                                   value="{{ client.name }}" required>
+                        </div>
+
+                        <!-- Nome Fantasia -->
+                        <div class="col-md-6" id="wrap_trade_name"
+                             {% if client.person_type == "PF" %}style="display:none"{% endif %}>
+                            <label class="form-label fw-semibold">Nome Fantasia</label>
+                            <input type="text" name="trade_name" id="id_trade_name" class="form-control"
+                                   value="{{ client.trade_name|default:'' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" id="label_document">
+                                {% if client.person_type == "PF" %}CPF{% else %}CNPJ{% endif %}
+                                <span class="text-danger">*</span>
+                            </label>
+                            {% if is_supervisor %}
+                                <input type="text" name="document" id="id_document" class="form-control"
+                                       value="{{ client.document|format_document }}" required>
+                            {% else %}
+                                <input type="text" id="id_document" class="form-control"
+                                       value="{{ client.document|format_document }}" disabled>
+                            {% endif %}
+                        </div>
+
+                        <!-- Inscrição Estadual -->
+                        <div class="col-md-6" id="wrap_state_registration"
+                             {% if client.person_type == "PF" %}style="display:none"{% endif %}>
+                            <label class="form-label fw-semibold">Inscrição Estadual</label>
+                            <input type="text" name="state_registration" id="id_state_registration" class="form-control"
+                                   value="{{ client.state_registration|default:'' }}">
+                        </div>
+
+                        <!-- Inscrição Municipal -->
+                        <div class="col-md-6" id="wrap_municipal_registration"
+                             {% if client.person_type == "PF" %}style="display:none"{% endif %}>
+                            <label class="form-label fw-semibold">Inscrição Municipal</label>
+                            <input type="text" name="municipal_registration" id="id_municipal_registration" class="form-control"
+                                   value="{{ client.municipal_registration|default:'' }}">
+                        </div>
+
+                    </div>
+
+                    <!-- Contato -->
+                    <h6 class="text-primary fw-bold border-bottom pb-1 mb-3">
+                        <i class="bi bi-telephone me-1"></i> Contato
+                    </h6>
+
+                    <div class="row g-3 mb-4">
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Responsável</label>
+                            <input type="text" name="contact_person" id="id_contact_person" class="form-control"
+                                   value="{{ client.contact_person|default:'' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">E-mail</label>
+                            <input type="email" name="email" id="id_email" class="form-control"
+                                   value="{{ client.email|default:'' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Telefone</label>
+                            <input type="text" name="phone" id="id_phone" class="form-control"
+                                   placeholder="(00) 0000-0000"
+                                   value="{{ client.phone|format_phone }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Celular</label>
+                            <input type="text" name="whatsapp" id="id_whatsapp" class="form-control"
+                                   placeholder="(00) 00000-0000"
+                                   value="{{ client.whatsapp|format_phone }}">
+                        </div>
+
+                    </div>
+
+                    <!-- Endereço -->
+                    <h6 class="text-primary fw-bold border-bottom pb-1 mb-3">
+                        <i class="bi bi-geo-alt me-1"></i> Endereço
+                    </h6>
+
+                    <div class="row g-3 mb-4">
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">CEP</label>
+                            <input type="text" name="zip_code" id="id_zip_code" class="form-control"
+                                   placeholder="00000-000"
+                                   value="{{ client.zip_code|format_cep }}">
+                        </div>
+
+                        <div class="col-md-7">
+                            <label class="form-label fw-semibold">Logradouro</label>
+                            <input type="text" name="street" id="id_street" class="form-control"
+                                   value="{{ client.street|default:'' }}">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Número</label>
+                            <input type="text" name="number" id="id_number" class="form-control"
+                                   value="{{ client.number|default:'' }}">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Complemento</label>
+                            <input type="text" name="complement" id="id_complement" class="form-control"
+                                   value="{{ client.complement|default:'' }}">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Bairro</label>
+                            <input type="text" name="neighborhood" id="id_neighborhood" class="form-control"
+                                   value="{{ client.neighborhood|default:'' }}">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Cidade</label>
+                            <input type="text" name="city" id="id_city" class="form-control"
+                                   value="{{ client.city|default:'' }}">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">UF</label>
+                            <select name="state" id="id_state" class="form-select">
+                                <option value="">--</option>
+                                <option {% if client.state == "AC" %}selected{% endif %}>AC</option>
+                                <option {% if client.state == "AL" %}selected{% endif %}>AL</option>
+                                <option {% if client.state == "AP" %}selected{% endif %}>AP</option>
+                                <option {% if client.state == "AM" %}selected{% endif %}>AM</option>
+                                <option {% if client.state == "BA" %}selected{% endif %}>BA</option>
+                                <option {% if client.state == "CE" %}selected{% endif %}>CE</option>
+                                <option {% if client.state == "DF" %}selected{% endif %}>DF</option>
+                                <option {% if client.state == "ES" %}selected{% endif %}>ES</option>
+                                <option {% if client.state == "GO" %}selected{% endif %}>GO</option>
+                                <option {% if client.state == "MA" %}selected{% endif %}>MA</option>
+                                <option {% if client.state == "MT" %}selected{% endif %}>MT</option>
+                                <option {% if client.state == "MS" %}selected{% endif %}>MS</option>
+                                <option {% if client.state == "MG" %}selected{% endif %}>MG</option>
+                                <option {% if client.state == "PA" %}selected{% endif %}>PA</option>
+                                <option {% if client.state == "PB" %}selected{% endif %}>PB</option>
+                                <option {% if client.state == "PR" %}selected{% endif %}>PR</option>
+                                <option {% if client.state == "PE" %}selected{% endif %}>PE</option>
+                                <option {% if client.state == "PI" %}selected{% endif %}>PI</option>
+                                <option {% if client.state == "RJ" %}selected{% endif %}>RJ</option>
+                                <option {% if client.state == "RN" %}selected{% endif %}>RN</option>
+                                <option {% if client.state == "RS" %}selected{% endif %}>RS</option>
+                                <option {% if client.state == "RO" %}selected{% endif %}>RO</option>
+                                <option {% if client.state == "RR" %}selected{% endif %}>RR</option>
+                                <option {% if client.state == "SC" %}selected{% endif %}>SC</option>
+                                <option {% if client.state == "SP" %}selected{% endif %}>SP</option>
+                                <option {% if client.state == "SE" %}selected{% endif %}>SE</option>
+                                <option {% if client.state == "TO" %}selected{% endif %}>TO</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- Classificação -->
+                    <div class="row g-2">
+
+                        <div class="col-auto form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_active"
+                                   id="id_is_active" {% if client.is_active %}checked{% endif %}>
+                            <label class="form-check-label">Ativo</label>
+                        </div>
+
+                        <div class="col-auto form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_supplier"
+                                   id="id_is_supplier" {% if client.is_supplier %}checked{% endif %}>
+                            <label class="form-check-label">Fornecedor</label>
+                        </div>
+
+                        <div class="col-auto form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_carrier"
+                                   id="id_is_carrier" {% if client.is_carrier %}checked{% endif %}>
+                            <label class="form-check-label">Transportadora</label>
+                        </div>
+
+                        <div class="col-auto form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_partner"
+                                   id="id_is_partner" {% if client.is_partner %}checked{% endif %}>
+                            <label class="form-check-label">Parceiro</label>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- FOOTER -->
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Salvar Alterações
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

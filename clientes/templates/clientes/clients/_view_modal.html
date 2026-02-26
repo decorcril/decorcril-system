@@ -1,0 +1,250 @@
+{# ============================================= #}
+{# MODAL: VISUALIZAR CLIENTE #}
+{# ============================================= #}
+{% load client_filters %}
+
+<div class="modal fade" id="viewClientModal{{ client.pk }}" tabindex="-1" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content shadow-sm">
+
+            <!-- HEADER -->
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-semibold">
+                    <i class="bi bi-person-lines-fill me-2"></i>
+                    Detalhes do Cliente
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- BODY -->
+            <div class="modal-body px-4 py-3">
+
+                <!-- ================= IDENTIFICAÇÃO ================= -->
+                <div class="mb-4">
+                    <h6 class="text-primary fw-bold border-bottom pb-2 mb-3">
+                        <i class="bi bi-person-vcard me-1"></i> Identificação
+                    </h6>
+
+                    <div class="row g-3">
+
+                        <!-- Categoria -->
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">Categoria</small>
+                            {% if client.person_type == "PF" %}
+                            <span class="badge bg-info-subtle text-info border">Pessoa Física</span>
+                            {% else %}
+                            <span class="badge bg-dark-subtle text-dark border">Pessoa Jurídica</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Nome -->
+                        <div class="col-md-6">
+                            <small class="text-muted d-block">Nome / Razão Social</small>
+                            <div class="fw-semibold fs-6">
+                                {{ client.name }}
+                            </div>
+                        </div>
+
+                        <!-- Documento -->
+                        <div class="col-md-3">
+                            <small class="text-muted d-block">
+                                {% if client.person_type == "PF" %}CPF{% else %}CNPJ{% endif %}
+                            </small>
+                            <span class="badge bg-secondary-subtle text-dark border">
+                                {{ client.document|format_document }}
+                            </span>
+                        </div>
+
+                    </div>
+
+                    {% if client.trade_name or client.state_registration or client.municipal_registration %}
+                    <div class="row mt-3">
+                        <div class="col small text-muted">
+
+                            {% if client.trade_name %}
+                            <i class="bi"></i>
+                            <strong>Nome Fantasia:</strong> {{client.trade_name }}
+                            {% endif %}
+
+                            {% if client.state_registration %}
+                            {% if client.trade_name %}<br>{% endif %}
+                            <strong>Inscrição Estadual:</strong> {{ client.state_registration }}
+                            {% endif %}
+
+                            {% if client.municipal_registration %}
+                            {% if client.trade_name or client.state_registration %}<br>{% endif %}
+                            <strong>Inscrição Municipal:</strong> {{ client.municipal_registration }}
+                            {% endif %}
+
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+
+                <!-- ================= CONTATO ================= -->
+                {% if client.contact_person or client.email or client.phone or client.whatsapp %}
+                <div class="mb-4">
+                    <h6 class="text-success fw-bold border-bottom pb-2 mb-3">
+                        <i class="bi bi-telephone me-1"></i> Contato
+                    </h6>
+
+                    <div class="row g-3">
+
+                        {% if client.contact_person %}
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">
+                                <i class="bi bi-person me-1"></i>Responsável
+                            </small>
+                            {{ client.contact_person }}
+                        </div>
+                        {% endif %}
+
+                        {% if client.email %}
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">
+                                <i class="bi bi-envelope me-1"></i>E-mail
+                            </small>
+                            {{ client.email }}
+                        </div>
+                        {% endif %}
+
+                        {% if client.phone %}
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">
+                                <i class="bi bi-telephone-fill me-1"></i>Telefone
+                            </small>
+                            {{ client.phone|format_phone }}
+                        </div>
+                        {% endif %}
+
+                        {% if client.whatsapp %}
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">
+                                <i class="bi bi-whatsapp text-success me-1"></i>WhatsApp
+                            </small>
+                            {{ client.whatsapp|format_phone }}
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+                {% endif %}
+
+
+                <!-- ================= ENDEREÇO ================= -->
+                {% if client.street or client.city %}
+                <div class="mb-4">
+                    <h6 class="text-danger fw-bold border-bottom pb-2 mb-3">
+                        <i class="bi bi-geo-alt me-1"></i> Endereço
+                    </h6>
+
+                    <div class="row g-2">
+
+                        {% if client.street %}
+                        <div class="col-12">
+                            <i class="bi bi-house-door me-1 text-muted"></i>
+                            {{ client.street }}
+                            {% if client.number %}, {{ client.number }}{% endif %}
+                            {% if client.complement %} — {{ client.complement }}{% endif %}
+                        </div>
+                        {% endif %}
+
+                        <div class="col-12 text-muted small">
+                            {% if client.neighborhood %}
+                            {{ client.neighborhood }} ·
+                            {% endif %}
+                            {% if client.city %}
+                            {{ client.city }}
+                            {% endif %}
+                            {% if client.state %} -
+                            {{ client.state }}
+                            {% endif %}
+                            {% if client.zip_code %}
+                            · CEP {{ client.zip_code|format_cep }}
+                            {% endif %}
+                        </div>
+
+                    </div>
+                </div>
+                {% endif %}
+
+
+                <!-- ================= CLASSIFICAÇÃO ================= -->
+                <div class="mb-4">
+                    <h6 class="text-secondary fw-bold border-bottom pb-2 mb-3">
+                        <i class="bi bi-tags me-1"></i> Classificação
+                    </h6>
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        {% if client.is_active %}
+                        <span class="badge bg-success">
+                            <i class="bi bi-check-circle me-1"></i>Ativo
+                        </span>
+                        {% else %}
+                        <span class="badge bg-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Inativo
+                        </span>
+                        {% endif %}
+
+                        {% if client.is_supplier %}
+                        <span class="badge bg-dark">
+                            <i class="bi bi-box-seam me-1"></i>Fornecedor
+                        </span>
+                        {% endif %}
+
+                        {% if client.is_carrier %}
+                        <span class="badge bg-warning text-dark">
+                            <i class="bi bi-truck me-1"></i>Transportadora
+                        </span>
+                        {% endif %}
+
+                        {% if client.is_partner %}
+                        <span class="badge bg-info">
+                            <i class="bi bi-handshake me-1"></i>Parceiro
+                        </span>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+
+                <!-- ================= CONTROLE ================= -->
+                <div>
+                    <h6 class="text-muted fw-bold border-bottom pb-2 mb-3">
+                        <i class="bi bi-clock-history me-1"></i> Controle
+                    </h6>
+
+                    <div class="row small">
+
+                        <div class="col-md-6">
+                            <i class="bi bi-calendar-plus me-1 text-muted"></i>
+                            <span class="text-muted">Criado em:</span><br>
+                            {{ client.created_at|date:"d/m/Y" }} às {{ client.created_at|date:"H:i" }}
+                        </div>
+
+                        {% if client.updated_at %}
+                        <div class="col-md-6">
+                            <i class="bi bi-calendar-check me-1 text-muted"></i>
+                            <span class="text-muted">Última atualização:</span><br>
+                            {{ client.updated_at|date:"d/m/Y" }} às {{ client.updated_at|date:"H:i" }}
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+                <button class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Fechar
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

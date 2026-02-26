@@ -1,0 +1,98 @@
+{% load client_filters %}
+
+<tr id="client-row-{{ client.pk }}">
+
+    <!-- Código -->
+    <td class="text-center">
+        <span class="fw-semibold">{{ client.code }}</span>
+    </td>
+
+    <!-- Cliente -->
+    <td class="text-center">
+        <div class="fw-medium lh-sm">{{ client.name }}</div>
+        {% if client.trade_name %}
+        <div class="text-muted lh-sm">{{ client.trade_name }}</div>
+        {% endif %}
+    </td>
+
+    <!-- Documento -->
+    <td class="text-center">
+        <span class="fw-medium">{{ client.document|format_document }}</span>
+    </td>
+
+    <!-- Contato -->
+    <td class="text-center">
+        <div class="lh-sm">
+            {% if client.email %}
+            <div><i class="bi bi-envelope-at me-1"></i>{{ client.email }}</div>
+            {% endif %}
+            {% if client.whatsapp %}
+            <div><i class="bi bi-whatsapp me-1"></i>{{ client.whatsapp|format_phone }}</div>
+            {% endif %}
+            {% if not client.email and not client.whatsapp %}
+            <span class="fw-semibold">—</span>
+            {% endif %}
+        </div>
+    </td>
+
+    <!-- Cidade -->
+    <td class="text-center">
+        {% if client.city %}
+        <span class="fw-medium">{{ client.city }} - {{ client.state }}</span>
+        {% else %}
+        <span class="fw-medium">—</span>
+        {% endif %}
+    </td>
+
+    <!-- Status -->
+    <td class="text-center">
+        <div class="d-flex flex-column align-items-center gap-1">
+            {% if client.is_active %}
+            <span class="badge bg-success">Ativo</span>
+            {% else %}
+            <span class="badge bg-secondary">Inativo</span>
+            {% endif %}
+            {% if client.is_supplier %}
+            <span class="badge bg-warning text-dark">Fornecedor</span>
+            {% endif %}
+            {% if client.is_carrier %}
+            <span class="badge bg-info">Transportadora</span>
+            {% endif %}
+            {% if client.is_partner %}
+            <span class="badge bg-primary">Parceiro</span>
+            {% endif %}
+        </div>
+    </td>
+
+    <!-- Cadastro -->
+    <td class="text-center">
+        <span class="fw-medium">{{ client.created_at|date:"d/m/Y" }}</span>
+    </td>
+
+    {% if is_supervisor or is_vendedor %}
+    <!-- Ações -->
+    <td class="text-center">
+        <div class="btn-group btn-group-sm">
+
+            <button class="btn btn-outline-info" data-bs-toggle="modal"
+                data-bs-target="#viewClientModal{{ client.pk }}">
+                <i class="bi bi-eye"></i>
+            </button>
+
+            {% if is_supervisor %}
+            <button class="btn btn-outline-primary btn-edit-client"
+                data-url="{% url 'clientes:client_update' client.pk %}">
+                <i class="bi bi-pencil"></i>
+            </button>
+
+            <button class="btn btn-outline-secondary" data-bs-toggle="modal"
+                data-bs-target="#deleteClientModal{{ client.pk }}">
+                <i class="bi bi-trash"></i>
+            </button>
+            {% endif %}
+
+        </div>
+    </td>
+    {% endif %}
+
+</tr>

@@ -27,7 +27,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-start-success border-left-4 shadow h-100 py-2">
             <div class="card-body">
@@ -45,46 +45,31 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Novo Card: Total Clientes -->
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-start-warning border-left-4 shadow h-100 py-2">
+        <div class="card border-start-secondary border-left-4 shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs fw-bold text-warning text-uppercase mb-1">
-                            Meu Grupo
+                        <div class="text-xs fw-bold text-secondary text-uppercase mb-1">
+                            Clientes
                         </div>
-                        <div class="h5 mb-0 fw-bold text-gray-800">{{ user_group }}</div>
+                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_clients }}</div>
                     </div>
                     <div class="col-auto">
-                        <i class="bi bi-people fa-2x text-warning"></i>
+                        <i class="bi bi-people fa-2x text-secondary"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
     
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-start-info border-left-4 shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs fw-bold text-info text-uppercase mb-1">
-                            Status
-                        </div>
-                        <div class="h5 mb-0 fw-bold text-gray-800">Online</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-wifi fa-2x text-info"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Ações Rápidas -->
-{% if is_supervisor %}
+{% if is_supervisor or is_vendedor %}
 <div class="row mb-4">
     <div class="col-12">
         <div class="card shadow">
@@ -103,6 +88,13 @@
                         <a href="{% url 'product_list' %}" class="btn btn-outline-success w-100 h-100 py-3">
                             <i class="bi bi-box fs-1 mb-2 d-block"></i>
                             Produtos
+                        </a>
+                    </div>
+                    <!-- NOVO: Botão Clientes -->
+                    <div class="col-md-3 mb-3">
+                        <a href="{% url 'clientes:clients_list' %}" class="btn btn-outline-secondary w-100 h-100 py-3">
+                            <i class="bi bi-people fs-1 mb-2 d-block"></i>
+                            Clientes
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
@@ -178,7 +170,7 @@
                             <input type="number" class="form-control" name="price" step="0.01" required>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-8 mb-3">
                             <label class="form-label">Nome*</label>
@@ -194,12 +186,12 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label class="form-label">Descrição</label>
                         <textarea class="form-control" name="description" rows="3"></textarea>
                     </div>
-                    
+
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" name="is_active" checked>
                         <label class="form-check-label">Ativo</label>
@@ -215,13 +207,13 @@
 </div>
 
 <script>
-// Auto-uppercase para SKU
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('input[name="sku"]').forEach(input => {
-        input.addEventListener('input', function() {
-            this.value = this.value.toUpperCase();
+    // Auto-uppercase para SKU
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('input[name="sku"]').forEach(input => {
+            input.addEventListener('input', function () {
+                this.value = this.value.toUpperCase();
+            });
         });
     });
-});
 </script>
 {% endblock %}
