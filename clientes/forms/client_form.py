@@ -37,7 +37,7 @@ def validate_cnpj(cnpj):
     if len(cnpj) != 14:
         return False
 
-    weights_1 = [5,4,3,2,9,8,7,6,5,4,3,2]
+    weights_1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
     weights_2 = [6] + weights_1
 
     def calc_digit(numbers, weights):
@@ -104,8 +104,7 @@ class ClientForm(forms.ModelForm):
 
         if person_type == "PF" and trade_name:
             self.add_error(
-                "trade_name",
-                "Nome fantasia não se aplica para Pessoa Física"
+                "trade_name", "Nome fantasia não se aplica para Pessoa Física"
             )
 
         return cleaned

@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from .single_piece import SinglePiece
-from .product_component import ProductComponent
 
 
 class Kit(models.Model):
@@ -10,6 +9,14 @@ class Kit(models.Model):
     """
 
     name = models.CharField(max_length=100, unique=True, verbose_name="Nome do Kit")
+
+    base_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Preço base",
+    )
 
     class Meta:
         verbose_name = "Kit"
@@ -32,7 +39,7 @@ class KitComponent(models.Model):
         verbose_name="Kit",
     )
 
-    # Referencia um produto simples
+    # Referencia um produto simples (is_composite=False)
     product = models.ForeignKey(
         SinglePiece,
         on_delete=models.PROTECT,
@@ -42,13 +49,14 @@ class KitComponent(models.Model):
         verbose_name="Produto simples",
     )
 
-    # Referencia um produto composto
+    # Referencia um produto composto (is_composite=True)
+    # Corrigido: era ProductComponent (linha de composição), agora aponta para SinglePiece
     composed_product = models.ForeignKey(
-        ProductComponent,
+        SinglePiece,
         on_delete=models.PROTECT,
         null=True,
         blank=True,
-        related_name="used_in_kits",
+        related_name="used_in_kits_as_composed",
         verbose_name="Produto composto",
     )
 
@@ -61,7 +69,6 @@ class KitComponent(models.Model):
         verbose_name = "Componente de Kit"
         verbose_name_plural = "Componentes de Kit"
         ordering = ["id"]
-        # Garante que não repita o mesmo produto simples ou composto no mesmo kit
         unique_together = (
             ("kit", "product"),
             ("kit", "composed_product"),
@@ -79,6 +86,18 @@ class KitComponent(models.Model):
         if self.product and self.composed_product:
             errors["product"] = (
                 "Não é possível escolher produto simples e composto ao mesmo tempo."
+            )
+
+        # Valida que o campo composed_product é realmente um produto composto
+        if self.composed_product and not self.composed_product.is_composite:
+            errors["composed_product"] = (
+                "O produto selecionado não é um produto composto."
+            )
+
+        # Valida que o campo product é realmente um produto simples
+        if self.product and self.product.is_composite:
+            errors["product"] = (
+                "O produto selecionado é composto. Use o campo 'Produto composto'."
             )
 
         # Quantidade mínima

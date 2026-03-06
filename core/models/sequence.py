@@ -7,27 +7,15 @@ class Sequence(models.Model):
     Controle de sequências ERP (CLIENT, ORDER, PRODUCT, etc.)
     """
 
-    key = models.CharField(
-        max_length=30,
-        unique=True,
-        verbose_name="Chave"
-    )
+    key = models.CharField(max_length=30, unique=True, verbose_name="Chave")
 
-    last_value = models.PositiveBigIntegerField(
-        default=0,
-        verbose_name="Último valor"
-    )
+    last_value = models.PositiveBigIntegerField(default=0, verbose_name="Último valor")
 
     prefix = models.CharField(
-        max_length=10,
-        blank=True,
-        null=True,
-        verbose_name="Prefixo"
+        max_length=10, blank=True, null=True, verbose_name="Prefixo"
     )
 
-    updated_at = models.DateTimeField(
-        auto_now=True
-    )
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Sequência"
@@ -47,8 +35,7 @@ class Sequence(models.Model):
         """
         with transaction.atomic():
             seq, created = cls.objects.select_for_update().get_or_create(
-                key=key,
-                defaults={"last_value": 1000}  # <- valor inicial
+                key=key, defaults={"last_value": 1000}  # <- valor inicial
             )
             seq.last_value += 1
             seq.save(update_fields=["last_value"])
@@ -62,8 +49,7 @@ class Sequence(models.Model):
         """
         with transaction.atomic():
             seq, created = cls.objects.select_for_update().get_or_create(
-                key=key,
-                defaults={"last_value": 1000}  # <- valor inicial
+                key=key, defaults={"last_value": 1000}  # <- valor inicial
             )
             seq.last_value += 1
             seq.save(update_fields=["last_value"])

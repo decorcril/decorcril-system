@@ -1,4 +1,7 @@
 from django.shortcuts import render
+from django.utils.timezone import now
+
+from vendas.models.order import Order
 from ..models import Category, SinglePiece
 from clientes.models import Client
 from ..decorators import group_required
@@ -15,10 +18,12 @@ def dashboard(request):
     is_vendedor = user.groups.filter(name="Vendedor").exists()
 
     # =========================
-    # Queries
+    # Queries base
     # =========================
     categories = Category.objects.filter(is_active=True)
     products = SinglePiece.objects.filter(is_active=True)
+
+    today = now().date()
 
     # =========================
     # Contexto
@@ -28,10 +33,11 @@ def dashboard(request):
         "categories": categories[:5],
         "products": products[:5],
 
-        # Totais
+        # Totais gerais
         "total_categories": categories.count(),
         "total_products": products.count(),
-        'total_clients': Client.objects.count(),
+        "total_clients": Client.objects.count(),
+       "total_orders": Order.objects.filter(created_by=user).count(),
 
         # Permissões
         "is_supervisor": is_supervisor,
@@ -39,9 +45,7 @@ def dashboard(request):
 
         # Grupo atual
         "user_group": (
-            user.groups.first().name
-            if user.groups.exists()
-            else "Sem grupo"
+            user.groups.first().name if user.groups.exists() else "Sem grupo"
         ),
     }
 

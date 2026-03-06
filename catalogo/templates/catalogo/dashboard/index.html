@@ -8,67 +8,85 @@
 {% endblock %}
 
 {% block content %}
+
+<!-- ========================= -->
 <!-- Cards de Estatísticas -->
+<!-- ========================= -->
 <div class="row mb-4">
+
+    <!-- Categorias -->
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-start-primary border-left-4 shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs fw-bold text-primary text-uppercase mb-1">
-                            Categorias
-                        </div>
-                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_categories }}</div>
+        <div class="card border-start-primary shadow h-100 py-2">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-xs fw-bold text-primary text-uppercase mb-1">
+                        Categorias
                     </div>
-                    <div class="col-auto">
-                        <i class="bi bi-list-ul fa-2x text-primary"></i>
+                    <div class="h5 mb-0 fw-bold text-gray-800">
+                        {{ total_categories }}
                     </div>
                 </div>
+                <i class="bi bi-list-ul fs-2 text-primary"></i>
             </div>
         </div>
     </div>
 
+    <!-- Produtos -->
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-start-success border-left-4 shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs fw-bold text-success text-uppercase mb-1">
-                            Produtos
-                        </div>
-                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_products }}</div>
+        <div class="card border-start-success shadow h-100 py-2">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-xs fw-bold text-success text-uppercase mb-1">
+                        Total de Produtos
                     </div>
-                    <div class="col-auto">
-                        <i class="bi bi-box fa-2x text-success"></i>
+                    <div class="h5 mb-0 fw-bold text-gray-800">
+                        {{ total_products }}
                     </div>
                 </div>
+                <i class="bi bi-box fs-2 text-success"></i>
             </div>
         </div>
     </div>
 
-    <!-- Novo Card: Total Clientes -->
+    <!-- Clientes -->
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-start-secondary border-left-4 shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs fw-bold text-secondary text-uppercase mb-1">
-                            Clientes
-                        </div>
-                        <div class="h5 mb-0 fw-bold text-gray-800">{{ total_clients }}</div>
+        <div class="card border-start-secondary shadow h-100 py-2">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-xs fw-bold text-secondary text-uppercase mb-1">
+                        Total de Clientes
                     </div>
-                    <div class="col-auto">
-                        <i class="bi bi-people fa-2x text-secondary"></i>
+                    <div class="h5 mb-0 fw-bold text-gray-800">
+                        {{ total_clients }}
                     </div>
                 </div>
+                <i class="bi bi-people fs-2 text-secondary"></i>
             </div>
         </div>
     </div>
 
-    
+    <!-- Pedidos -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start-warning shadow h-100 py-2">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-xs fw-bold text-warning text-uppercase mb-1">
+                        Meus Pedidos
+                    </div>
+                    <div class="h5 mb-0 fw-bold text-gray-800">
+                        {{ total_orders }}
+                    </div>
+                </div>
+                <i class="bi bi-cart-check fs-2 text-warning"></i>
+            </div>
+        </div>
+    </div>
+
 </div>
 
+<!-- ========================= -->
 <!-- Ações Rápidas -->
+<!-- ========================= -->
 {% if is_supervisor or is_vendedor %}
 <div class="row mb-4">
     <div class="col-12">
@@ -77,38 +95,44 @@
                 <h6 class="m-0 fw-bold text-primary">Ações Rápidas</h6>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'category_list' %}" class="btn btn-outline-primary w-100 h-100 py-3">
-                            <i class="bi bi-list-ul fs-1 mb-2 d-block"></i>
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+                        <a href="{% url 'category_list' %}" class="btn btn-outline-primary w-100 py-3">
+                            <i class="bi bi-list-ul fs-1 d-block mb-2"></i>
                             Categorias
                         </a>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'product_list' %}" class="btn btn-outline-success w-100 h-100 py-3">
-                            <i class="bi bi-box fs-1 mb-2 d-block"></i>
+
+                    <div class="col-md-3">
+                        <a href="{% url 'product_list' %}" class="btn btn-outline-success w-100 py-3">
+                            <i class="bi bi-box fs-1 d-block mb-2"></i>
                             Produtos
                         </a>
                     </div>
-                    <!-- NOVO: Botão Clientes -->
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'clientes:clients_list' %}" class="btn btn-outline-secondary w-100 h-100 py-3">
-                            <i class="bi bi-people fs-1 mb-2 d-block"></i>
+
+                    <div class="col-md-3">
+                        <a href="{% url 'clientes:clients_list' %}" class="btn btn-outline-secondary w-100 py-3">
+                            <i class="bi bi-people fs-1 d-block mb-2"></i>
                             Clientes
                         </a>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="/admin/" target="_blank" class="btn btn-outline-warning w-100 h-100 py-3">
-                            <i class="bi bi-person-gear fs-1 mb-2 d-block"></i>
+
+
+                    <div class="col-md-3">
+                        <a href="{% url 'vendas:order_list' %}" class="btn btn-outline-warning w-100 py-3">
+                            <i class="bi bi-cart-check fs-1 d-block mb-2"></i>
+                            Pedidos
+                        </a>
+                    </div>
+
+                    <div class="col-md-3">
+                        <a href="/admin/" target="_blank" class="btn btn-outline-dark w-100 py-3">
+                            <i class="bi bi-person-gear fs-1 d-block mb-2"></i>
                             Admin
                         </a>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-outline-info w-100 h-100 py-3">
-                            <i class="bi bi-graph-up fs-1 mb-2 d-block"></i>
-                            Relatórios
-                        </a>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -116,104 +140,4 @@
 </div>
 {% endif %}
 
-<!-- Modal Nova Categoria -->
-<div class="modal fade" id="createCategoryModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Nova Categoria</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="post" action="{% url 'category_create' %}">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nome*</label>
-                        <input type="text" class="form-control" name="name" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Descrição</label>
-                        <textarea class="form-control" name="description" rows="3"></textarea>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="is_active" checked>
-                        <label class="form-check-label">Ativa</label>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Novo Produto -->
-<div class="modal fade" id="createProductModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Novo Produto</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="post" action="{% url 'product_create' %}">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">SKU*</label>
-                            <input type="text" class="form-control" name="sku" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Preço (R$)*</label>
-                            <input type="number" class="form-control" name="price" step="0.01" required>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-8 mb-3">
-                            <label class="form-label">Nome*</label>
-                            <input type="text" class="form-control" name="name" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Categoria*</label>
-                            <select class="form-select" name="category" required>
-                                <option value="">Selecione...</option>
-                                {% for category in categories %}
-                                <option value="{{ category.id }}">{{ category.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Descrição</label>
-                        <textarea class="form-control" name="description" rows="3"></textarea>
-                    </div>
-
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="is_active" checked>
-                        <label class="form-check-label">Ativo</label>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Salvar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-    // Auto-uppercase para SKU
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('input[name="sku"]').forEach(input => {
-            input.addEventListener('input', function () {
-                this.value = this.value.toUpperCase();
-            });
-        });
-    });
-</script>
 {% endblock %}

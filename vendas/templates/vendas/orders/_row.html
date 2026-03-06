@@ -1,0 +1,97 @@
+{% load static humanize %}
+<tr id="order-row-{{ order.pk }}">
+
+    <!-- Número -->
+    <td class="text-center align-middle">
+        <span class="font-monospace small text-muted">{{ order.number }}</span>
+    </td>
+
+    <!-- Cliente -->
+    <td class="align-middle">
+        <div class="text-center td-truncate" title="{{ order.client.name }}">
+            {{ order.client.name }}
+        </div>
+    </td>
+
+    <!-- Criado por -->
+    <td class="text-center align-middle">
+        <span class="small">{{ order.created_by.get_full_name|default:order.created_by.username }}</span>
+    </td>
+
+    <!-- Status -->
+    <td class="text-center align-middle" id="order-status-{{ order.pk }}">
+        {% if order.status == "open" %}
+            <span class="badge bg-primary">Em aberto</span>
+        {% elif order.status == "approved" %}
+            <span class="badge bg-warning text-dark">Aprovado</span>
+        {% elif order.status == "in_production" %}
+            <span class="badge bg-success">Em Produção</span>
+        {% elif order.status == "picking" %}
+            <span class="badge bg-info text-dark">Em Separação</span>
+        {% elif order.status == "invoiced" %}
+            <span class="badge bg-secondary">Faturado</span>
+        {% elif order.status == "shipped" %}
+            <span class="badge bg-dark">Em Trânsito</span>
+        {% elif order.status == "delivered" %}
+            <span class="badge bg-success">Entregue</span>
+        {% elif order.status == "canceled" %}
+            <span class="badge bg-danger">Cancelado</span>
+        {% else %}
+            <span class="badge bg-light text-dark">{{ order.get_status_display }}</span>
+        {% endif %}
+    </td>
+
+    <!-- Total -->
+    <td class="text-center align-middle">
+<span class="fw-semibold">R$ {{ order.total_amount|default:0|intcomma }}</span>    </td>
+
+    <!-- Criado em -->
+    <td class="text-center align-middle">
+        <span class="small text-muted">{{ order.created_at|date:"d/m/Y H:i" }}</span>
+    </td>
+
+    <!-- Ações -->
+    <td class="text-center align-middle">
+        <div class="d-flex justify-content-center gap-1 flex-nowrap">
+
+            <!-- Visualizar -->
+            <button type="button"
+                    class="btn btn-sm btn-outline-info open-view-order-btn"
+                    data-id="{{ order.pk }}"
+                    title="Visualizar pedido">
+                <i class="bi bi-eye"></i>
+            </button>
+
+            <!-- Pagamentos -->
+            <button type="button"
+                    class="btn btn-sm btn-outline-success open-payments-btn"
+                    data-id="{{ order.pk }}"
+                    data-number="{{ order.number }}"
+                    title="Registrar pagamento">
+                <i class="bi bi-cash-coin"></i>
+            </button>
+
+            
+<a href="{% url 'vendas:order_pdf' order.pk %}"
+   class="btn btn-sm btn-outline-dark"
+   target="_blank">
+   <i class="bi bi-file-earmark-pdf"></i>
+</a>
+            <!-- Excluir -->
+            <button type="button"
+                    class="btn btn-sm {% if order.status == 'open' or order.status == 'canceled' %}btn-outline-danger{% else %}btn-outline-secondary{% endif %}"
+                    {% if order.status == 'open' or order.status == 'canceled' %}
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteOrderModal{{ order.pk }}"
+                    {% else %}
+                    disabled
+                    {% endif %}
+                    title="{% if order.status == 'open' or order.status == 'canceled' %}Excluir pedido{% else %}Exclusão bloqueada — pedido em {{ order.get_status_display }}{% endif %}">
+                <i class="bi bi-trash"></i>
+            </button>
+
+        </div>
+    </td>
+
+</tr>
+{% include "vendas/orders/_delete.html" %}

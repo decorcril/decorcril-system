@@ -1,0 +1,214 @@
+<!-- MODAL CRIAR PEDIDO -->
+<div class="modal fade" id="createOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <form id="orderForm" method="post" data-url="{% url 'vendas:order_create' %}">
+                {% csrf_token %}
+                <input type="hidden" name="items_json" id="items_json_field">
+                <input type="hidden" name="client" id="client_id">
+
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-primary">
+                        <i class="bi bi-cart-plus me-2"></i>Novo Pedido
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+
+                <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+
+                    <!-- ================= SEÇÃO 1: CLIENTE ================= -->
+                    <h6 class="text-muted fw-semibold text-uppercase small mb-2">
+                        <i class="bi bi-person me-1"></i> Cliente
+                    </h6>
+
+                    <div class="row g-3 mb-3">
+
+                        <!-- Busca do cliente — ocupa linha inteira -->
+                        <div class="col-12 position-relative">
+                            <label for="client_input" class="form-label fw-semibold">Cliente *</label>
+                            <div class="input-group">
+                                <input type="text" id="client_input" class="form-control" autocomplete="off"
+                                       data-url="{% url 'vendas:autocomplete_client' %}" placeholder="Pesquisar cliente...">
+                                <button type="button" id="btn_search_client" class="btn btn-outline-primary">Pesquisar</button>
+                                <button type="button" id="btn_clear_client" class="btn btn-outline-secondary">Limpar</button>
+                            </div>
+                            <div id="client_results" class="list-group d-none position-absolute w-100" style="z-index:1056;"></div>
+                        </div>
+
+                        <!-- Card com dados do cliente selecionado — ocupa linha inteira -->
+                        <div class="col-12">
+                            <div id="client_info_card" class="d-none p-3 border rounded bg-light">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="fw-semibold text-primary fs-6" id="client_info_name"></div>
+                                        <div class="text-muted small" id="client_info_document"></div>
+                                    </div>
+                                    <span class="badge bg-secondary" id="client_info_badge"></span>
+                                </div>
+                                <div class="row g-2 small">
+                                    <div class="col-md-4" id="client_info_phone_wrap">
+                                        <i class="bi bi-telephone me-1 text-muted"></i><span id="client_info_phone"></span>
+                                    </div>
+                                    <div class="col-md-4" id="client_info_email_wrap">
+                                        <i class="bi bi-envelope me-1 text-muted"></i><span id="client_info_email"></span>
+                                    </div>
+                                    <div class="col-md-4" id="client_info_address_wrap">
+                                        <i class="bi bi-geo-alt me-1 text-muted"></i><span id="client_info_address"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <hr>
+
+                    <!-- ================= SEÇÃO 2: INFORMAÇÕES COMERCIAIS ================= -->
+                    <h6 class="text-muted fw-semibold text-uppercase small mb-2">
+                        <i class="bi bi-briefcase me-1"></i> Informações Comerciais
+                    </h6>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label for="id_sale_type" class="form-label">Tipo de venda</label>
+                            {{ form.sale_type }}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="order_contact_field" class="form-label">Contato</label>
+                            <input type="text" class="form-control"
+                                   name="contact"
+                                   id="order_contact_field"
+                                   placeholder="Nome do contato">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="order_customer_order_field" class="form-label">Pedido do cliente</label>
+                            <input type="text" class="form-control"
+                                   name="customer_order"
+                                   id="order_customer_order_field"
+                                   placeholder="Número do pedido do cliente">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="order_payment_terms_field" class="form-label">Condição de pagamento</label>
+                            <input type="text" class="form-control"
+                                   name="payment_terms"
+                                   id="order_payment_terms_field"
+                                   placeholder="Ex: 30/60 dias">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="order_carrier_field" class="form-label">Transportadora</label>
+                            <select class="form-select" name="carrier" id="order_carrier_field">
+                                <option value="">Selecione...</option>
+                                <option value="Transportadora">Transportadora</option>
+                                <option value="Retirada pelo cliente">Retirada pelo cliente</option>
+                                <option value="Envio pela Decorcril">Envio pela Decorcril</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="order_freight_field" class="form-label">Frete (R$)</label>
+                            <input type="number" step="0.01" min="0"
+                                   class="form-control"
+                                   name="freight"
+                                   id="order_freight_field"
+                                   value="0">
+                        </div>
+
+                        <div class="col-md-2">
+                            <label for="order_down_payment_field" class="form-label fw-semibold">Sinal (%)</label>
+                            <input type="number" step="0.01" min="0" max="100"
+                                   class="form-control"
+                                   name="down_payment_percent"
+                                   id="order_down_payment_field"
+                                   value="0"
+                                   placeholder="0,00">
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- ================= SEÇÃO 3: PRODUTOS ================= -->
+                    <h6 class="text-muted fw-semibold text-uppercase small mb-2">
+                        <i class="bi bi-box me-1"></i> Produtos
+                    </h6>
+
+                    <div class="mb-3 position-relative">
+                        <label for="order_product_input" class="form-label">Pesquisar produto</label>
+                        <div class="input-group">
+                            <input type="text" id="order_product_input" class="form-control" autocomplete="off"
+                                   data-url="{% url 'vendas:autocomplete_product' %}" placeholder="Pesquisar produto...">
+                            <button type="button" id="btn_search_product" class="btn btn-outline-primary">Pesquisar</button>
+                            <button type="button" id="btn_add_product" class="btn btn-outline-success">
+                                <i class="bi bi-plus-lg me-1"></i>Adicionar
+                            </button>
+                        </div>
+                        <div id="order_product_results" class="list-group d-none position-absolute w-100" style="z-index:1056;"></div>
+                    </div>
+
+                    <!-- Tabela de itens -->
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Produto</th>
+                                    <th width="120">Preço base</th>
+                                    <th width="100">Qtd</th>
+                                    <th width="120">Desc (%)</th>
+                                    <th width="130">Subtotal</th>
+                                    <th width="50"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="order_items_body"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Totais -->
+                    <div class="row g-3 mt-2">
+                        <div class="col-12 text-end">
+                            <div class="d-flex flex-column align-items-end gap-1">
+                                <span class="text-muted small">
+                                    Entrada: R$ <span id="order_down_payment_value">0,00</span>
+                                </span>
+                                <h5 class="fw-bold mb-0">
+                                    Total: R$ <span id="order_total">0,00</span>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- ================= SEÇÃO 4: OBSERVAÇÕES ================= -->
+                    <h6 class="text-muted fw-semibold text-uppercase small mb-2">
+                        <i class="bi bi-chat-left-text me-1"></i> Observações
+                    </h6>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="order_notes" class="form-label">Observações</label>
+                            <textarea name="notes" id="order_notes" class="form-control" rows="3"
+                                      placeholder="Observações visíveis ao cliente..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="order_internal_notes" class="form-label">Observações internas</label>
+                            <textarea name="internal_notes" id="order_internal_notes" class="form-control" rows="3"
+                                      placeholder="Notas internas (não visíveis ao cliente)..."></textarea>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>Criar Pedido
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

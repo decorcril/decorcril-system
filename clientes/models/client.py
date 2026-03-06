@@ -8,10 +8,7 @@ class Client(models.Model):
     # Identificação interna ERP
     # =========================
     code = models.PositiveIntegerField(
-        unique=True,
-        editable=False,
-        db_index=True,
-        verbose_name="Código"
+        unique=True, editable=False, db_index=True, verbose_name="Código"
     )
 
     # =========================
@@ -23,41 +20,26 @@ class Client(models.Model):
     )
 
     person_type = models.CharField(
-        max_length=2,
-        choices=PERSON_TYPE_CHOICES,
-        verbose_name="Tipo"
+        max_length=2, choices=PERSON_TYPE_CHOICES, verbose_name="Tipo"
     )
 
     # =========================
     # Dados principais
     # =========================
-    name = models.CharField(
-        max_length=255,
-        verbose_name="Nome / Razão Social"
-    )
+    name = models.CharField(max_length=255, verbose_name="Nome / Razão Social")
 
     trade_name = models.CharField(
-        max_length=255,
-        blank=True,
-        verbose_name="Nome Fantasia"
+        max_length=255, blank=True, verbose_name="Nome Fantasia"
     )
 
-    document = models.CharField(
-        max_length=18,
-        unique=True,
-        verbose_name="CPF / CNPJ"
-    )
+    document = models.CharField(max_length=18, unique=True, verbose_name="CPF / CNPJ")
 
     state_registration = models.CharField(
-        max_length=30,
-        blank=True,
-        verbose_name="Inscrição Estadual"
+        max_length=30, blank=True, verbose_name="Inscrição Estadual"
     )
 
     municipal_registration = models.CharField(
-        max_length=30,
-        blank=True,
-        verbose_name="Inscrição Municipal"
+        max_length=30, blank=True, verbose_name="Inscrição Municipal"
     )
 
     # =========================
@@ -93,7 +75,7 @@ class Client(models.Model):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="clients_created"
+        related_name="clients_created",
     )
 
     updated_by = models.ForeignKey(
@@ -101,7 +83,7 @@ class Client(models.Model):
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        related_name="clients_updated"
+        related_name="clients_updated",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

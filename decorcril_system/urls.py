@@ -9,4 +9,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("catalogo.urls")),
     path("clientes/", include("clientes.urls")),
+     path('vendas/', include('vendas.urls')),  # orçamentos
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

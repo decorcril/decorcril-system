@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<style>
+
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size:11px;
+    color:#222;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+td, th{
+    border:1px solid #555;
+    padding:4px;
+}
+
+.no-border td{
+    border:none;
+}
+
+.header td{
+    border:none;
+}
+
+.title{
+    text-align:center;
+    font-weight:bold;
+    font-size:14px;
+    padding:6px;
+}
+
+.label{
+    background:#f2f2f2;
+    font-weight:bold;
+    width:120px;
+}
+
+.center{
+    text-align:center;
+}
+
+.right{
+    text-align:right;
+}
+
+.small{
+    font-size:10px;
+}
+
+.items th{
+    background:#f2f2f2;
+}
+
+.totals td{
+    border:1px solid #555;
+}
+
+</style>
+</head>
+
+<body>
+
+
+<!-- CABEÇALHO EMPRESA -->
+
+<table class="header">
+<tr>
+
+<td style="width:120px">
+{% if company_logo %}
+<img src="{{ company_logo }}" width="100">
+{% endif %}
+</td>
+
+<td class="right small">
+
+<b>DECORCRIL ACRÍLICOS E ARTESANATOS LTDA</b><br>
+Rua Prudente de Moraes, 1327 Galpão 2<br>
+Suzano - SP<br>
+CEP: 08610-005<br>
+CNPJ: 45.401.044/0001-61
+
+</td>
+
+</tr>
+</table>
+
+
+<!-- TITULO -->
+
+<table>
+<tr>
+<td class="title">PEDIDO DE VENDA</td>
+</tr>
+</table>
+
+
+<!-- RESUMO -->
+
+<table>
+
+<tr>
+
+<td class="label">Cliente</td>
+<td>{{ order.client.name }}</td>
+
+<td class="label">Nro.Pedido</td>
+<td>{{ order.number }}</td>
+
+<td class="label">Data</td>
+<td>{{ order.created_at|date:"d/m/Y" }}</td>
+
+<td class="label">Situação</td>
+<td>{{ order.get_status_display }}</td>
+
+<td class="label">ID Pedido</td>
+<td>{{ order.id }}</td>
+
+<td class="label">Folha</td>
+<td>1/1</td>
+
+</tr>
+
+</table>
+
+
+<!-- DADOS CLIENTE -->
+
+<table>
+
+<tr>
+<td colspan="6" class="label">Dados do Cliente</td>
+</tr>
+
+<tr>
+
+<td class="label">Nome</td>
+<td colspan="3">{{ order.client.name }}</td>
+
+<td class="label">CNPJ/CPF</td>
+<td>{{ order.client.document }}</td>
+
+</tr>
+
+<tr>
+
+<td class="label">Endereço</td>
+<td colspan="5">
+
+{{ order.client.street }},
+{{ order.client.number }}
+{{ order.client.neighborhood }}
+
+</td>
+
+</tr>
+
+<tr>
+
+<td class="label">Município</td>
+<td>{{ order.client.city }}</td>
+
+<td class="label">CEP</td>
+<td>{{ order.client.zipcode }}</td>
+
+<td class="label">Telefone</td>
+<td>{{ order.client.phone }}</td>
+
+</tr>
+
+<tr>
+
+<td class="label">Email</td>
+<td colspan="5">{{ order.client.email }}</td>
+
+</tr>
+
+</table>
+
+
+<!-- DADOS COMPLEMENTARES -->
+
+<table>
+
+<tr>
+<td colspan="6" class="label">Dados Complementares</td>
+</tr>
+
+<tr>
+
+<td class="label">Representante</td>
+<td>{{ order.created_by }}</td>
+
+<td class="label">Tipo Venda</td>
+<td>{{ order.get_sale_type_display }}</td>
+
+<td class="label">Pedido Cliente</td>
+<td>{{ order.customer_order }}</td>
+
+</tr>
+
+<tr>
+
+<td class="label">Condição Pagamento</td>
+<td>{{ order.payment_terms }}</td>
+
+<td class="label">Contato</td>
+<td>{{ order.contact }}</td>
+
+<td class="label">Orçamento</td>
+<td>-</td>
+
+</tr>
+
+<tr>
+
+<td class="label">Transportadora</td>
+<td>{{ order.carrier }}</td>
+
+<td class="label">Frete</td>
+<td>{{ order.freight }}</td>
+
+<td colspan="2"></td>
+
+</tr>
+
+</table>
+
+
+<!-- ITENS -->
+
+<table class="items">
+
+<thead>
+
+<tr>
+
+<th style="width:60px">Qtde.</th>
+<th style="width:60px">Un</th>
+<th>Descrição</th>
+<th style="width:120px">Valor Unit.</th>
+<th style="width:120px">Valor Total</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for item in order.items.all %}
+
+<tr>
+
+<td class="center">
+{{ item.quantity }}
+</td>
+
+<td class="center">
+CJ
+</td>
+
+<td>
+
+<b>{{ item.product.name }}</b>
+
+{% if item.product.thickness_mm %}
+ - {{ item.product.get_thickness_mm_display }}
+{% endif %}
+
+{% if item.product.acrylic_color %}
+ - {{ item.product.get_acrylic_color_display }}
+{% endif %}
+
+</td>
+
+<td class="right">
+{{ item.unit_price }}
+</td>
+
+<td class="right">
+{{ item.subtotal }}
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+
+<!-- OBS + TOTAIS -->
+
+<table class="no-border">
+
+<tr>
+
+<td style="width:65%; vertical-align:top">
+
+<b>Observação:</b><br>
+{{ order.notes }}
+
+</td>
+
+<td style="width:35%">
+
+<table class="totals">
+
+<tr>
+<td>Total do Produto</td>
+<td class="right">{{ order.total_amount }}</td>
+</tr>
+
+<tr>
+<td>Total do IPI</td>
+<td class="right">0,00</td>
+</tr>
+
+<tr>
+<td>Total ICMS ST</td>
+<td class="right">0,00</td>
+</tr>
+
+<tr>
+<td>Total Desconto</td>
+<td class="right">0,00</td>
+</tr>
+
+<tr>
+<td>Frete/Seg/Outras</td>
+<td class="right">{{ order.freight }}</td>
+</tr>
+
+<tr>
+<td><b>Total Geral</b></td>
+<td class="right"><b>{{ order.total_amount }}</b></td>
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</table>
+
+
+<table class="no-border small">
+
+<tr>
+
+<td>
+Desconto Praticado:
+</td>
+
+<td class="center">
+Total de Itens: {{ order.items.count }}
+</td>
+
+</tr>
+
+</table>
+
+
+</body>
+</html>

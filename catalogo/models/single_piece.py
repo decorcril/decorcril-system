@@ -73,22 +73,46 @@ class SinglePiece(models.Model):
     )
 
     height_cm = models.DecimalField(
-        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Altura (cm)"
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Altura (cm)",
     )
     width_cm = models.DecimalField(
-        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Largura (cm)"
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Largura (cm)",
     )
     length_cm = models.DecimalField(
-        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Comprimento (cm)"
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Comprimento (cm)",
     )
     diameter_cm = models.DecimalField(
-        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Diâmetro (cm)"
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Diâmetro (cm)",
     )
     depth_cm = models.DecimalField(
-        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Profundidade (cm)"
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Profundidade (cm)",
     )
     curvature_cm = models.DecimalField(
-        max_digits=6, decimal_places=2, null=True, blank=True, verbose_name="Curvatura (cm)"
+        max_digits=6,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Curvatura (cm)",
     )
 
     # =========================
@@ -132,6 +156,7 @@ class SinglePiece(models.Model):
     VOLTAGE_CHOICES = [
         ("", "Selecione..."),
         ("127", "127V"),
+        ("220", "220V"),
         ("BIVOLT", "Bivolt"),
     ]
 
@@ -150,13 +175,19 @@ class SinglePiece(models.Model):
         ("FRIO", "Frio"),
     ]
 
-    led_type = models.CharField(max_length=10, choices=LED_TYPE_CHOICES, blank=True, verbose_name="Tipo de LED")
+    led_type = models.CharField(
+        max_length=10, choices=LED_TYPE_CHOICES, blank=True, verbose_name="Tipo de LED"
+    )
 
     # =========================
     # Controle
     # =========================
     is_active = models.BooleanField(default=True, verbose_name="Ativo")
-    is_kit = models.BooleanField(default=False, verbose_name="É kit?", help_text="Identifica se este produto é um kit")
+    is_kit = models.BooleanField(
+        default=False,
+        verbose_name="É kit?",
+        help_text="Identifica se este produto é um kit",
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

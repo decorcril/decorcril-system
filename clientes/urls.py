@@ -2,7 +2,7 @@ from django.urls import path
 from .views.client_views import (
     clients_list_view,
     client_update_view,
-    check_document_view
+    check_document_view,
 )
 
 app_name = "clientes"

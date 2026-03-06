@@ -62,7 +62,7 @@ def kit_create(request):
 
             try:
                 with transaction.atomic():
-                                    # Salva o kit
+                    # Salva o kit
                     kit = form.save(commit=False)
                     kit.is_sellable = True
                     kit.is_kit = True

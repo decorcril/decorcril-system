@@ -21,12 +21,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # Third party apps - ADICIONE ESTA LINHA
-    # My apps
-    "django.contrib.humanize",  # <-- Adicione esta 
+    "django.contrib.humanize",  # <-- biblioteca para visualiazação
     "core",
     "catalogo",
-    "clientes"
+    "clientes",
+    "vendas",
 ]
 
 MIDDLEWARE = [
