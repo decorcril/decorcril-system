@@ -6,6 +6,9 @@ from clientes.models import Client
 
 TWO = Decimal("0.01")
 
+# Tipos de venda que não exigem pagamento para entrar em produção
+FREE_SALE_TYPES = {"exchange", "maintenance", "advertising"}
+
 
 class Order(models.Model):
     """
@@ -13,7 +16,7 @@ class Order(models.Model):
     """
 
     class Status(models.TextChoices):
-        OPEN          = "open",          "Em aberto / Novo"
+        OPEN          = "open",          "Em aberto"
         IN_PRODUCTION = "in_production", "Em Produção"
         PICKING       = "picking",       "Em Separação / Faturando"
         INVOICED      = "invoiced",      "Faturado / NF emitida"
@@ -63,12 +66,12 @@ class Order(models.Model):
     internal_notes = models.TextField("Observações internas", blank=True)
 
     # TOTAIS (cache)
-    total_products = models.DecimalField("Total produtos", max_digits=12, decimal_places=2, default=0)
-    total_discount = models.DecimalField("Total desconto", max_digits=12, decimal_places=2, default=0)
+    total_products = models.DecimalField("Total produtos",              max_digits=12, decimal_places=2, default=0)
+    total_discount = models.DecimalField("Total desconto",              max_digits=12, decimal_places=2, default=0)
     total_taxes    = models.DecimalField("Total impostos (IPI + ICMS)", max_digits=12, decimal_places=2, default=0)
-    total_amount   = models.DecimalField("Total geral", max_digits=12, decimal_places=2, default=0)
+    total_amount   = models.DecimalField("Total geral",                 max_digits=12, decimal_places=2, default=0)
 
-    # SAVE
+    # ── SAVE ─────────────────────────────────────────────────
     def save(self, *args, **kwargs):
         if not self.pk and not self.number:
             self.number = Sequence.next_formatted("order")
@@ -76,7 +79,12 @@ class Order(models.Model):
             self.assigned_to = self.created_by
         super().save(*args, **kwargs)
 
-    # HELPERS
+    # ── PROPERTIES ───────────────────────────────────────────
+    @property
+    def is_free_sale(self) -> bool:
+        """Venda sem cobrança (troca, manutenção, publicidade)."""
+        return self.sale_type in FREE_SALE_TYPES
+
     @property
     def total_paid(self) -> Decimal:
         result = self.payments.aggregate(total=models.Sum("amount"))["total"]
@@ -90,14 +98,23 @@ class Order(models.Model):
     def down_payment_value(self) -> Decimal:
         return (self.total_amount * self.down_payment_percent / 100).quantize(TWO)
 
+    @property
+    def total_amount_display(self) -> str:
+        return f"{self.total_amount:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+    # ── STATUS ───────────────────────────────────────────────
     def sync_payment_status(self):
         """
-        Regra de negócio do vendedor:
+        Regras de transição automática de status:
 
-        Qualquer pagamento registrado → Em Produção
-        Sem nenhum pagamento          → Em aberto
+        - Troca / Manutenção / Publicidade → vai direto para Em Produção
+          (não exige pagamento)
+        - Venda direta → Em Produção só após registrar pagamento;
+          sem pagamento volta para Em aberto
 
-        Status acima de IN_PRODUCTION são gerenciados pela cobrança/logística.
+        Status acima de IN_PRODUCTION (picking, invoiced, shipped,
+        delivered, canceled) são gerenciados pela cobrança/logística
+        e nunca são alterados aqui.
         """
         protected_statuses = {
             self.Status.PICKING,
@@ -109,25 +126,26 @@ class Order(models.Model):
         if self.status in protected_statuses:
             return
 
-        has_payment = self.payments.exists()
-        new_status  = self.Status.IN_PRODUCTION if has_payment else self.Status.OPEN
+        if self.is_free_sale:
+            # Vendas sem cobrança entram direto em produção
+            new_status = self.Status.IN_PRODUCTION
+        else:
+            # Venda direta: exige ao menos um pagamento
+            new_status = self.Status.IN_PRODUCTION if self.payments.exists() else self.Status.OPEN
 
         if self.status != new_status:
             self.status = new_status
             self.save(update_fields=["status", "updated_at"])
 
+    # ── META ─────────────────────────────────────────────────
     def __str__(self):
         return f"Pedido {self.number} - {self.client.name}"
 
     class Meta:
-        verbose_name = "Pedido"
+        verbose_name        = "Pedido"
         verbose_name_plural = "Pedidos"
-        ordering = ["-created_at"]
+        ordering            = ["-created_at"]
         indexes = [
             models.Index(fields=["number"]),
             models.Index(fields=["status"]),
         ]
-
-    @property
-    def total_amount_display(self):
-        return f"{self.total_amount:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")

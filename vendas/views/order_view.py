@@ -32,13 +32,9 @@ class OrderListView(LoginRequiredMixin, ListView):
 
         q = self.request.GET.get("q", "").strip()
         if q:
-            # Mapeia label de status para valor interno (ex: "Em Produção" → "in_production")
             status_map = {label.lower(): value for value, label in Order.Status.choices}
-            matched_status = next(
-                (v for k, v in status_map.items() if q.lower() in k), None
-            )
+            matched_status = next((v for k, v in status_map.items() if q.lower() in k), None)
             status_filter = Q(status=matched_status) if matched_status else Q()
-
             qs = qs.filter(
                 Q(client__name__icontains=q) |
                 Q(number__icontains=q)        |
@@ -53,21 +49,23 @@ class OrderListView(LoginRequiredMixin, ListView):
         qs = Order.objects
         if not (user.is_superuser or user.groups.filter(name="Supervisor").exists()):
             qs = qs.filter(created_by=user)
+
         counts = qs.values("status").annotate(total=Count("id"))
         status_counts = {item["status"]: item["total"] for item in counts}
-        ctx["count_total"]         = sum(status_counts.values())
-        ctx["count_open"]          = status_counts.get("open", 0)
-        ctx["count_in_production"] = status_counts.get("in_production", 0)
-        ctx["count_picking"]       = status_counts.get("picking", 0)
-        ctx["count_invoiced"]      = status_counts.get("invoiced", 0)
-        ctx["count_shipped"]       = status_counts.get("shipped", 0)
-        ctx["count_delivered"]     = status_counts.get("delivered", 0)
-        ctx["count_canceled"]      = status_counts.get("canceled", 0)
-        # Form para o modal de criação (necessário para {{ form.sale_type }})
-        ctx["form"] = OrderForm()
-        # Contexto de permissões
-        ctx["is_supervisor"] = user.is_superuser or user.groups.filter(name="Supervisor").exists()
-        ctx["is_vendedor"]   = user.groups.filter(name="Vendedor").exists()
+
+        ctx.update({
+            "count_total":         sum(status_counts.values()),
+            "count_open":          status_counts.get("open", 0),
+            "count_in_production": status_counts.get("in_production", 0),
+            "count_picking":       status_counts.get("picking", 0),
+            "count_invoiced":      status_counts.get("invoiced", 0),
+            "count_shipped":       status_counts.get("shipped", 0),
+            "count_delivered":     status_counts.get("delivered", 0),
+            "count_canceled":      status_counts.get("canceled", 0),
+            "form":                OrderForm(),
+            "is_supervisor":       user.is_superuser or user.groups.filter(name="Supervisor").exists(),
+            "is_vendedor":         user.groups.filter(name="Vendedor").exists(),
+        })
         return ctx
 
 
@@ -79,7 +77,6 @@ class OrderCreateView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         form = OrderForm(request.POST)
         if not form.is_valid():
-            print("ERROS DO FORM:", form.errors)
             return self._json_error(form.errors)
 
         try:
@@ -103,7 +100,10 @@ class OrderCreateView(LoginRequiredMixin, View):
 
     @staticmethod
     def _json_error(errors, status=400):
-        formatted = {k: [str(e) for e in v] for k, v in errors.items()} if isinstance(errors, dict) else {"__all__": [str(errors)]}
+        if isinstance(errors, dict):
+            formatted = {k: [str(e) for e in v] for k, v in errors.items()}
+        else:
+            formatted = {"__all__": [str(errors)]}
         return JsonResponse({"success": False, "errors": formatted}, status=status)
 
 
@@ -115,7 +115,7 @@ class OrderConfirmView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
         order = get_object_or_404(Order, pk=pk)
-        user = request.user
+        user  = request.user
 
         if not (user.is_superuser or order.created_by_id == user.pk):
             return JsonResponse({"success": False, "error": "Sem permissão para confirmar."}, status=403)
@@ -132,24 +132,40 @@ class OrderConfirmView(LoginRequiredMixin, View):
 
 
 # ==============================
-# GERENCIAMENTO DE ITENS DE PEDIDO
+# GERENCIAMENTO DE ITENS
 # ==============================
 class OrderItemManager:
-    """Helper para criar ou atualizar itens de pedido"""
+    """Gerencia criação e atualização de itens de pedido."""
 
     @staticmethod
-    def parse_decimal(value, default=Decimal("0.00")):
+    def parse_decimal(value, default=Decimal("0.00")) -> Decimal:
+        if value is None:
+            return default
         try:
-            return Decimal(str(value))
-        except (InvalidOperation, TypeError, ValueError):
+            return Decimal(str(value).replace("%", "").replace(",", ".").strip())
+        except (InvalidOperation, ValueError, TypeError):
             return default
 
     @classmethod
-    def create_or_update(cls, order, data, item_id=None):
-        unit_price = cls.parse_decimal(data.get("unit_price"))
-        quantity = int(data.get("quantity", 1))
-        discount_percent = cls.parse_decimal(data.get("discount", "0"))
-        discount = (unit_price * discount_percent / 100).quantize(Decimal("0.01")) if unit_price else Decimal("0.00")
+    def calculate_discount(cls, unit_price: Decimal, percent: Decimal) -> Decimal:
+        """Percentual → valor monetário do desconto (salvo no banco)."""
+        if not unit_price or not percent:
+            return Decimal("0.00")
+        return (unit_price * percent / Decimal("100")).quantize(Decimal("0.01"))
+
+    @classmethod
+    def discount_to_percent(cls, unit_price: Decimal, discount_value: Decimal) -> Decimal:
+        """Valor monetário do desconto → percentual (para exibição)."""
+        if not unit_price or not discount_value:
+            return Decimal("0.00")
+        return (discount_value / unit_price * Decimal("100")).quantize(Decimal("0.01"))
+
+    @classmethod
+    def create_or_update(cls, order, data, item_id=None) -> OrderItem:
+        unit_price       = cls.parse_decimal(data.get("unit_price"))
+        quantity         = int(data.get("quantity") or 1)
+        discount_percent = cls.parse_decimal(data.get("discount"))
+        discount_value   = cls.calculate_discount(unit_price, discount_percent)
 
         if item_id:
             item = get_object_or_404(OrderItem, pk=item_id)
@@ -157,15 +173,16 @@ class OrderItemManager:
             item = OrderItem(order=order, product_id=int(data["product_id"]))
 
         item.unit_price = unit_price
-        item.quantity = quantity
-        item.discount = discount
+        item.quantity   = quantity
+        item.discount   = discount_value  # salvo em reais no banco
+
         item.full_clean()
         item.save()
         return item
 
 
 # ==============================
-# ITENS DE PEDIDO
+# ITENS DE PEDIDO (CRUD)
 # ==============================
 class OrderItemListView(LoginRequiredMixin, View):
     def get(self, request, order_id):
@@ -211,22 +228,19 @@ class OrderItemDeleteView(LoginRequiredMixin, View):
 class OrderDeleteView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
+        from django.contrib import messages
         order = get_object_or_404(Order, pk=pk)
-        user = request.user
+        user  = request.user
 
         if not (user.is_superuser or order.created_by_id == user.pk):
-            from django.contrib import messages
             messages.error(request, "Sem permissão para excluir este pedido.")
             return redirect("vendas:order_list")
 
         if order.status not in (Order.Status.OPEN,):
-            from django.contrib import messages
             messages.error(request, f"Pedido {order.number} não pode ser excluído no status {order.get_status_display()}.")
             return redirect("vendas:order_list")
 
         order.delete()
-
-        from django.contrib import messages
         messages.success(request, f"Pedido {order.number} excluído com sucesso.")
         return redirect("vendas:order_list")
 
@@ -237,78 +251,32 @@ class OrderDeleteView(LoginRequiredMixin, View):
 class OrderDetailView(LoginRequiredMixin, View):
     """Retorna todos os dados de um pedido em JSON para o modal de visualização."""
 
+    STATUS_COLORS = {
+        "open":          "bg-primary",
+        "in_production": "bg-success",
+        "picking":       "bg-info text-dark",
+        "invoiced":      "bg-secondary",
+        "shipped":       "bg-dark",
+        "delivered":     "bg-success",
+        "canceled":      "bg-danger",
+    }
+
     def get(self, request, pk):
-        order = get_object_or_404(
-            Order.objects.select_related("client", "created_by"),
-            pk=pk
-        )
-
-        # Itens
-        items = []
-        for item in order.items.select_related("product"):
-            subtotal = item.unit_price * (1 - item.discount / 100) * item.quantity if item.unit_price else 0
-            p = item.product
-
-            dims = []
-            if getattr(p, "height_cm",    None): dims.append(f"Alt: {p.height_cm} cm")
-            if getattr(p, "width_cm",     None): dims.append(f"Larg: {p.width_cm} cm")
-            if getattr(p, "length_cm",    None): dims.append(f"Comp: {p.length_cm} cm")
-            if getattr(p, "diameter_cm",  None): dims.append(f"Diâm: {p.diameter_cm} cm")
-            if getattr(p, "depth_cm",     None): dims.append(f"Prof: {p.depth_cm} cm")
-            if getattr(p, "curvature_cm", None): dims.append(f"Curv: {p.curvature_cm} cm")
-
-            items.append({
-                "name":       p.name,
-                "sku":        p.sku or "",
-                "quantity":   item.quantity,
-                "unit_price": str(item.unit_price),
-                "discount":   str(item.discount),
-                "subtotal":   f"{subtotal:.2f}",
-                "thickness":  p.get_thickness_mm_display() if getattr(p, "thickness_mm", None) else "",
-                "color":      p.get_acrylic_color_display() if getattr(p, "acrylic_color", None) else "",
-                "color_obs":  getattr(p, "color_observation", "") or "",
-                "dimensions": " · ".join(dims),
-                "voltage":    p.get_voltage_display() if getattr(p, "voltage", None) else "",
-                "led":        p.get_led_type_display() if getattr(p, "has_led", None) and p.has_led else "",
-            })
-
-        # Pagamentos
         from vendas.models.payment import Payment
-        payments = []
-        for p in order.payments.select_related("created_by"):
-            payments.append({
-                "method_label": dict(Payment.Method.choices).get(p.method, p.method),
-                "amount":       str(p.amount),
-                "transaction":  p.transaction or "",
-                "paid_at":      tz.localtime(p.paid_at).strftime("%d/%m/%Y %H:%M"),
-                "created_by":   p.created_by.get_full_name() or p.created_by.username,
-            })
 
-        # Cliente
-        c = order.client
-        address = ", ".join(filter(None, [
-            getattr(c, "street", ""), getattr(c, "number", ""),
-            getattr(c, "neighborhood", ""), getattr(c, "city", ""), getattr(c, "state", "")
-        ]))
-
-        status_colors = {
-            "open":          "bg-primary",
-            "in_production": "bg-success",
-            "picking":       "bg-info text-dark",
-            "invoiced":      "bg-secondary",
-            "shipped":       "bg-dark",
-            "delivered":     "bg-success",
-            "canceled":      "bg-danger",
-        }
+        order = get_object_or_404(
+            Order.objects.select_related("client", "created_by"), pk=pk
+        )
 
         return JsonResponse({
             "number":               order.number,
             "status":               order.status,
             "status_label":         order.get_status_display(),
-            "status_color":         status_colors.get(order.status, "bg-light text-dark"),
+            "status_color":         self.STATUS_COLORS.get(order.status, "bg-light text-dark"),
             "created_at":           tz.localtime(order.created_at).strftime("%d/%m/%Y %H:%M"),
             "created_by":           order.created_by.get_full_name() or order.created_by.username,
             "sale_type":            order.get_sale_type_display() if order.sale_type else "—",
+            "sale_type_raw":        order.sale_type or "",
             "contact":              order.contact or "—",
             "customer_order":       order.customer_order or "—",
             "payment_terms":        order.payment_terms or "—",
@@ -321,15 +289,78 @@ class OrderDetailView(LoginRequiredMixin, View):
             "total_amount":         str(order.total_amount),
             "total_paid":           str(order.total_paid),
             "remaining":            str(order.remaining),
-            "client": {
-                "name":     c.name,
-                "document": getattr(c, "document", "") or "—",
-                "type":     c.get_person_type_display() if hasattr(c, "get_person_type_display") else "—",
-                "phone":    getattr(c, "phone", "") or "—",
-                "email":    getattr(c, "email", "") or "—",
-                "address":  address or "—",
-            },
-            "items":    items,
-            "payments": payments,
+            "client":               self._serialize_client(order.client),
+            "items":                self._serialize_items(order),
+            "payments":             self._serialize_payments(order, Payment),
         })
 
+    # ── helpers privados ──────────────────────────────────────
+
+    @staticmethod
+    def _serialize_client(c) -> dict:
+        address = ", ".join(filter(None, [
+            getattr(c, "street", ""),
+            getattr(c, "number", ""),
+            getattr(c, "neighborhood", ""),
+            getattr(c, "city", ""),
+            getattr(c, "state", ""),
+        ]))
+        return {
+            "name":     c.name,
+            "document": getattr(c, "document", "") or "—",
+            "type":     c.get_person_type_display() if hasattr(c, "get_person_type_display") else "—",
+            "phone":    getattr(c, "phone", "") or "—",
+            "email":    getattr(c, "email", "") or "—",
+            "address":  address or "—",
+        }
+
+    @staticmethod
+    def _serialize_items(order) -> list:
+        items = []
+        for item in order.items.select_related("product"):
+            p            = item.product
+            subtotal     = (item.unit_price - item.discount) * item.quantity if item.unit_price else Decimal("0.00")
+            discount_pct = OrderItemManager.discount_to_percent(item.unit_price, item.discount)
+
+            dims = []
+            for attr, label in [
+                ("height_cm",    "Alt"),
+                ("width_cm",     "Larg"),
+                ("length_cm",    "Comp"),
+                ("diameter_cm",  "Diâm"),
+                ("depth_cm",     "Prof"),
+                ("curvature_cm", "Curv"),
+            ]:
+                val = getattr(p, attr, None)
+                if val:
+                    dims.append(f"{label}: {val} cm")
+
+            items.append({
+                "name":       p.name,
+                "sku":        p.sku or "",
+                "quantity":   item.quantity,
+                "unit_price": str(item.unit_price),
+                "discount":   str(discount_pct),  # exibido como %
+                "subtotal":   f"{subtotal:.2f}",
+                "thickness":  p.get_thickness_mm_display() if getattr(p, "thickness_mm", None) else "",
+                "color":      p.get_acrylic_color_display() if getattr(p, "acrylic_color", None) else "",
+                "color_obs":  getattr(p, "color_observation", "") or "",
+                "dimensions": " · ".join(dims),
+                "voltage":    p.get_voltage_display() if getattr(p, "voltage", None) else "",
+                "led":        p.get_led_type_display() if getattr(p, "has_led", None) and p.has_led else "",
+            })
+        return items
+
+    @staticmethod
+    def _serialize_payments(order, Payment) -> list:
+        method_map = dict(Payment.Method.choices)
+        return [
+            {
+                "method_label": method_map.get(p.method, p.method),
+                "amount":       str(p.amount),
+                "transaction":  p.transaction or "",
+                "paid_at":      tz.localtime(p.paid_at).strftime("%d/%m/%Y %H:%M"),
+                "created_by":   p.created_by.get_full_name() or p.created_by.username,
+            }
+            for p in order.payments.select_related("created_by")
+        ]
