@@ -1,17 +1,20 @@
 {# ============================================= #}
 {# MODAL: EDITAR PRODUTO                          #}
+{# Usado em: products/ e composite_products/      #}
+{# Requer: catalogo/js/edit_product_modal.js      #}
 {# ============================================= #}
 
 <div class="modal fade"
      id="editProductModal{{ product.pk }}"
      tabindex="-1"
-     data-base-price="{{ product.base_price|default:'' }}"
-     data-height-cm="{{ product.height_cm|default:'' }}"
-     data-width-cm="{{ product.width_cm|default:'' }}"
-     data-length-cm="{{ product.length_cm|default:'' }}"
-     data-diameter-cm="{{ product.diameter_cm|default:'' }}"
-     data-depth-cm="{{ product.depth_cm|default:'' }}"
-     data-curvature-cm="{{ product.curvature_cm|default:'' }}">
+     data-product-id="{{ product.pk }}"
+     data-base-price="{{ product.numeric_fields.base_price }}"
+     data-height-cm="{{ product.numeric_fields.height_cm }}"
+     data-width-cm="{{ product.numeric_fields.width_cm }}"
+     data-length-cm="{{ product.numeric_fields.length_cm }}"
+     data-diameter-cm="{{ product.numeric_fields.diameter_cm }}"
+     data-depth-cm="{{ product.numeric_fields.depth_cm }}"
+     data-curvature-cm="{{ product.numeric_fields.curvature_cm }}">
 
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
@@ -31,7 +34,6 @@
 
                 <div class="modal-body">
 
-                    <!-- Abas -->
                     <ul class="nav nav-tabs mb-4" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" type="button" data-bs-toggle="tab"
@@ -67,20 +69,17 @@
                             <div class="row mb-4">
                                 <div class="col-md-4 text-center">
                                     <label class="form-label fw-bold">Foto do Produto</label>
-
                                     {% if product.photo %}
                                     <div class="mb-2">
                                         <img src="{{ product.photo.url }}" class="img-thumbnail"
                                              style="max-height:150px;" alt="{{ product.name }}">
                                     </div>
                                     {% endif %}
-
                                     <input type="file" class="form-control mt-2" name="photo" accept="image/*"
                                            onchange="previewEditImage(event, '{{ product.pk }}')">
                                     <small class="text-muted">
                                         {% if product.photo %}Alterar foto{% else %}Adicionar foto{% endif %}
                                     </small>
-
                                     <div id="imagePreviewEdit{{ product.pk }}" class="mt-3" style="display:none;">
                                         <img id="previewImageEdit{{ product.pk }}" class="img-thumbnail" style="max-height:150px;">
                                     </div>
@@ -101,7 +100,6 @@
                                                    value="{{ product.name }}" required>
                                         </div>
                                     </div>
-
                                     <div class="row">
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label fw-bold">Categoria*</label>
@@ -115,7 +113,6 @@
                                                 {% endfor %}
                                             </select>
                                         </div>
-
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label fw-bold">Espessura*</label>
                                             <select class="form-select" name="thickness_mm" required>
@@ -150,7 +147,6 @@
                                         </label>
                                     </div>
                                 </div>
-
                                 <div class="col-md-6 mb-3" id="priceFieldEdit{{ product.pk }}"
                                      {% if not product.is_sellable %}style="display:none;"{% endif %}>
                                     <label class="form-label fw-bold">Preço Base (R$)*</label>
@@ -179,50 +175,42 @@
                                 <i class="bi bi-info-circle me-2"></i>
                                 Preencha apenas as medidas aplicáveis ao produto.
                             </div>
-
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Altura (cm)</label>
-                                    <input type="text" class="form-control"
-                                           id="height_cm_display_edit_{{ product.pk }}"
+                                    <input type="text" class="form-control" id="height_cm_display_edit_{{ product.pk }}"
                                            placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="height_cm" id="height_cm_value_edit_{{ product.pk }}">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Largura (cm)</label>
-                                    <input type="text" class="form-control"
-                                           id="width_cm_display_edit_{{ product.pk }}"
+                                    <input type="text" class="form-control" id="width_cm_display_edit_{{ product.pk }}"
                                            placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="width_cm" id="width_cm_value_edit_{{ product.pk }}">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Comprimento (cm)</label>
-                                    <input type="text" class="form-control"
-                                           id="length_cm_display_edit_{{ product.pk }}"
+                                    <input type="text" class="form-control" id="length_cm_display_edit_{{ product.pk }}"
                                            placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="length_cm" id="length_cm_value_edit_{{ product.pk }}">
                                 </div>
                             </div>
-
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Diâmetro (cm)</label>
-                                    <input type="text" class="form-control"
-                                           id="diameter_cm_display_edit_{{ product.pk }}"
+                                    <input type="text" class="form-control" id="diameter_cm_display_edit_{{ product.pk }}"
                                            placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="diameter_cm" id="diameter_cm_value_edit_{{ product.pk }}">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Profundidade (cm)</label>
-                                    <input type="text" class="form-control"
-                                           id="depth_cm_display_edit_{{ product.pk }}"
+                                    <input type="text" class="form-control" id="depth_cm_display_edit_{{ product.pk }}"
                                            placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="depth_cm" id="depth_cm_value_edit_{{ product.pk }}">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label fw-bold">Curvatura (cm)</label>
-                                    <input type="text" class="form-control"
-                                           id="curvature_cm_display_edit_{{ product.pk }}"
+                                    <input type="text" class="form-control" id="curvature_cm_display_edit_{{ product.pk }}"
                                            placeholder="0,00" inputmode="decimal" autocomplete="off">
                                     <input type="hidden" name="curvature_cm" id="curvature_cm_value_edit_{{ product.pk }}">
                                 </div>
@@ -247,7 +235,6 @@
                                     <option value="COLORIDO"               {% if product.acrylic_color == "COLORIDO"               %}selected{% endif %}>Colorido</option>
                                 </select>
                             </div>
-
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Observação de Cor</label>
                                 <input type="text" class="form-control" name="color_observation"
@@ -258,7 +245,6 @@
 
                         <!-- ABA: ELÉTRICA -->
                         <div class="tab-pane fade" id="electrical-edit-{{ product.pk }}" role="tabpanel">
-
                             <div class="form-check form-switch mb-3">
                                 <input class="form-check-input" type="checkbox" name="has_electrical_component"
                                        id="has_electrical_edit_{{ product.pk }}"
@@ -268,7 +254,6 @@
                                     Possui Componente Elétrico?
                                 </label>
                             </div>
-
                             <div id="electricalFieldsEdit{{ product.pk }}"
                                  {% if not product.has_electrical_component %}style="display:none;"{% endif %}>
                                 <div class="mb-3">
@@ -280,7 +265,6 @@
                                         <option value="BIVOLT" {% if product.voltage == "BIVOLT" %}selected{% endif %}>Bivolt</option>
                                     </select>
                                 </div>
-
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" name="has_led"
                                            id="has_led_edit_{{ product.pk }}"
@@ -290,7 +274,6 @@
                                         Possui LED?
                                     </label>
                                 </div>
-
                                 <div id="ledFieldsEdit{{ product.pk }}"
                                      {% if not product.has_led %}style="display:none;"{% endif %}>
                                     <label class="form-label fw-bold">Tipo de LED</label>
@@ -303,8 +286,8 @@
                             </div>
                         </div>
 
-                    </div>
-                </div>
+                    </div>{# /tab-content #}
+                </div>{# /modal-body #}
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -318,148 +301,3 @@
         </div>
     </div>
 </div>
-
-<script>
-// Registra apenas uma vez (evita duplicar listeners no loop)
-(function () {
-    const modalId = 'editProductModal{{ product.pk }}';
-    if (window['_editInit_' + modalId]) return;
-    window['_editInit_' + modalId] = true;
-
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
-
-    const productId = '{{ product.pk }}';
-
-    // ── Formatadores ──────────────────────────────────────────
-    function formatBR(value) {
-        if (!value) return '';
-        let num = value.replace(/\D/g, '');
-        if (!num) return '';
-        num = (parseInt(num) / 100).toFixed(2);
-        return num.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    }
-
-    function parseBR(value) {
-        if (!value) return '';
-        return value.replace(/\./g, '').replace(',', '.');
-    }
-
-    // Converte "123.45" do backend para "123,45" para exibição
-    function fromBackend(value) {
-        if (!value || isNaN(parseFloat(value))) return '';
-        const num = parseFloat(value);
-        if (num === 0) return '';
-        return num.toFixed(2).replace('.', ',');
-    }
-
-    function applyMask(displayEl, hiddenEl) {
-        if (!displayEl || !hiddenEl) return;
-        displayEl.addEventListener('input', function (e) {
-            const formatted = formatBR(e.target.value);
-            e.target.value = formatted;
-            hiddenEl.value = parseBR(formatted);
-        });
-        displayEl.addEventListener('blur', function (e) {
-            if (e.target.value === '') hiddenEl.value = '';
-        });
-    }
-
-    // ── Ao abrir o modal ──────────────────────────────────────
-    modal.addEventListener('show.bs.modal', function () {
-        const d = modal.dataset;
-
-        // Preço
-        const priceDisplay = document.getElementById('base_price_display_edit_' + productId);
-        const priceHidden  = document.getElementById('base_price_value_edit_'   + productId);
-        if (priceDisplay && priceHidden) {
-            const fmt = fromBackend(d.basePrice);
-            priceDisplay.value = fmt;
-            priceHidden.value  = fmt ? parseBR(fmt) : '';
-            applyMask(priceDisplay, priceHidden);
-        }
-
-        // Medidas — data-height-cm → dataset.heightCm
-        [
-            ['height_cm',   'heightCm'],
-            ['width_cm',    'widthCm'],
-            ['length_cm',   'lengthCm'],
-            ['diameter_cm', 'diameterCm'],
-            ['depth_cm',    'depthCm'],
-            ['curvature_cm','curvatureCm'],
-        ].forEach(function ([field, key]) {
-            const display = document.getElementById(field + '_display_edit_' + productId);
-            const hidden  = document.getElementById(field + '_value_edit_'   + productId);
-            if (!display || !hidden) return;
-            const fmt = fromBackend(d[key]);
-            display.value = fmt;
-            hidden.value  = fmt ? parseBR(fmt) : '';
-            applyMask(display, hidden);
-        });
-    });
-
-    // ── Ao fechar o modal ─────────────────────────────────────
-    modal.addEventListener('hidden.bs.modal', function () {
-        ['base_price'].concat([
-            'height_cm','width_cm','length_cm','diameter_cm','depth_cm','curvature_cm'
-        ]).forEach(function (field) {
-            const d = document.getElementById(field + '_display_edit_' + productId);
-            const h = document.getElementById(field + '_value_edit_'   + productId);
-            if (d) d.value = '';
-            if (h) h.value = '';
-        });
-        const preview = document.getElementById('imagePreviewEdit' + productId);
-        if (preview) preview.style.display = 'none';
-    });
-})();
-
-// ── Helpers globais (declarados só uma vez) ───────────────────
-if (!window._editHelpersRegistered) {
-    window._editHelpersRegistered = true;
-
-    window.previewEditImage = function (event, productId) {
-        const reader = new FileReader();
-        reader.onload = function () {
-            const img = document.getElementById('previewImageEdit' + productId);
-            const box = document.getElementById('imagePreviewEdit' + productId);
-            if (img && box) { img.src = reader.result; box.style.display = 'block'; }
-        };
-        if (event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
-    };
-
-    window.togglePriceFieldEdit = function (productId, isChecked) {
-        const field   = document.getElementById('priceFieldEdit' + productId);
-        const hidden  = document.getElementById('base_price_value_edit_' + productId);
-        const display = document.getElementById('base_price_display_edit_' + productId);
-        if (!field) return;
-        field.style.display = isChecked ? 'block' : 'none';
-        if (hidden)  hidden.required  = isChecked;
-        if (!isChecked) {
-            if (display) display.value = '';
-            if (hidden)  hidden.value  = '';
-        }
-    };
-
-    window.toggleElectricalFieldsEdit = function (productId, isChecked) {
-        const fields = document.getElementById('electricalFieldsEdit' + productId);
-        if (!fields) return;
-        fields.style.display = isChecked ? 'block' : 'none';
-        if (!isChecked) {
-            const voltage = fields.querySelector('select[name="voltage"]');
-            const led     = document.getElementById('has_led_edit_' + productId);
-            if (voltage) voltage.value = '';
-            if (led) { led.checked = false; window.toggleLEDFieldEdit(productId, false); }
-        }
-    };
-
-    window.toggleLEDFieldEdit = function (productId, isChecked) {
-        const fields = document.getElementById('ledFieldsEdit' + productId);
-        if (!fields) return;
-        fields.style.display = isChecked ? 'block' : 'none';
-        if (!isChecked) {
-            const ledType = fields.querySelector('select[name="led_type"]');
-            if (ledType) ledType.value = '';
-        }
-    };
-}
-</script>

@@ -1,0 +1,147 @@
+<!-- MODAL EDITAR PEDIDO -->
+<div class="modal fade" id="editOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-pencil-square me-2"></i>
+                    Editar Pedido <span id="edit-order-number"></span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+
+                <!-- Alerta pedido bloqueado -->
+                <div id="edit-locked-alert" class="alert alert-danger d-flex align-items-center gap-2 py-2 d-none">
+                    <i class="bi bi-lock-fill fs-5"></i>
+                    <div class="small">Este pedido está em um status que não permite edição.</div>
+                </div>
+
+                <div id="edit-form-body">
+
+                    <!-- ===== INFORMAÇÕES COMERCIAIS ===== -->
+                    <h6 class="text-muted fw-semibold text-uppercase small mb-2">
+                        <i class="bi bi-briefcase me-1"></i> Informações Comerciais
+                    </h6>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Tipo de venda</label>
+                            <select class="form-select" id="edit-sale-type" name="sale_type">
+                                <option value="">—</option>
+                                <option value="direct">Venda direta</option>
+                                <option value="exchange">Troca</option>
+                                <option value="maintenance">Manutenção</option>
+                                <option value="advertising">Publicidade</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Contato</label>
+                            <input type="text" class="form-control" id="edit-contact" name="contact">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Pedido do cliente</label>
+                            <input type="text" class="form-control" id="edit-customer-order" name="customer_order">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Condição de pagamento</label>
+                            <input type="text" class="form-control" id="edit-payment-terms" name="payment_terms">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Transportadora</label>
+                            <select class="form-select" id="edit-carrier" name="carrier">
+                                <option value="">Selecione...</option>
+                                <option value="Contratação Remetente - CIF">Contratação Remetente - CIF</option>
+                                <option value="Contratação Destinatário - FOB">Contratação Destinatário - FOB</option>
+                                <option value="Envio pela Decorcril">Envio pela Decorcril</option>
+                                <option value="Retirada na Loja">Retirada na Loja</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Frete (R$)</label>
+                            <input type="number" step="0.01" min="0" class="form-control" id="edit-freight" name="freight">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Sinal (%)</label>
+                            <input type="number" step="0.01" min="0" max="100" class="form-control" id="edit-down-payment" name="down_payment_percent">
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- ===== ITENS DO PEDIDO ===== -->
+                    <h6 class="text-muted fw-semibold text-uppercase small mb-2">
+                        <i class="bi bi-box me-1"></i> Itens do Pedido
+                    </h6>
+
+                    <!-- Busca de produto para adicionar -->
+                    <div class="mb-3 position-relative">
+                        <div class="input-group">
+                            <input type="text" id="edit-product-input" class="form-control" autocomplete="off"
+                                data-url="{% url 'vendas:autocomplete_product' %}"
+                                placeholder="Pesquisar produto para adicionar...">
+                            <button type="button" id="edit-btn-search-product" class="btn btn-outline-primary">Pesquisar</button>
+                            <button type="button" id="edit-btn-add-product" class="btn btn-outline-success">
+                                <i class="bi bi-plus-lg me-1"></i>Adicionar
+                            </button>
+                        </div>
+                        <div id="edit-product-results" class="list-group d-none position-absolute w-100" style="z-index:1056;"></div>
+                    </div>
+
+                    <!-- Tabela de itens -->
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Produto</th>
+                                    <th class="text-end" width="120">Preço unit.</th>
+                                    <th class="text-center" width="100">Qtd</th>
+                                    <th class="text-center" width="110">Desc (%)</th>
+                                    <th class="text-end" width="120">Subtotal</th>
+                                    <th width="50"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="edit-items-body">
+                                <tr><td colspan="6" class="text-center text-muted py-3">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="text-end mb-3">
+                        <h5 class="fw-bold mb-0">Total: R$ <span id="edit-total">0,00</span></h5>
+                    </div>
+
+                    <hr>
+
+                    <!-- ===== OBSERVAÇÕES ===== -->
+                    <h6 class="text-muted fw-semibold text-uppercase small mb-2">
+                        <i class="bi bi-chat-left-text me-1"></i> Observações
+                    </h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Observações</label>
+                            <textarea class="form-control" id="edit-notes" name="notes" rows="3"
+                                placeholder="Observações visíveis ao cliente..."></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Observações internas</label>
+                            <textarea class="form-control" id="edit-internal-notes" name="internal_notes" rows="3"
+                                placeholder="Notas internas (não visíveis ao cliente)..."></textarea>
+                        </div>
+                    </div>
+
+                </div><!-- /edit-form-body -->
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning fw-semibold" id="edit-save-btn">
+                    <i class="bi bi-check-lg me-1"></i>Salvar alterações
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

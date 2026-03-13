@@ -2,6 +2,8 @@ from django.urls import path
 
 from catalogo import views
 from vendas.views import order_pdf
+from vendas.views.order_qr_view import OrderQRDetailView, OrderQRPublicView  # Importe a nova view
+from vendas.views.production_pdf import production_pdf_view
 from .views.autocomplete import ClientAutocompleteView, ProductAutocompleteView
 from .views.order_view import (
     OrderDetailView,
@@ -13,6 +15,7 @@ from .views.order_view import (
     OrderItemCreateView,
     OrderItemUpdateView,
     OrderItemDeleteView,
+    OrderUpdateView,
     
 )
 from .views.payment_view import (
@@ -48,6 +51,7 @@ urlpatterns = [
     path("orders/<int:order_id>/items/add/", OrderItemCreateView.as_view(), name="orderitem_add"),
     path("orders/items/<int:item_id>/edit/", OrderItemUpdateView.as_view(), name="orderitem_edit"),
     path("orders/items/<int:item_id>/delete/", OrderItemDeleteView.as_view(), name="orderitem_delete"),
+    path("orders/<int:pk>/update/", OrderUpdateView.as_view(), name="order_update"),
 
     # =====================
     # Pagamentos
@@ -60,4 +64,11 @@ urlpatterns = [
     # PDF
     # ==================
     path("orders/<int:pk>/pdf/", order_pdf, name="order_pdf"),
+    path("orders/<int:pk>/production-pdf/", production_pdf_view, name="order_production_pdf"),
+    
+    # ==================
+    # QR Code Views
+    # ==================
+    path("orders/<int:pk>/qr/", OrderQRDetailView.as_view(), name="order_qr_detail"),  # COM login
+    path("orders/<int:pk>/public/", OrderQRPublicView.as_view(), name="order_public"),  # SEM login (público)
 ]

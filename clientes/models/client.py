@@ -1,3 +1,4 @@
+import re
 from django.db import models
 from django.conf import settings
 from core.models import Sequence
@@ -72,16 +73,14 @@ class Client(models.Model):
 
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
+        null=True, blank=True,
         on_delete=models.SET_NULL,
         related_name="clients_created",
     )
 
     updated_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        null=True,
-        blank=True,
+        null=True, blank=True,
         on_delete=models.SET_NULL,
         related_name="clients_updated",
     )
@@ -93,8 +92,38 @@ class Client(models.Model):
     # Flags futuras
     # =========================
     is_supplier = models.BooleanField(default=False)
-    is_carrier = models.BooleanField(default=False)
-    is_partner = models.BooleanField(default=False)
+    is_carrier  = models.BooleanField(default=False)
+    is_partner  = models.BooleanField(default=False)
+
+    # =========================
+    # Properties de formatação
+    # =========================
+    @property
+    def document_display(self) -> str:
+        d = re.sub(r'\D', '', self.document or '')
+        if len(d) == 14:
+            return f'{d[:2]}.{d[2:5]}.{d[5:8]}/{d[8:12]}-{d[12:]}'
+        if len(d) == 11:
+            return f'{d[:3]}.{d[3:6]}.{d[6:9]}-{d[9:]}'
+        return self.document
+
+    @property
+    def phone_display(self) -> str:
+        p = re.sub(r'\D', '', self.phone or '')
+        if len(p) == 11:
+            return f'({p[:2]}) {p[2:7]}-{p[7:]}'
+        if len(p) == 10:
+            return f'({p[:2]}) {p[2:6]}-{p[6:]}'
+        return self.phone
+
+    @property
+    def whatsapp_display(self) -> str:
+        p = re.sub(r'\D', '', self.whatsapp or '')
+        if len(p) == 11:
+            return f'({p[:2]}) {p[2:7]}-{p[7:]}'
+        if len(p) == 10:
+            return f'({p[:2]}) {p[2:6]}-{p[6:]}'
+        return self.whatsapp
 
     # =========================
     # Meta

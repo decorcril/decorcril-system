@@ -25,29 +25,29 @@
     <!-- HEADER -->
     <div class="card-header py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
 
-    <div class="d-flex align-items-center flex-wrap gap-2">
-        <h6 class="m-0 fw-bold text-primary">
-            <i class="bi bi-cart me-2"></i>
-            Pedidos
-        </h6>
+        <div class="d-flex align-items-center flex-wrap gap-2">
+            <h6 class="m-0 fw-bold text-primary">
+                <i class="bi bi-cart me-2"></i>
+                Pedidos
+            </h6>
 
-        <div class="d-flex flex-wrap gap-1 small">
-            <span class="badge bg-secondary">Total: {{ count_total }}</span>
-            {% if count_open %}<span class="badge bg-primary">Em aberto: {{ count_open }}</span>{% endif %}
-            {% if count_in_production %}<span class="badge bg-success">Produção: {{ count_in_production }}</span>{% endif %}
-            {% if count_picking %}<span class="badge bg-info text-dark">Separação: {{ count_picking }}</span>{% endif %}
-            {% if count_invoiced %}<span class="badge bg-secondary">Faturado: {{ count_invoiced }}</span>{% endif %}
-            {% if count_shipped %}<span class="badge bg-dark">Trânsito: {{ count_shipped }}</span>{% endif %}
-            {% if count_delivered %}<span class="badge bg-success">Entregue: {{ count_delivered }}</span>{% endif %}
-            {% if count_canceled %}<span class="badge bg-danger">Cancelado: {{ count_canceled }}</span>{% endif %}
+            <div class="d-flex flex-wrap gap-1 small">
+                <span class="badge bg-secondary">Total: {{ count_total }}</span>
+                {% if count_open %}<span class="badge bg-primary">Em aberto: {{ count_open }}</span>{% endif %}
+                {% if count_in_production %}<span class="badge bg-success">Produção: {{ count_in_production }}</span>{% endif %}
+                {% if count_picking %}<span class="badge bg-info text-dark">Separação: {{ count_picking }}</span>{% endif %}
+                {% if count_invoiced %}<span class="badge bg-secondary">Faturado: {{ count_invoiced }}</span>{% endif %}
+                {% if count_shipped %}<span class="badge bg-dark">Trânsito: {{ count_shipped }}</span>{% endif %}
+                {% if count_delivered %}<span class="badge bg-success">Entregue: {{ count_delivered }}</span>{% endif %}
+                {% if count_canceled %}<span class="badge bg-danger">Cancelado: {{ count_canceled }}</span>{% endif %}
+            </div>
         </div>
+
+        <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()" title="Atualizar">
+            <i class="bi bi-arrow-clockwise"></i>
+        </button>
+
     </div>
-
-    <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()" title="Atualizar">
-        <i class="bi bi-arrow-clockwise"></i>
-    </button>
-
-</div>
 
     <!-- BODY -->
     <div class="card-body p-0">
@@ -123,6 +123,7 @@
 {% endif %}
 {% include "vendas/orders/_payments_modal.html" %}
 {% include "vendas/orders/_view_modal.html" %}
+{% include "vendas/orders/_edit_modal.html" %}
 
 {% endblock %}
 
@@ -131,4 +132,5 @@
 <script src="{% static 'vendas/js/create_order.js' %}"></script>
 <script src="{% static 'vendas/js/payments.js' %}"></script>
 <script src="{% static 'vendas/js/view_order.js' %}"></script>
+<script src="{% static 'vendas/js/edit_order.js' %}"></script>
 {% endblock %}

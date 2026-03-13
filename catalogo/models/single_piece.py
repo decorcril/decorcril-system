@@ -198,7 +198,7 @@ class SinglePiece(models.Model):
     def clean(self):
         errors = {}
         if self.name:
-            self.name = self.name.strip().title()
+            self.name = self.name.strip()
 
         if self.sku:
             self.sku = self.sku.strip().upper()
@@ -262,3 +262,19 @@ class SinglePiece(models.Model):
     @property
     def is_composite(self):
         return not self.is_kit and self.components.exists()
+
+    @property
+    def numeric_fields(self):
+        """Retorna campos numéricos sempre com ponto decimal (seguro para data-* attributes)."""
+        def fmt(v):
+            return f"{v:.2f}" if v is not None else ""
+
+        return {
+            "base_price":   fmt(self.base_price),
+            "height_cm":    fmt(self.height_cm),
+            "width_cm":     fmt(self.width_cm),
+            "length_cm":    fmt(self.length_cm),
+            "diameter_cm":  fmt(self.diameter_cm),
+            "depth_cm":     fmt(self.depth_cm),
+            "curvature_cm": fmt(self.curvature_cm),
+        }

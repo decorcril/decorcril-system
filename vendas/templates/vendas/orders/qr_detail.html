@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedido #{{ order.number }} — Decorcril</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        :root {
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --light: #94a3b8;
+            --border: #e2e8f0;
+            --amber: #f59e0b;
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        /* ── HEADER ── */
+        .page-header {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0.875rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .company-name { font-weight: 700; font-size: 1rem; }
+        .order-number { font-size: 0.78rem; color: var(--muted); }
+
+        /* ── CARDS ── */
+        .card {
+            border: none;
+            border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+        .card-body { padding: 1rem; }
+
+        /* ── SECTION TITLE ── */
+        .section-title {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--light);
+            margin: 1.25rem 0 0.5rem;
+        }
+
+        /* ── INFO GRID ── */
+        .info-label { font-size: 0.72rem; color: var(--light); margin-bottom: 1px; }
+        .info-value { font-size: 0.875rem; font-weight: 500; word-break: break-word; }
+
+        /* ── TOTAIS ── */
+        .totals-table td { padding: 0.35rem 1rem; font-size: 0.875rem; }
+        .totals-table tr.grand td {
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-top: 2px solid var(--border);
+            padding-top: 0.6rem;
+        }
+
+        /* ── ITEM CARD (mobile) ── */
+        .item-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        }
+        .item-card .item-name {
+            font-weight: 600;
+            font-size: 0.88rem;
+            line-height: 1.3;
+        }
+        .item-card .item-sku { font-size: 0.72rem; color: var(--muted); margin-top: 1px; }
+        .item-card .item-total {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-top: 0.4rem;
+        }
+        .item-card .item-specs { margin-top: 0.35rem; }
+        .item-card .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.82rem;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* ── TABELA DESKTOP ── */
+        .table-desktop { display: none; }
+        @media (min-width: 768px) {
+            .table-desktop { display: block; }
+            .items-mobile  { display: none; }
+        }
+
+        /* ── PAGAMENTOS ── */
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 1rem;
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .payment-item:last-child { border-bottom: none; }
+        .payment-item .pay-method { font-weight: 500; }
+        .payment-item .pay-sub    { font-size: 0.72rem; color: var(--muted); }
+
+        /* ── OBS INTERNA ── */
+        .obs-internal {
+            border-left: 3px solid var(--amber) !important;
+            background: #fffbeb !important;
+        }
+
+        /* ── AÇÕES ── */
+        .actions-bar {
+            padding: 1rem 0;
+            margin-top: 0.5rem;
+            border-top: 1px solid var(--border);
+        }
+        .actions-bar .btn { font-size: 0.82rem; padding: 0.45rem 0.85rem; }
+
+        /* ── META ── */
+        .meta-bar { font-size: 0.78rem; color: var(--muted); }
+
+        /* ── BADGE STATUS ── */
+        .badge-status { font-size: 0.75rem; padding: 0.4em 0.85em; }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER FIXO -->
+    <div class="page-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="company-name">Decorcril</div>
+                    <div class="order-number">Pedido #{{ order.number }}</div>
+                </div>
+                <span class="badge rounded-pill badge-status
+                    {% if order.status == 'open' %}bg-warning text-dark
+                    {% elif order.status == 'in_production' %}bg-primary
+                    {% elif order.status == 'picking' %}bg-info text-dark
+                    {% elif order.status == 'invoiced' %}bg-secondary
+                    {% elif order.status == 'shipped' or order.status == 'delivered' %}bg-success
+                    {% elif order.status == 'canceled' %}bg-danger
+                    {% else %}bg-secondary{% endif %}">
+                    {{ order.get_status_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-4">
+
+        <!-- META -->
+        <div class="meta-bar d-flex justify-content-between pt-3 pb-1">
+            <span><i class="bi bi-calendar3 me-1"></i>{{ order.created_at|date:"d/m/Y H:i" }}</span>
+            <span><i class="bi bi-person me-1"></i>{{ order.created_by.get_full_name|default:order.created_by.username }}</span>
+        </div>
+
+        <!-- ALERTA VENDA GRATUITA -->
+        {% if order.is_free_sale %}
+        <div class="alert alert-warning d-flex align-items-start gap-2 py-2 mt-2 rounded-3 small" role="alert">
+            <i class="bi bi-info-circle-fill mt-1 flex-shrink-0"></i>
+            <div>Pedido do tipo <strong>{{ order.get_sale_type_display }}</strong> — sem cobrança, entra automaticamente em produção.</div>
+        </div>
+        {% endif %}
+
+        <!-- CLIENTE -->
+        <div class="section-title"><i class="bi bi-person me-1"></i>Cliente</div>
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-7 col-md-4">
+                        <div class="info-label">Nome</div>
+                        <div class="info-value">{{ order.client.name|default:"—" }}</div>
+                    </div>
+                    <div class="col-5 col-md-4">
+                        <div class="info-label">Documento</div>
+                        <div class="info-value">{{ order.client.document_display|default:"—" }}</div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="info-label">Telefone</div>
+                        <div class="info-value">
+                            <a href="tel:{{ order.client.phone }}" class="text-decoration-none text-reset">
+                                {{ order.client.phone_display|default:"—" }}
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-4">
+                        <div class="info-label">E-mail</div>
+                        <div class="info-value">{{ order.client.email|default:"—" }}</div>
+                    </div>
+                    <div class="col-12 col-md-8">
+                        <div class="info-label">Endereço</div>
+                        <div class="info-value">
+                            {% with a=order.client %}
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ a.street|default:'' }},{{ a.number|default:'' }},{{ a.neighborhood|default:'' }},{{ a.city|default:'' }},{{ a.state|default:'' }}"
+                               target="_blank"
+                               class="text-decoration-none text-reset d-flex align-items-start gap-1">
+                                <i class="bi bi-geo-alt text-danger mt-1 flex-shrink-0"></i>
+                                <span>
+                                    {{ a.street|default:"" }}{% if a.number %}, {{ a.number }}{% endif %}{% if a.complement %} — {{ a.complement }}{% endif %}{% if a.neighborhood %} · {{ a.neighborhood }}{% endif %}{% if a.city %} · {{ a.city }}{% if a.state %}/{{ a.state }}{% endif %}{% endif %}{% if a.zip_code %} · CEP {{ a.zip_code }}{% endif %}
+                                </span>
+                            </a>
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMERCIAL -->
+        <div class="section-title"><i class="bi bi-briefcase me-1"></i>Informações Comerciais</div>
+        <div class="card">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6 col-md-3">
+                        <div class="info-label">Tipo de Venda</div>
+                        <div class="info-value">{{ order.get_sale_type_display|default:"—" }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="info-label">Contato</div>
+                        <div class="info-value">{{ order.contact|default:"—" }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="info-label">Pedido do Cliente</div>
+                        <div class="info-value">{{ order.customer_order|default:"—" }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="info-label">Cond. Pagamento</div>
+                        <div class="info-value">{{ order.payment_terms|default:"—" }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="info-label">Transportadora</div>
+                        <div class="info-value">{{ order.carrier|default:"—" }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="info-label">Frete</div>
+                        <div class="info-value">R$ {{ order.freight|floatformat:2 }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="info-label">Sinal (%)</div>
+                        <div class="info-value">{{ order.down_payment_percent|default:"—" }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="info-label">Valor do Sinal</div>
+                        <div class="info-value">R$ {{ order.down_payment_value|floatformat:2|default:"0,00" }}</div>
+                    </div>
+                </div>
+
+                {% with payments=order.payments.all %}
+                {% if payments %}
+                <hr class="my-3" style="opacity:0.1;">
+                <div class="info-label mb-2"><i class="bi bi-cash-coin me-1"></i>Pagamentos Registrados</div>
+                {% for payment in payments %}
+                <div class="payment-item px-0 py-2">
+                    <div>
+                        <div class="pay-method">{{ payment.get_method_display }}</div>
+                        <div class="pay-sub">
+                            {% if payment.transaction %}Nº {{ payment.transaction }} · {% endif %}
+                            {{ payment.paid_at|date:"d/m/Y H:i"|default:"—" }}
+                        </div>
+                    </div>
+                    <div class="fw-semibold">R$ {{ payment.amount|floatformat:2 }}</div>
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+
+        <!-- ITENS DO PEDIDO -->
+        <div class="section-title"><i class="bi bi-box me-1"></i>Itens do Pedido</div>
+
+        <!-- Mobile: cards por item -->
+        <div class="items-mobile">
+            {% for item in order.items.all %}
+            <div class="item-card">
+                <div class="item-name">{{ item.product.name }}</div>
+                <div class="item-sku">{{ item.product.sku }}</div>
+                <div class="item-total">R$ {{ item.subtotal|floatformat:2 }}</div>
+                {% if item.product.voltage %}
+                <div class="item-specs">
+                    <span class="badge bg-secondary" style="font-size:0.68rem;">{{ item.product.get_voltage_display }}</span>
+                </div>
+                {% endif %}
+                <div class="item-row">
+                    <span class="text-muted">Qtd: <strong class="text-reset">{{ item.quantity }}</strong></span>
+                    <span class="text-muted">Unit.: <strong class="text-reset">R$ {{ item.unit_price|floatformat:2 }}</strong></span>
+                    {% if item.discount > 0 %}
+                    <span class="text-danger">Desc.: -R$ {{ item.discount|floatformat:2 }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center text-muted py-3 small">Nenhum item cadastrado</div>
+            {% endfor %}
+        </div>
+
+        <!-- Desktop: tabela -->
+        <div class="table-desktop">
+            <div class="card">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Produto</th>
+                                    <th>Especificações</th>
+                                    <th class="text-center">Qtd</th>
+                                    <th class="text-end">Preço unit.</th>
+                                    <th class="text-end">Desconto</th>
+                                    <th class="text-end pe-3">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-semibold">{{ item.product.name }}</div>
+                                        <small class="text-muted">{{ item.product.sku }}</small>
+                                    </td>
+                                    <td>
+                                        {% if item.product.acrylic_color %}
+                                            <span class="badge bg-info text-dark">{{ item.product.get_acrylic_color_display }}</span>
+                                        {% endif %}
+                                        {% if item.product.has_led %}
+                                            <span class="badge bg-warning text-dark">LED {{ item.product.get_led_type_display }}</span>
+                                        {% endif %}
+                                        {% if item.product.voltage %}
+                                            <span class="badge bg-secondary">{{ item.product.get_voltage_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">{{ item.quantity }}</td>
+                                    <td class="text-end">R$ {{ item.unit_price|floatformat:2 }}</td>
+                                    <td class="text-end">
+                                        {% if item.discount > 0 %}
+                                            <span class="text-danger">- R$ {{ item.discount|floatformat:2 }}</span>
+                                        {% else %}<span class="text-muted">—</span>{% endif %}
+                                    </td>
+                                    <td class="text-end pe-3 fw-semibold">R$ {{ item.subtotal|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-3">Nenhum item cadastrado</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOTAIS -->
+        <div class="row justify-content-end">
+            <div class="col-12 col-sm-8 col-md-5 col-lg-4">
+                <div class="card">
+                    <div class="card-body p-0">
+                        <table class="table totals-table mb-0">
+                            {% if order.total_discount > 0 %}
+                            <tr>
+                                <td class="text-muted">Total Bruto</td>
+                                <td class="text-end">R$ {{ order.total_products|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Descontos</td>
+                                <td class="text-end text-danger">- R$ {{ order.total_discount|floatformat:2 }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <td class="text-muted">Total Produtos</td>
+                                <td class="text-end">R$ {{ order.total_products|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Frete</td>
+                                <td class="text-end">R$ {{ order.freight|floatformat:2 }}</td>
+                            </tr>
+                            <tr class="grand">
+                                <td>Total Geral</td>
+                                <td class="text-end text-primary">R$ {{ order.total_amount|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Total Pago</td>
+                                <td class="text-end text-success">R$ {{ order.total_paid|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Saldo a Pagar</td>
+                                <td class="text-end fw-semibold {% if order.remaining > 0 %}text-danger{% else %}text-success{% endif %}">
+                                    R$ {{ order.remaining|floatformat:2 }}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OBSERVAÇÕES -->
+        {% if order.notes or order.internal_notes %}
+        <div class="section-title"><i class="bi bi-chat-left-text me-1"></i>Observações</div>
+        <div class="row g-2 mb-3">
+            {% if order.notes %}
+            <div class="col-12 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="info-label mb-1">Observações</div>
+                        <div class="small">{{ order.notes|linebreaks }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% if order.internal_notes %}
+            <div class="col-12 col-md-6">
+                <div class="card h-100 obs-internal">
+                    <div class="card-body">
+                        <div class="info-label mb-1" style="color:#92400e;">Observações Internas</div>
+                        <div class="small">{{ order.internal_notes|linebreaks }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- AÇÕES -->
+        <div class="actions-bar">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <small class="text-muted">
+                    <i class="bi bi-qr-code me-1"></i>Escaneado em {% now "d/m/Y H:i" %}
+                </small>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'vendas:order_pdf' order.pk %}" class="btn btn-sm btn-dark" target="_blank">
+                        <i class="bi bi-file-pdf me-1"></i>PDF Cliente
+                    </a>
+                    <a href="{% url 'vendas:order_production_pdf' order.pk %}" class="btn btn-sm btn-primary" target="_blank">
+                        <i class="bi bi-gear me-1"></i>PDF Produção
+                    </a>
+                    <a href="{% url 'vendas:order_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Voltar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

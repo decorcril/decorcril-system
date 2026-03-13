@@ -67,6 +67,19 @@ const Masks = (() => {
     }
 
     /* =========================
+       ENTRADA MONETÁRIA (digita e formata em tempo real)
+       Masks.aplicar(inputEl, 'brl_input')
+       Resultado: usuário digita 1250 → exibe 1.250,00
+    ========================= */
+    function brl_input(v) {
+        // Remove tudo que não é dígito
+        const digits = v.replace(/\D/g, '');
+        if (!digits) return '0,00';
+        const num = parseInt(digits, 10) / 100;
+        return num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    /* =========================
        APLICAR MÁSCARA A UM INPUT
        Masks.aplicar(inputEl, 'cep')
        Masks.aplicar(inputEl, 'documento', () => personType.value)
@@ -79,8 +92,9 @@ const Masks = (() => {
             cnpj:      () => { input.value = cnpj(input.value); },
             cep:       () => { input.value = cep(input.value); },
             phone:     () => { input.value = phone(input.value); },
-            whatsapp:  () => { input.value = whatsapp(input.value); },
-            documento: () => { input.value = documento(input.value, getTipo ? getTipo() : ''); },
+            whatsapp:   () => { input.value = whatsapp(input.value); },
+            documento:  () => { input.value = documento(input.value, getTipo ? getTipo() : ''); },
+            brl_input:  () => { input.value = brl_input(input.value); },
         };
 
         const fn = handlers[tipo];
@@ -122,6 +136,6 @@ const Masks = (() => {
         return map[tipo] ? map[tipo](valor) : valor;
     }
 
-    return { cpf, cnpj, cep, phone, whatsapp, documento, aplicar, autocepBind, formatar, brl };
+    return { cpf, cnpj, cep, phone, whatsapp, documento, aplicar, autocepBind, formatar, brl, brl_input };
 
 })();

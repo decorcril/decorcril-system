@@ -11,8 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-xpzc(*q7&=e8b0a#xz---w21v4ta3(kv!x_a9yi64=+0j-b)nz"
 
 DEBUG = True
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*', 'felicita-incogitable-ichnographically.ngrok-free.dev']
 # Application definition
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -79,10 +78,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "pt-br"  # Mudei para português
-TIME_ZONE = "America/Sao_Paulo"  # Mudei para Brasil
+LANGUAGE_CODE = "pt-br"
+TIME_ZONE = "America/Sao_Paulo"
+
 USE_I18N = True
 USE_TZ = True
+USE_L10N = True
+
+USE_THOUSAND_SEPARATOR = True
+THOUSAND_SEPARATOR = "."
+DECIMAL_SEPARATOR = ","
 
 # Login settings
 LOGIN_URL = "login"

@@ -8,7 +8,11 @@ class Kit(models.Model):
     Define um Kit que pode conter produtos simples e produtos compostos.
     """
 
-    name = models.CharField(max_length=100, unique=True, verbose_name="Nome do Kit")
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+        verbose_name="Nome do Kit"
+    )
 
     base_price = models.DecimalField(
         max_digits=10,
@@ -39,7 +43,7 @@ class KitComponent(models.Model):
         verbose_name="Kit",
     )
 
-    # Referencia um produto simples (is_composite=False)
+    # Produto simples
     product = models.ForeignKey(
         SinglePiece,
         on_delete=models.PROTECT,
@@ -49,8 +53,7 @@ class KitComponent(models.Model):
         verbose_name="Produto simples",
     )
 
-    # Referencia um produto composto (is_composite=True)
-    # Corrigido: era ProductComponent (linha de composição), agora aponta para SinglePiece
+    # Produto composto
     composed_product = models.ForeignKey(
         SinglePiece,
         on_delete=models.PROTECT,
@@ -74,27 +77,61 @@ class KitComponent(models.Model):
             ("kit", "composed_product"),
         )
 
-    # =========================
+    # ==========================================================
+    # Helper central para acessar o produto real
+    # ==========================================================
+
+    @property
+    def item(self):
+        """
+        Retorna o produto do componente independentemente
+        de ser simples ou composto.
+        """
+        return self.product or self.composed_product
+
+    # ==========================================================
+    # Helpers de medidas
+    # ==========================================================
+
+    @property
+    def measurements(self):
+        """
+        Retorna as medidas formatadas do produto.
+        """
+        if self.item:
+            return self.item.get_measurements_display()
+        return "Sem medidas"
+
+    @property
+    def thickness(self):
+        if self.item:
+            return self.item.thickness_mm
+        return None
+
+    # ==========================================================
     # Regras de domínio
-    # =========================
+    # ==========================================================
+
     def clean(self):
         errors = {}
 
-        # Um componente deve ser ou produto simples ou produto composto
+        # Deve escolher um tipo de produto
         if not self.product and not self.composed_product:
             errors["product"] = "Escolha um produto simples ou composto."
+
+        # Não pode escolher ambos
         if self.product and self.composed_product:
             errors["product"] = (
                 "Não é possível escolher produto simples e composto ao mesmo tempo."
             )
 
-        # Valida que o campo composed_product é realmente um produto composto
+        # Produto composto precisa ser realmente composto
         if self.composed_product and not self.composed_product.is_composite:
             errors["composed_product"] = (
                 "O produto selecionado não é um produto composto."
             )
 
-        # Valida que o campo product é realmente um produto simples
+        # Produto simples não pode ser composto
         if self.product and self.product.is_composite:
             errors["product"] = (
                 "O produto selecionado é composto. Use o campo 'Produto composto'."
@@ -112,5 +149,5 @@ class KitComponent(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        item = self.product or self.composed_product
+        item = self.item
         return f"{self.quantity}x {item} → {self.kit}"

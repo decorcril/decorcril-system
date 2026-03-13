@@ -3,6 +3,7 @@
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
 
+            <!-- HEADER -->
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title">
                     <i class="bi bi-file-earmark-text me-2"></i>
@@ -11,10 +12,11 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+            <!-- BODY -->
+            <div class="modal-body" style="max-height:75vh; overflow-y:auto;">
 
-                <!-- ===== STATUS E DATAS ===== -->
-                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <!-- STATUS -->
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
                     <div id="view-status-badge"></div>
                     <div class="text-muted small text-end">
                         <div><i class="bi bi-calendar-plus me-1"></i>Criado em: <span id="view-created-at"></span></div>
@@ -22,9 +24,9 @@
                     </div>
                 </div>
 
-                <!-- ===== ALERTA VENDA SEM COBRANÇA ===== -->
-                <div id="view-free-sale-alert" class="alert alert-warning d-flex align-items-center gap-2 py-2 d-none" role="alert">
-                    <i class="bi bi-info-circle-fill fs-5"></i>
+                <!-- ALERTA VENDA GRATUITA -->
+                <div id="view-free-sale-alert" class="alert alert-warning d-flex align-items-center gap-2 py-2 d-none">
+                    <i class="bi bi-info-circle-fill"></i>
                     <div class="small">
                         Este pedido é do tipo <strong id="view-free-sale-type"></strong> —
                         <span class="text-muted">não há cobrança e o pedido entra automaticamente em produção.</span>
@@ -33,81 +35,39 @@
 
                 <hr>
 
-                <!-- ===== DADOS DO CLIENTE ===== -->
+                <!-- CLIENTE -->
                 <h6 class="text-muted fw-semibold text-uppercase small mb-2">
                     <i class="bi bi-person me-1"></i> Cliente
                 </h6>
-                <div class="row g-2 mb-3 small">
-                    <div class="col-md-4">
-                        <div class="text-muted">Nome</div>
-                        <div class="fw-semibold" id="view-client-name">—</div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="text-muted">Documento</div>
-                        <div id="view-client-document">—</div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="text-muted">Tipo</div>
-                        <div id="view-client-type">—</div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="text-muted">Telefone</div>
-                        <div id="view-client-phone">—</div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="text-muted">E-mail</div>
-                        <div id="view-client-email">—</div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="text-muted">Endereço</div>
-                        <div id="view-client-address">—</div>
-                    </div>
+                <div class="row g-3 small mb-3">
+                    <div class="col-md-6 col-lg-4"><div class="text-muted">Nome</div><div class="fw-semibold" id="view-client-name">—</div></div>
+                    <div class="col-md-6 col-lg-4"><div class="text-muted">Documento</div><div id="view-client-document">—</div></div>
+                    <div class="col-md-6 col-lg-4"><div class="text-muted">Tipo</div><div id="view-client-type">—</div></div>
+                    <div class="col-md-6 col-lg-4"><div class="text-muted">Telefone</div><div id="view-client-phone">—</div></div>
+                    <div class="col-md-6 col-lg-4"><div class="text-muted">E-mail</div><div id="view-client-email">—</div></div>
+                    <div class="col-md-12 col-lg-4"><div class="text-muted">Endereço</div><div id="view-client-address">—</div></div>
                 </div>
 
                 <hr>
 
-                <!-- ===== INFORMAÇÕES COMERCIAIS ===== -->
+                <!-- INFORMAÇÕES COMERCIAIS -->
                 <h6 class="text-muted fw-semibold text-uppercase small mb-2">
                     <i class="bi bi-briefcase me-1"></i> Informações Comerciais
                 </h6>
-                <div class="row g-2 mb-3 small">
-                    <div class="col-md-3">
-                        <div class="text-muted">Tipo de venda</div>
-                        <div id="view-sale-type">—</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-muted">Contato</div>
-                        <div id="view-contact">—</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-muted">Pedido do cliente</div>
-                        <div id="view-customer-order">—</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-muted">Condição de pagamento</div>
-                        <div id="view-payment-terms">—</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-muted">Transportadora</div>
-                        <div id="view-carrier">—</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-muted">Frete</div>
-                        <div id="view-freight">—</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-muted">Sinal acordado (%)</div>
-                        <div id="view-down-payment-pct">—</div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-muted">Valor do sinal</div>
-                        <div id="view-down-payment-val">—</div>
-                    </div>
+                <div class="row g-3 small mb-3">
+                    <div class="col-md-6 col-lg-3"><div class="text-muted">Tipo de venda</div><div id="view-sale-type">—</div></div>
+                    <div class="col-md-6 col-lg-3"><div class="text-muted">Contato</div><div id="view-contact">—</div></div>
+                    <div class="col-md-6 col-lg-3"><div class="text-muted">Pedido do cliente</div><div id="view-customer-order">—</div></div>
+                    <div class="col-md-6 col-lg-3"><div class="text-muted">Condição de pagamento</div><div id="view-payment-terms">—</div></div>
+                    <div class="col-md-6 col-lg-3"><div class="text-muted">Transportadora</div><div id="view-carrier">—</div></div>
+                    <div class="col-md-6 col-lg-3"><div class="text-muted">Frete</div><div id="view-freight">—</div></div>
+                    <div class="col-md-6 col-lg-3"><div class="text-muted">Sinal (%)</div><div id="view-down-payment-pct">—</div></div>
+                    <div class="col-md-6 col-lg-3"><div class="text-muted">Valor do sinal</div><div id="view-down-payment-val">—</div></div>
                 </div>
 
                 <hr>
 
-                <!-- ===== ITENS DO PEDIDO ===== -->
+                <!-- ITENS DO PEDIDO -->
                 <h6 class="text-muted fw-semibold text-uppercase small mb-2">
                     <i class="bi bi-box me-1"></i> Itens do Pedido
                 </h6>
@@ -115,12 +75,12 @@
                     <table class="table table-sm align-middle">
                         <thead class="table-light">
                             <tr>
+                                <th class="text-center" style="width:80px;">Qtd</th>
+                                <th class="text-center" style="width:120px;">Código</th>
                                 <th>Produto</th>
-                                <th>Especificações</th>
-                                <th class="text-center" width="80">Qtd</th>
-                                <th class="text-end" width="110">Preço unit.</th>
-                                <th class="text-center" width="80">Desc (%)</th>
-                                <th class="text-end" width="120">Subtotal</th>
+                                <th class="text-end" style="width:120px;">Preço</th>
+                                <th class="text-center" style="width:80px;">Desc</th>
+                                <th class="text-end" style="width:130px;">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody id="view-items-body">
@@ -129,33 +89,21 @@
                     </table>
                 </div>
 
-                <!-- ===== TOTAIS ===== -->
+                <!-- TOTAIS -->
                 <div class="row justify-content-end mb-3">
-                    <div class="col-md-4">
-                        <table class="table table-sm mb-0 small">
-                            <tr>
-                                <td class="text-muted">Frete</td>
-                                <td class="text-end fw-semibold" id="view-total-freight">R$ 0,00</td>
-                            </tr>
-                            <tr class="table-light">
-                                <td class="fw-bold">Total</td>
-                                <td class="text-end fw-bold text-primary fs-6" id="view-total-amount">R$ 0,00</td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted">Total pago</td>
-                                <td class="text-end fw-semibold text-success" id="view-total-paid">R$ 0,00</td>
-                            </tr>
-                            <tr>
-                                <td class="text-muted">Saldo restante</td>
-                                <td class="text-end fw-semibold text-danger" id="view-remaining">R$ 0,00</td>
-                            </tr>
+                    <div class="col-md-4 col-lg-3">
+                        <table class="table table-sm small mb-0">
+                            <tr><td class="text-muted">Frete</td><td class="text-end fw-semibold" id="view-total-freight">R$ 0,00</td></tr>
+                            <tr class="table-light"><td class="fw-bold">Total</td><td class="text-end fw-bold text-primary fs-6" id="view-total-amount">R$ 0,00</td></tr>
+                            <tr><td class="text-muted">Total pago</td><td class="text-end fw-semibold text-success" id="view-total-paid">R$ 0,00</td></tr>
+                            <tr><td class="text-muted">Saldo restante</td><td class="text-end fw-semibold text-danger" id="view-remaining">R$ 0,00</td></tr>
                         </table>
                     </div>
                 </div>
 
                 <hr>
 
-                <!-- ===== PAGAMENTOS ===== -->
+                <!-- PAGAMENTOS -->
                 <h6 class="text-muted fw-semibold text-uppercase small mb-2">
                     <i class="bi bi-cash-coin me-1"></i> Pagamentos
                 </h6>
@@ -165,7 +113,7 @@
 
                 <hr>
 
-                <!-- ===== OBSERVAÇÕES ===== -->
+                <!-- OBSERVAÇÕES -->
                 <h6 class="text-muted fw-semibold text-uppercase small mb-2">
                     <i class="bi bi-chat-left-text me-1"></i> Observações
                 </h6>
@@ -182,8 +130,9 @@
 
             </div>
 
+            <!-- FOOTER -->
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
 
         </div>
