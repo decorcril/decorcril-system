@@ -450,3 +450,22 @@ def _serialize_payments(order, Payment) -> list:
         }
         for p in order.payments.select_related("created_by")
     ]
+
+class OrderCancelView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        order = get_object_or_404(Order, pk=pk)
+
+        # Status que não podem ser cancelados
+        if order.status in (Order.Status.DELIVERED, Order.Status.CANCELED):
+            return JsonResponse({
+                'success': False,
+                'error': f'Pedido com status "{order.get_status_display()}" não pode ser cancelado.'
+            })
+
+        order.status = Order.Status.CANCELED
+        order.save(update_fields=['status', 'updated_at'])
+
+        return JsonResponse({
+            'success': True,
+            'status_label': order.get_status_display(),
+        })

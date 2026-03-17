@@ -118,19 +118,18 @@ def _product_details(p) -> str:
 def _styles() -> dict:
     return {
         'company':     ParagraphStyle('company',     fontSize=18, textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=22),
-        'company_sub': ParagraphStyle('company_sub', fontSize=9,  textColor=C_TEXT_MUTED, fontName='Helvetica',      leading=13),
+        'company_sub': ParagraphStyle('company_sub', fontSize=9,  textColor=C_PRIMARY,    fontName='Helvetica',      leading=13),
         'doc_number':  ParagraphStyle('doc_number',  fontSize=20, textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=24, alignment=TA_RIGHT),
-        'doc_label':   ParagraphStyle('doc_label',   fontSize=9,  textColor=C_TEXT_MUTED, fontName='Helvetica',      leading=13, alignment=TA_RIGHT),
+        'doc_label':   ParagraphStyle('doc_label',   fontSize=9,  textColor=C_PRIMARY,    fontName='Helvetica',      leading=13, alignment=TA_RIGHT),
         'section':     ParagraphStyle('section',     fontSize=10, textColor=C_PRIMARY,    fontName='Helvetica-Bold', spaceBefore=2, spaceAfter=4, leading=12),
-        'label':       ParagraphStyle('label',       fontSize=10,  textColor=C_TEXT,       fontName='Helvetica-Bold', leading=11),
-        'value': ParagraphStyle('value', fontSize=10, textColor=C_TEXT_MUTED, fontName='Helvetica', leading=13),
+        'label':       ParagraphStyle('label',       fontSize=10, textColor=colors.black, fontName='Helvetica-Bold', leading=11),
+        'value':       ParagraphStyle('value',       fontSize=10, textColor=colors.black, fontName='Helvetica',      leading=13),
         'th':          ParagraphStyle('th',          fontSize=8,  textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=11),
-        'td': ParagraphStyle('td', fontSize=8.5, textColor=C_TEXT, fontName='Helvetica-Bold', leading=12),
-        'td_bold':     ParagraphStyle('td_bold',     fontSize=8.5,textColor=C_TEXT,       fontName='Helvetica-Bold', leading=12),
-        'td_sub': ParagraphStyle('td_sub', fontSize=8, textColor=C_TEXT, fontName='Helvetica', leading=11),
-        'obs':         ParagraphStyle('obs',         fontSize=8.5,textColor=C_TEXT,       fontName='Helvetica',      leading=13),
+        'td':          ParagraphStyle('td',          fontSize=8.5,textColor=colors.black, fontName='Helvetica-Bold', leading=12),
+        'td_bold':     ParagraphStyle('td_bold',     fontSize=8.5,textColor=colors.black, fontName='Helvetica-Bold', leading=12),
+        'td_sub':      ParagraphStyle('td_sub',      fontSize=8,  textColor=colors.black, fontName='Helvetica',      leading=11),
+        'obs':         ParagraphStyle('obs',         fontSize=8.5,textColor=colors.black, fontName='Helvetica',      leading=13),
     }
-
 
 def _section_title(text: str, s: dict) -> Paragraph:
     return Paragraph(text.upper(), s['section'])
@@ -214,7 +213,7 @@ def _build_items_table(order, content_w: float, s: dict) -> list:
     COL_DESC = content_w - COL_QTD - COL_SKU
     col_widths = [COL_QTD, COL_SKU, COL_DESC]
 
-    rows = [[_th_c('Qtd'), _th('Código'), _th('Descrição')]]
+    rows = [[_th_c('Qtd'), _th('Código'), _th('Descrição do Produto')]]
     style_cmds = [
         ('BACKGROUND',    (0, 0),  (-1, 0),  C_LIGHT_BG),
         ('TOPPADDING',    (0, 0),  (-1, 0),  5),
@@ -262,20 +261,32 @@ def _make_canvas_class(wm_path, page_w, page_h, margin, content_w, header_h):
             total = len(self._pages)
             for page_num, state in enumerate(self._pages, 1):
                 self.__dict__.update(state)
-                if wm_path:
+
+                if page_num == 1:
+                    if wm_path:
+                        self.saveState()
+                        from PIL import Image as PILImage
+                        with PILImage.open(wm_path) as im:
+                            orig_w, orig_h = im.size
+                        scale  = header_h / orig_h
+                        draw_w = orig_w * scale
+                        draw_x = margin + (content_w - draw_w) / 2
+                        self.drawImage(
+                            wm_path, draw_x, page_h - margin - header_h,
+                            width=draw_w, height=header_h,
+                            mask='auto', preserveAspectRatio=False,
+                        )
+                        self.restoreState()
+                else:
                     self.saveState()
-                    from PIL import Image as PILImage
-                    with PILImage.open(wm_path) as im:
-                        orig_w, orig_h = im.size
-                    scale  = header_h / orig_h
-                    draw_w = orig_w * scale
-                    draw_x = margin + (content_w - draw_w) / 2
-                    self.drawImage(
-                        wm_path, draw_x, page_h - margin - header_h,
-                        width=draw_w, height=header_h,
-                        mask='auto', preserveAspectRatio=False,
-                    )
+                    self.setFont('Helvetica-Bold', 9)
+                    self.setFillColor(C_PRIMARY)
+                    self.drawString(margin, page_h - margin + 1 * mm, "DECORCRIL — Ordem de Produção")
+                    self.setLineWidth(0.4)
+                    self.setStrokeColor(C_BORDER)
+                    self.line(margin, page_h - margin - 1 * mm, page_w - margin, page_h - margin - 1 * mm)
                     self.restoreState()
+
                 self.saveState()
                 self.setFont('Helvetica', 7.5)
                 self.setFillColor(colors.HexColor('#64748B'))
@@ -288,7 +299,6 @@ def _make_canvas_class(wm_path, page_w, page_h, margin, content_w, header_h):
             super().save()
 
     return WatermarkCanvas
-
 
 # ══════════════════════════════════════════════════════════════
 # VIEW PRINCIPAL

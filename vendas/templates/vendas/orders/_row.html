@@ -53,51 +53,18 @@
 
     <!-- Ações -->
     <td class="text-center align-middle">
-        <div class="d-flex justify-content-center gap-1 flex-nowrap">
-
-            <!-- Visualizar -->
-            <button type="button" class="btn btn-sm btn-outline-info open-view-order-btn" data-id="{{ order.pk }}"
-                title="Visualizar pedido">
-                <i class="bi bi-eye"></i>
-            </button>
-
-            <!-- Pagamentos -->
-            <button type="button" class="btn btn-sm btn-outline-success open-payments-btn" data-id="{{ order.pk }}"
-                data-number="{{ order.number }}" title="Registrar pagamento">
-                <i class="bi bi-cash-coin"></i>
-            </button>
-
-            <!-- Editar -->
-            <button type="button" class="btn btn-sm btn-outline-warning open-edit-order-btn" data-id="{{ order.pk }}"
-                title="Editar pedido">
-                <i class="bi bi-pencil"></i>
-            </button>
-
-            <!-- PDF -->
-            <a href="{% url 'vendas:order_pdf' order.pk %}" class="btn btn-sm btn-outline-dark" target="_blank"
-                title="Gerar PDF">
-                <i class="bi bi-file-earmark-pdf"></i>
-            </a>
-
-            <a href="{% url 'vendas:order_production_pdf' order.pk %}" class="btn btn-sm btn-outline-primary"
-                target="_blank" title="Ordem de Produção">
-                <i class="bi bi-gear"></i>
-            </a>
-
-            <!-- Excluir -->
-            {% if order.status == "open" or order.status == "canceled" %}
-            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
-                data-bs-target="#deleteOrderModal{{ order.pk }}" title="Excluir pedido">
-                <i class="bi bi-trash"></i>
-            </button>
-            {% else %}
-            <button type="button" class="btn btn-sm btn-outline-secondary" disabled
-                title="Exclusão bloqueada — pedido em {{ order.get_status_display }}">
-                <i class="bi bi-trash"></i>
-            </button>
-            {% endif %}
-
-        </div>
+        <button type="button"
+            class="btn btn-sm btn-outline-secondary action-menu-btn"
+            data-id="{{ order.pk }}"
+            data-number="{{ order.number }}"
+            data-status="{{ order.status }}"
+            data-pdf-url="{% url 'vendas:order_pdf' order.pk %}"
+            data-prod-url="{% url 'vendas:order_production_pdf' order.pk %}"
+            data-can-delete="{% if order.status == 'open' or order.status == 'canceled' %}true{% else %}false{% endif %}"
+            data-can-cancel="{% if order.status != 'canceled' and order.status != 'delivered' %}true{% else %}false{% endif %}"
+            title="Ações">
+            <i class="bi bi-three-dots-vertical"></i>
+        </button>
     </td>
 
 </tr>

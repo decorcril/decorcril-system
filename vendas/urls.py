@@ -6,6 +6,7 @@ from vendas.views.order_qr_view import OrderQRDetailView, OrderQRPublicView  # I
 from vendas.views.production_pdf import production_pdf_view
 from .views.autocomplete import ClientAutocompleteView, ProductAutocompleteView
 from .views.order_view import (
+    OrderCancelView,
     OrderDetailView,
     OrderListView,
     OrderCreateView,
@@ -52,6 +53,9 @@ urlpatterns = [
     path("orders/items/<int:item_id>/edit/", OrderItemUpdateView.as_view(), name="orderitem_edit"),
     path("orders/items/<int:item_id>/delete/", OrderItemDeleteView.as_view(), name="orderitem_delete"),
     path("orders/<int:pk>/update/", OrderUpdateView.as_view(), name="order_update"),
+
+    # Adicione na lista urlpatterns:
+    path("orders/<int:pk>/cancel/", OrderCancelView.as_view(), name="order_cancel"),
 
     # =====================
     # Pagamentos

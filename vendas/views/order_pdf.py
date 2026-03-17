@@ -116,24 +116,23 @@ def _styles() -> dict:
 
     return {
         'company':     s('company',     fontSize=18, textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=22),
-        'company_sub': s('company_sub', fontSize=9,  textColor=C_TEXT_MUTED, fontName='Helvetica',      leading=13),
+        'company_sub': s('company_sub', fontSize=9,  textColor=C_PRIMARY,    fontName='Helvetica',      leading=13),
         'doc_number':  s('doc_number',  fontSize=20, textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=24, alignment=TA_RIGHT),
-        'doc_label':   s('doc_label',   fontSize=9,  textColor=C_TEXT_MUTED, fontName='Helvetica',      leading=13, alignment=TA_RIGHT),
-        'section': s('section', fontSize=10, textColor=C_PRIMARY, fontName='Helvetica-Bold', spaceBefore=2, spaceAfter=4, leading=12),
-        'label': ParagraphStyle('label', fontSize=10, textColor=C_TEXT, fontName='Helvetica-Bold', leading=11),
-        'value': ParagraphStyle('value', fontSize=9, textColor=C_TEXT_MUTED, fontName='Helvetica', leading=13),
+        'doc_label':   s('doc_label',   fontSize=9,  textColor=C_PRIMARY,    fontName='Helvetica',      leading=13, alignment=TA_RIGHT),
+        'section':     s('section',     fontSize=10, textColor=C_PRIMARY,    fontName='Helvetica-Bold', spaceBefore=2, spaceAfter=4, leading=12),
+        'label':       ParagraphStyle('label', fontSize=10, textColor=colors.black, fontName='Helvetica-Bold', leading=11),
+        'value':       ParagraphStyle('value', fontSize=9,  textColor=colors.black, fontName='Helvetica',      leading=13),
         'th':          s('th',          fontSize=8,  textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=11),
-        'td': ParagraphStyle('td', fontSize=8.5, textColor=C_TEXT, fontName='Helvetica-Bold', leading=12),
-        'td_bold':     s('td_bold',     fontSize=8.5,textColor=C_TEXT,       fontName='Helvetica-Bold', leading=12),
-        'total_label': s('total_label', fontSize=9,  textColor=C_TEXT_MUTED, fontName='Helvetica',      leading=13, alignment=TA_RIGHT),
-        'total_value': s('total_value', fontSize=9,  textColor=C_TEXT,       fontName='Helvetica-Bold', leading=13, alignment=TA_LEFT),
+        'td':          ParagraphStyle('td',     fontSize=8.5, textColor=colors.black, fontName='Helvetica',      leading=12),
+        'td_bold':     s('td_bold',     fontSize=8.5,textColor=colors.black, fontName='Helvetica-Bold', leading=12),
+        'total_label': s('total_label', fontSize=9,  textColor=colors.black, fontName='Helvetica',      leading=13, alignment=TA_RIGHT),
+        'total_value': s('total_value', fontSize=9,  textColor=colors.black, fontName='Helvetica-Bold', leading=13, alignment=TA_LEFT),
         'grand_label': s('grand_label', fontSize=11, textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=15, alignment=TA_RIGHT),
         'grand_value': s('grand_value', fontSize=11, textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=15, alignment=TA_LEFT),
-        'obs':         s('obs',         fontSize=8.5,textColor=C_TEXT,       fontName='Helvetica',      leading=13),
-        'footer':      s('footer',      fontSize=7.5,textColor=C_TEXT_MUTED, fontName='Helvetica',      leading=10),
+        'obs':         s('obs',         fontSize=8.5,textColor=colors.black, fontName='Helvetica',      leading=13),
+        'footer':      s('footer',      fontSize=7.5,textColor=C_PRIMARY,    fontName='Helvetica',      leading=10),
         'qr_hint':     s('qr_hint',     fontSize=6.5,textColor=C_TEXT_MUTED, fontName='Helvetica',      leading=9,  alignment=TA_CENTER),
     }
-
 
 # ══════════════════════════════════════════════════════════════
 # COMPONENTES DE LAYOUT
@@ -264,7 +263,7 @@ def _build_items_table(order, content_w: float, s: dict) -> list:
     COL_TOTAL = 24 * mm
     COL_DESC  = content_w - COL_QTD - COL_SKU - COL_PRICE - COL_DISC - COL_TOTAL
 
-    header_row = [_th_c('Qtd'), _th('Cod'), _th('Descrição'), _th_c('Vlr. Unit.')]
+    header_row = [_th_c('Qtd'), _th('Cod'), _th('Produto'), _th_c('Vlr. Unit.')]
     col_widths  = [COL_QTD, COL_SKU, COL_DESC, COL_PRICE]
     if has_discount:
         header_row.append(_th_c('Desconto'))
@@ -368,21 +367,36 @@ def _make_canvas_class(wm_path):
             for page_num, state in enumerate(self._pages, 1):
                 self.__dict__.update(state)
 
-                if wm_path:
+                if page_num == 1:
+                    # Página 1: desenha o logo no cabeçalho normalmente
+                    if wm_path:
+                        self.saveState()
+                        from PIL import Image as PILImage
+                        with PILImage.open(wm_path) as im:
+                            orig_w, orig_h = im.size
+                        scale  = HEADER_H / orig_h
+                        draw_w = orig_w * scale
+                        draw_x = MARGIN + (CONTENT_W - draw_w) / 2
+                        self.drawImage(
+                            wm_path, draw_x, PAGE_H - MARGIN - HEADER_H,
+                            width=draw_w, height=HEADER_H,
+                            mask='auto', preserveAspectRatio=False,
+                        )
+                        self.restoreState()
+                else:
+                    # Páginas seguintes: cabeçalho simples com nome e número do pedido
                     self.saveState()
-                    from PIL import Image as PILImage
-                    with PILImage.open(wm_path) as im:
-                        orig_w, orig_h = im.size
-                    scale  = HEADER_H / orig_h
-                    draw_w = orig_w * scale
-                    draw_x = MARGIN + (CONTENT_W - draw_w) / 2
-                    self.drawImage(
-                        wm_path, draw_x, PAGE_H - MARGIN - HEADER_H,
-                        width=draw_w, height=HEADER_H,
-                        mask='auto', preserveAspectRatio=False,
-                    )
+                    self.setFont('Helvetica-Bold', 9)
+                    self.setFillColor(C_PRIMARY)
+                    # Extrai número do pedido do título do doc (guardado no estado)
+                    doc_title = self._doc.title if hasattr(self, '_doc') else ''
+                    self.drawString(MARGIN, PAGE_H - MARGIN + 1 * mm, "DECORCRIL — Pedido de Venda")
+                    self.setLineWidth(0.4)
+                    self.setStrokeColor(C_BORDER)
+                    self.line(MARGIN, PAGE_H - MARGIN - 1 * mm, PAGE_W - MARGIN, PAGE_H - MARGIN - 1 * mm)
                     self.restoreState()
 
+                # Numeração em todas as páginas
                 self.saveState()
                 self.setFont('Helvetica', 7.5)
                 self.setFillColor(colors.HexColor('#64748B'))
@@ -395,7 +409,6 @@ def _make_canvas_class(wm_path):
             super().save()
 
     return WatermarkCanvas
-
 
 # ══════════════════════════════════════════════════════════════
 # VIEW PRINCIPAL

@@ -56,6 +56,11 @@
                 </ul>
             </li>
             {% endif %}
+            <li class="{% if 'orders' in request.path %}active{% endif %}">
+                <a href="{% url 'vendas:order_list' %}">
+                    <i class="bi bi-cart me-2"></i> Pedidos
+                </a>
+            </li>
 
             <li>
                 <a href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> Sair</a>
@@ -175,7 +180,7 @@
             setInterval(updateClock, 1000);
         });
     </script>
-        <script src="{% static 'catalogo/js/edit_product_modal.js' %}"></script>
+    <script src="{% static 'catalogo/js/edit_product_modal.js' %}"></script>
 
 
     {% block extra_js %}{% endblock %}

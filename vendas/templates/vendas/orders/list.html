@@ -124,7 +124,7 @@
 {% include "vendas/orders/_payments_modal.html" %}
 {% include "vendas/orders/_view_modal.html" %}
 {% include "vendas/orders/_edit_modal.html" %}
-
+{% include "vendas/orders/_cancel.html" %}
 {% endblock %}
 
 {% block extra_js %}
@@ -133,4 +133,5 @@
 <script src="{% static 'vendas/js/payments.js' %}"></script>
 <script src="{% static 'vendas/js/view_order.js' %}"></script>
 <script src="{% static 'vendas/js/edit_order.js' %}"></script>
+<script src="{% static 'vendas/js/action_menu.js' %}"></script>
 {% endblock %}
