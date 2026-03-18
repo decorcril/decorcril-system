@@ -19,21 +19,17 @@ class PaymentListView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         order = get_object_or_404(Order, pk=pk)
-        payments = order.payments.select_related("created_by").values(
-            "id", "method", "amount", "transaction", "notes", "paid_at",
-            "created_by__username"
-        )
         data = []
-        for p in payments:
+        for p in order.payments.select_related("created_by"):
             data.append({
-                "id":           p["id"],
-                "method":       p["method"],
-                "method_label": dict(Payment.Method.choices).get(p["method"], p["method"]),
-                "amount":       str(p["amount"]),
-                "transaction":  p["transaction"] or "",
-                "notes":        p["notes"] or "",
-                "paid_at":      timezone.localtime(p["paid_at"]).strftime("%d/%m/%Y %H:%M"),
-                "created_by":   p["created_by__username"],
+                "id":           p.id,
+                "method":       p.method,
+                "method_label": dict(Payment.Method.choices).get(p.method, p.method),
+                "amount":       str(p.amount),
+                "transaction":  p.transaction or "",
+                "notes":        p.notes or "",
+                "paid_at":      timezone.localtime(p.paid_at).strftime("%d/%m/%Y %H:%M"),
+                "created_by":   p.created_by.get_full_name() or p.created_by.username,
             })
         return JsonResponse({
             "payments":           data,
@@ -44,11 +40,16 @@ class PaymentListView(LoginRequiredMixin, View):
             "payment_terms":      order.payment_terms or "",
         })
 
-
 class PaymentCreateView(LoginRequiredMixin, View):
     """Registra um novo pagamento para um pedido."""
 
     def post(self, request, pk):
+        # ── Permissão ─────────────────────────────────────────
+        if not (request.user.is_superuser or request.user.groups.filter(
+            name__in=["Supervisor", "Financeiro"]
+        ).exists()):
+            return JsonResponse({"success": False, "error": "Sem permissão para registrar pagamentos."}, status=403)
+
         order = get_object_or_404(Order, pk=pk)
 
         method      = request.POST.get("method", "").strip()
@@ -56,11 +57,9 @@ class PaymentCreateView(LoginRequiredMixin, View):
         transaction = request.POST.get("transaction", "").strip() or None
         notes       = request.POST.get("notes", "").strip()
 
-        # Valida forma de pagamento
         if method not in dict(Payment.Method.choices):
             return JsonResponse({"success": False, "error": "Forma de pagamento inválida."}, status=400)
 
-        # Valida valor
         try:
             amount = Decimal(amount_raw)
             if amount <= 0:
@@ -68,7 +67,6 @@ class PaymentCreateView(LoginRequiredMixin, View):
         except Exception:
             return JsonResponse({"success": False, "error": "Valor inválido."}, status=400)
 
-        # Cria o pagamento — clean() valida unicidade da transação
         payment = Payment(
             order=order,
             method=method,

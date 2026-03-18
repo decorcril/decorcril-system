@@ -55,9 +55,9 @@
                     <p class="text-muted text-center small py-2">Carregando...</p>
                 </div>
 
+                <!-- Formulário novo pagamento — apenas Financeiro/Supervisor -->
+                {% if is_financeiro %}
                 <hr>
-
-                <!-- Formulário novo pagamento -->
                 <h6 class="fw-semibold text-muted text-uppercase small mb-2">
                     <i class="bi bi-plus-circle me-1"></i> Registrar pagamento
                 </h6>
@@ -96,14 +96,17 @@
                         <input type="text" class="form-control" id="pay-notes" placeholder="Opcional...">
                     </div>
                 </div>
+                {% endif %}
 
             </div>
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                {% if is_financeiro %}
                 <button type="button" class="btn btn-success" id="pay-submit-btn">
                     <i class="bi bi-check-lg me-1"></i>Registrar Pagamento
                 </button>
+                {% endif %}
             </div>
 
         </div>

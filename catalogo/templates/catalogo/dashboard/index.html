@@ -10,21 +10,18 @@
 {% block content %}
 
 <!-- ========================= -->
-<!-- Cards de Estatísticas -->
+<!-- Cards de Estatísticas   -->
 <!-- ========================= -->
 <div class="row mb-4">
 
+    {% if is_supervisor or is_vendedor %}
     <!-- Categorias -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-start-primary shadow h-100 py-2">
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
-                    <div class="text-xs fw-bold text-primary text-uppercase mb-1">
-                        Categorias
-                    </div>
-                    <div class="h5 mb-0 fw-bold text-gray-800">
-                        {{ total_categories }}
-                    </div>
+                    <div class="text-xs fw-bold text-primary text-uppercase mb-1">Categorias</div>
+                    <div class="h5 mb-0 fw-bold text-gray-800">{{ total_categories }}</div>
                 </div>
                 <i class="bi bi-list-ul fs-2 text-primary"></i>
             </div>
@@ -36,12 +33,8 @@
         <div class="card border-start-success shadow h-100 py-2">
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
-                    <div class="text-xs fw-bold text-success text-uppercase mb-1">
-                        Total de Produtos
-                    </div>
-                    <div class="h5 mb-0 fw-bold text-gray-800">
-                        {{ total_products }}
-                    </div>
+                    <div class="text-xs fw-bold text-success text-uppercase mb-1">Total de Produtos</div>
+                    <div class="h5 mb-0 fw-bold text-gray-800">{{ total_products }}</div>
                 </div>
                 <i class="bi bi-box fs-2 text-success"></i>
             </div>
@@ -53,41 +46,52 @@
         <div class="card border-start-secondary shadow h-100 py-2">
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
-                    <div class="text-xs fw-bold text-secondary text-uppercase mb-1">
-                        Total de Clientes
-                    </div>
-                    <div class="h5 mb-0 fw-bold text-gray-800">
-                        {{ total_clients }}
-                    </div>
+                    <div class="text-xs fw-bold text-secondary text-uppercase mb-1">Total de Clientes</div>
+                    <div class="h5 mb-0 fw-bold text-gray-800">{{ total_clients }}</div>
                 </div>
                 <i class="bi bi-people fs-2 text-secondary"></i>
             </div>
         </div>
     </div>
+    {% endif %}
 
     <!-- Pedidos -->
+    {% if is_supervisor or is_vendedor or is_pos_venda %}
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-start-warning shadow h-100 py-2">
             <div class="card-body d-flex justify-content-between align-items-center">
                 <div>
                     <div class="text-xs fw-bold text-warning text-uppercase mb-1">
-                        Meus Pedidos
+                        {% if is_supervisor or is_pos_venda %}Total de Pedidos{% else %}Meus Pedidos{% endif %}
                     </div>
-                    <div class="h5 mb-0 fw-bold text-gray-800">
-                        {{ total_orders }}
-                    </div>
+                    <div class="h5 mb-0 fw-bold text-gray-800">{{ total_orders }}</div>
                 </div>
                 <i class="bi bi-cart-check fs-2 text-warning"></i>
             </div>
         </div>
     </div>
+    {% endif %}
+
+    <!-- Pagamentos — apenas Financeiro -->
+    {% if is_financeiro %}
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-start-success shadow h-100 py-2">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-xs fw-bold text-success text-uppercase mb-1">Pagamentos Registrados</div>
+                    <div class="h5 mb-0 fw-bold text-gray-800">{{ total_payments }}</div>
+                </div>
+                <i class="bi bi-cash-coin fs-2 text-success"></i>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
 </div>
 
 <!-- ========================= -->
-<!-- Ações Rápidas -->
+<!-- Ações Rápidas            -->
 <!-- ========================= -->
-{% if is_supervisor or is_vendedor %}
 <div class="row mb-4">
     <div class="col-12">
         <div class="card shadow">
@@ -97,6 +101,7 @@
             <div class="card-body">
                 <div class="row g-3">
 
+                    {% if is_supervisor or is_vendedor %}
                     <div class="col-md-3">
                         <a href="{% url 'category_list' %}" class="btn btn-outline-primary w-100 py-3">
                             <i class="bi bi-list-ul fs-1 d-block mb-2"></i>
@@ -117,27 +122,39 @@
                             Clientes
                         </a>
                     </div>
+                    {% endif %}
 
-
+                    {% if is_supervisor or is_vendedor or is_pos_venda %}
                     <div class="col-md-3">
                         <a href="{% url 'vendas:order_list' %}" class="btn btn-outline-warning w-100 py-3">
                             <i class="bi bi-cart-check fs-1 d-block mb-2"></i>
                             Pedidos
                         </a>
                     </div>
+                    {% endif %}
 
+                    {% if is_financeiro %}
+                    <div class="col-md-3">
+                        <a href="{% url 'vendas:order_list' %}" class="btn btn-outline-success w-100 py-3">
+                            <i class="bi bi-cash-coin fs-1 d-block mb-2"></i>
+                            Pagamentos
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% if is_supervisor %}
                     <div class="col-md-3">
                         <a href="/admin/" target="_blank" class="btn btn-outline-dark w-100 py-3">
                             <i class="bi bi-person-gear fs-1 d-block mb-2"></i>
                             Admin
                         </a>
                     </div>
+                    {% endif %}
 
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endif %}
 
 {% endblock %}

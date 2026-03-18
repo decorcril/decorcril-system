@@ -20,6 +20,15 @@
 {% endblock %}
 
 {% block content %}
+
+{# Permissões passadas ao JS via data-attributes #}
+<div id="user-perms"
+    data-can-payment="{{ is_financeiro|lower }}"
+    data-can-advance="{{ is_pos_venda|lower }}"
+    data-is-supervisor="{{ is_supervisor|lower }}"
+    style="display:none">
+</div>
+
 <div class="card shadow">
 
     <!-- HEADER -->
@@ -125,6 +134,7 @@
 {% include "vendas/orders/_view_modal.html" %}
 {% include "vendas/orders/_edit_modal.html" %}
 {% include "vendas/orders/_cancel.html" %}
+
 {% endblock %}
 
 {% block extra_js %}

@@ -28,7 +28,7 @@ class OrderListView(LoginRequiredMixin, ListView):
         user = self.request.user
         qs = Order.objects.select_related("client", "created_by", "assigned_to")
 
-        if not _is_supervisor(user):
+        if not (_is_supervisor(user) or _is_financeiro(user) or _is_pos_venda(user)):
             qs = qs.filter(created_by=user)
 
         q = self.request.GET.get("q", "").strip()
@@ -37,9 +37,9 @@ class OrderListView(LoginRequiredMixin, ListView):
             matched_status = next((v for k, v in status_map.items() if q.lower() in k), None)
             status_filter = Q(status=matched_status) if matched_status else Q()
             qs = qs.filter(
-                Q(client__name__icontains=q)    |
-                Q(number__icontains=q)           |
-                Q(customer_order__icontains=q)   |
+                Q(client__name__icontains=q)  |
+                Q(number__icontains=q)        |
+                Q(customer_order__icontains=q)|
                 status_filter
             )
         return qs.order_by("-created_at")
@@ -47,7 +47,9 @@ class OrderListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         ctx  = super().get_context_data(**kwargs)
         user = self.request.user
-        qs   = Order.objects if _is_supervisor(user) else Order.objects.filter(created_by=user)
+
+        can_see_all = _is_supervisor(user) or _is_financeiro(user) or _is_pos_venda(user)
+        qs = Order.objects if can_see_all else Order.objects.filter(created_by=user)
 
         counts = {
             item["status"]: item["total"]
@@ -66,6 +68,8 @@ class OrderListView(LoginRequiredMixin, ListView):
             "form":                OrderForm(),
             "is_supervisor":       _is_supervisor(user),
             "is_vendedor":         user.groups.filter(name="Vendedor").exists(),
+            "is_financeiro":       _is_financeiro(user),
+            "is_pos_venda":        _is_pos_venda(user),
         })
         return ctx
 
@@ -110,7 +114,7 @@ class OrderConfirmView(LoginRequiredMixin, View):
         order = get_object_or_404(Order, pk=pk)
         user  = request.user
 
-        if not (user.is_superuser or order.created_by_id == user.pk):
+        if not (_is_supervisor(user) or order.created_by_id == user.pk):
             return JsonResponse({"success": False, "error": "Sem permissão para confirmar."}, status=403)
 
         if order.status not in self.CONFIRMABLE_STATUSES:
@@ -139,11 +143,11 @@ class OrderDeleteView(LoginRequiredMixin, View):
         order = get_object_or_404(Order, pk=pk)
         user  = request.user
 
-        if not (user.is_superuser or order.created_by_id == user.pk):
+        if not _is_supervisor(user):
             messages.error(request, "Sem permissão para excluir este pedido.")
             return redirect("vendas:order_list")
 
-        if order.status not in (Order.Status.OPEN,):
+        if order.status not in (Order.Status.OPEN, Order.Status.CANCELED):
             messages.error(request, f"Pedido {order.number} não pode ser excluído no status {order.get_status_display()}.")
             return redirect("vendas:order_list")
 
@@ -160,8 +164,10 @@ class OrderUpdateView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
         order = get_object_or_404(Order, pk=pk)
+        user  = request.user
 
-        if order.created_by_id != request.user.pk and not request.user.is_superuser:
+        # Apenas supervisor ou criador do pedido pode editar
+        if not (_is_supervisor(user) or order.created_by_id == user.pk):
             return JsonResponse({"success": False, "error": "Sem permissão para editar este pedido."}, status=403)
 
         if order.status not in self.EDITABLE_STATUSES:
@@ -278,6 +284,31 @@ class OrderItemDeleteView(LoginRequiredMixin, View):
 
 
 # ==============================
+# CANCELAMENTO DE PEDIDO
+# ==============================
+class OrderCancelView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        order = get_object_or_404(Order, pk=pk)
+
+        if not _is_supervisor(request.user):
+            return JsonResponse({"success": False, "error": "Sem permissão para cancelar pedidos."}, status=403)
+
+        if order.status in (Order.Status.DELIVERED, Order.Status.CANCELED):
+            return JsonResponse({
+                "success": False,
+                "error": f'Pedido com status "{order.get_status_display()}" não pode ser cancelado.'
+            })
+
+        order.status = Order.Status.CANCELED
+        order.save(update_fields=["status", "updated_at"])
+
+        return JsonResponse({
+            "success":      True,
+            "status_label": order.get_status_display(),
+        })
+
+
+# ==============================
 # GERENCIAMENTO DE ITENS
 # ==============================
 class OrderItemManager:
@@ -335,6 +366,11 @@ class OrderItemManager:
 def _is_supervisor(user) -> bool:
     return user.is_superuser or user.groups.filter(name="Supervisor").exists()
 
+def _is_financeiro(user) -> bool:
+    return user.is_superuser or user.groups.filter(name__in=["Supervisor", "Financeiro"]).exists()
+
+def _is_pos_venda(user) -> bool:
+    return user.is_superuser or user.groups.filter(name__in=["Supervisor", "Pos-venda"]).exists()
 
 def _parse_decimal(value, default="0") -> Decimal:
     try:
@@ -379,11 +415,9 @@ def _serialize_items(order) -> list:
         if not p:
             continue
 
-        # ── financeiro ────────────────────────────────────────
         subtotal     = (item.unit_price - item.discount) * item.quantity if item.unit_price else Decimal("0.00")
         discount_pct = OrderItemManager.discount_to_percent(item.unit_price, item.discount)
 
-        # ── dimensões ─────────────────────────────────────────
         dims = []
         for attr, label in [
             ("height_cm",    "Alt"),
@@ -397,7 +431,6 @@ def _serialize_items(order) -> list:
             if val:
                 dims.append(f"{label}: {val} cm")
 
-        # ── espessura ─────────────────────────────────────────
         if p.is_composite:
             thicknesses = sorted(set(
                 comp.component.get_thickness_mm_display()
@@ -408,7 +441,6 @@ def _serialize_items(order) -> list:
         else:
             thickness = p.get_thickness_mm_display() if getattr(p, "thickness_mm", None) else ""
 
-        # ── componentes (para exibição no modal) ──────────────
         components = []
         if p.is_composite:
             for comp in p.components.all():
@@ -450,22 +482,3 @@ def _serialize_payments(order, Payment) -> list:
         }
         for p in order.payments.select_related("created_by")
     ]
-
-class OrderCancelView(LoginRequiredMixin, View):
-    def post(self, request, pk):
-        order = get_object_or_404(Order, pk=pk)
-
-        # Status que não podem ser cancelados
-        if order.status in (Order.Status.DELIVERED, Order.Status.CANCELED):
-            return JsonResponse({
-                'success': False,
-                'error': f'Pedido com status "{order.get_status_display()}" não pode ser cancelado.'
-            })
-
-        order.status = Order.Status.CANCELED
-        order.save(update_fields=['status', 'updated_at'])
-
-        return JsonResponse({
-            'success': True,
-            'status_label': order.get_status_display(),
-        })
