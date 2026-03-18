@@ -1,10 +1,10 @@
 (function () {
     // ── Lê permissões do data-attribute ──────────────────────
-    const perms       = document.getElementById('user-perms').dataset;
-    const canPayment  = perms.canPayment  === 'true';
-    const canAdvance  = perms.canAdvance  === 'true';
+    const perms        = document.getElementById('user-perms').dataset;
+    const canPayment   = perms.canPayment   === 'true';
+    const canAdvance   = perms.canAdvance   === 'true';
     const isSupervisor = perms.isSupervisor === 'true';
-    const canEdit     = isSupervisor || (!canPayment && !canAdvance); // Vendedor pode editar
+    const canEdit      = isSupervisor || (!canPayment && !canAdvance);
 
     // ── Menu flutuante ────────────────────────────────────────
     const menuEl = document.createElement('ul');
@@ -16,12 +16,16 @@
     let currentId = null;
 
     function buildMenu(btn) {
-        const id        = btn.dataset.id;
-        const number    = btn.dataset.number;
-        const pdfUrl    = btn.dataset.pdfUrl;
-        const prodUrl   = btn.dataset.prodUrl;
-        const canDelete = btn.dataset.canDelete === 'true';
-        const canCancel = btn.dataset.canCancel === 'true';
+        const id         = btn.dataset.id;
+        const number     = btn.dataset.number;
+        const pdfUrl     = btn.dataset.pdfUrl;
+        const prodUrl    = btn.dataset.prodUrl;
+        const canDelete  = btn.dataset.canDelete  === 'true';
+        const canCancel  = btn.dataset.canCancel  === 'true';
+        const hasInvoice = btn.dataset.hasInvoice === 'true';
+
+        const invoiceIcon  = hasInvoice ? 'text-success' : 'text-secondary';
+        const invoiceLabel = hasInvoice ? 'Ver Nota Fiscal' : 'Anexar Nota Fiscal';
 
         menuEl.innerHTML = `
             <li>
@@ -34,6 +38,17 @@
             <li>
                 <button class="dropdown-item open-payments-btn" data-id="${id}" data-number="${number}">
                     <i class="bi bi-cash-coin me-2 text-success"></i> Pagamentos
+                </button>
+            </li>
+            <li>
+                <button class="dropdown-item open-invoice-btn"
+                    data-id="${id}"
+                    data-number="${number}"
+                    data-has-invoice="${btn.dataset.hasInvoice || 'false'}"
+                    data-invoice-number="${btn.dataset.invoiceNumber || ''}"
+                    data-invoice-date="${btn.dataset.invoiceDate || ''}"
+                    data-invoice-url="${btn.dataset.invoiceUrl || ''}">
+                    <i class="bi bi-file-earmark-text me-2 ${invoiceIcon}"></i> ${invoiceLabel}
                 </button>
             </li>` : ''}
 

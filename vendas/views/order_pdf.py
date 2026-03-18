@@ -106,6 +106,24 @@ def _build_payments_text(order) -> str:
     return '<br/>'.join(lines)
 
 
+def _build_invoice_section(order, col_lbl: float, content_w: float, s: dict) -> list:
+    try:
+        invoice = order.invoice
+    except Exception:
+        return []
+
+    col_lbl_nf = 25 * mm
+    col_val_nf = content_w / 2 - col_lbl_nf
+
+    elements = []
+    elements.append(_section_title('Nota Fiscal', s))
+    elements.append(Spacer(1, 2 * mm))
+    elements.append(_info_grid([
+        [('Nº NF', invoice.number),
+         ('Emissão', invoice.issued_at.strftime('%d/%m/%Y'))],
+    ], [col_lbl_nf, col_val_nf, col_lbl_nf, col_val_nf], s))
+    elements.append(Spacer(1, 4 * mm))
+    return elements
 # ══════════════════════════════════════════════════════════════
 # ESTILOS
 # ══════════════════════════════════════════════════════════════
@@ -415,7 +433,10 @@ def _make_canvas_class(wm_path):
 # ══════════════════════════════════════════════════════════════
 
 def order_pdf(request, pk):
-    order  = get_object_or_404(Order.objects.select_related('client', 'created_by'), pk=pk)
+    order = get_object_or_404(
+    Order.objects.select_related('client', 'created_by', 'invoice'),
+    pk=pk
+)
     client = order.client
     s      = _styles()
     now    = datetime.now(tz=zoneinfo.ZoneInfo("America/Sao_Paulo")).strftime('%d/%m/%Y  %H:%M')
@@ -518,7 +539,11 @@ def order_pdf(request, pk):
     # ── Resumo Financeiro + QR Code ───────────────────────────
     el.append(_section_title('Resumo Financeiro', s))
     el.append(Spacer(1, 2 * mm))
+    # ── Nota Fiscal ───────────────────────────────────────────
+    el += _build_invoice_section(order, col_lbl, CONTENT_W, s)
 
+    # ── Resumo Financeiro + QR Code ───────────────────────────
+    el.append(_section_title('Resumo Financeiro', s))
     qr_width     = 35 * mm
     totals_width = CONTENT_W - qr_width - 5 * mm
 

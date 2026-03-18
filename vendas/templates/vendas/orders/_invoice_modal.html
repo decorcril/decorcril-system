@@ -1,0 +1,65 @@
+<!-- MODAL NOTA FISCAL -->
+<div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-file-earmark-text me-2"></i>
+                    Nota Fiscal — Pedido <span id="invoice-order-number"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <!-- NF já anexada -->
+                <div id="invoice-existing" class="d-none">
+                    <div class="alert alert-success d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi bi-check-circle me-2"></i>
+                            NF <strong id="invoice-existing-number"></strong>
+                            emitida em <strong id="invoice-existing-date"></strong>
+                        </div>
+                        <a id="invoice-existing-link" href="#" target="_blank" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-download me-1"></i> Baixar
+                        </a>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-sm btn-outline-danger" id="invoice-delete-btn">
+                            <i class="bi bi-trash me-1"></i> Remover NF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Formulário de upload -->
+                <div id="invoice-form">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="invoice-number" class="form-label">Número da NF *</label>
+                            <input type="text" class="form-control" id="invoice-number" placeholder="Ex: 000123">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="invoice-issued-at" class="form-label">Data de emissão *</label>
+                            <input type="date" class="form-control" id="invoice-issued-at">
+                        </div>
+                        <div class="col-12">
+                            <label for="invoice-file" class="form-label">Arquivo da NF *</label>
+                            <input type="file" class="form-control" id="invoice-file" accept=".pdf,.xml">
+                            <div class="form-text">Aceito: PDF ou XML</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-secondary" id="invoice-submit-btn">
+                    <i class="bi bi-upload me-1"></i> Anexar NF
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

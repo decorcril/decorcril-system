@@ -2,6 +2,7 @@ from django.urls import path
 
 from catalogo import views
 from vendas.views import order_pdf
+from vendas.views.invoice_view import InvoiceCreateView, InvoiceDeleteView
 from vendas.views.order_qr_view import OrderQRDetailView, OrderQRPublicView  # Importe a nova view
 from vendas.views.production_pdf import production_pdf_view
 from .views.autocomplete import ClientAutocompleteView, ProductAutocompleteView
@@ -75,4 +76,9 @@ urlpatterns = [
     # ==================
     path("orders/<int:pk>/qr/", OrderQRDetailView.as_view(), name="order_qr_detail"),  # COM login
     path("orders/<int:pk>/public/", OrderQRPublicView.as_view(), name="order_public"),  # SEM login (público)
+
+    
+    # Na lista urlpatterns:
+    path("orders/<int:pk>/invoice/", InvoiceCreateView.as_view(), name="invoice_create"),
+    path("orders/<int:pk>/invoice/delete/", InvoiceDeleteView.as_view(), name="invoice_delete"),
 ]

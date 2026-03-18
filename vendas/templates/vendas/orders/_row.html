@@ -62,6 +62,12 @@
             data-prod-url="{% url 'vendas:order_production_pdf' order.pk %}"
             data-can-delete="{% if order.status == 'open' or order.status == 'canceled' %}true{% else %}false{% endif %}"
             data-can-cancel="{% if order.status != 'canceled' and order.status != 'delivered' %}true{% else %}false{% endif %}"
+            data-has-invoice="{% if order.invoice %}true{% else %}false{% endif %}"
+            {% if order.invoice %}
+            data-invoice-number="{{ order.invoice.number }}"
+            data-invoice-date="{{ order.invoice.issued_at|date:'d/m/Y' }}"
+            data-invoice-url="{{ order.invoice.file.url }}"
+            {% endif %}
             title="Ações">
             <i class="bi bi-three-dots-vertical"></i>
         </button>

@@ -445,6 +445,33 @@
         </div>
         {% endif %}
 
+        <!-- NOTA FISCAL -->
+        {% if order.invoice %}
+        <div class="section-title"><i class="bi bi-file-earmark-text me-1"></i>Nota Fiscal</div>
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row g-3 align-items-center">
+                    <div class="col-6 col-md-3">
+                        <div class="info-label">Número da NF</div>
+                        <div class="info-value">{{ order.invoice.number }}</div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="info-label">Data de Emissão</div>
+                        <div class="info-value">{{ order.invoice.issued_at|date:"d/m/Y" }}</div>
+                    </div>
+                    <div class="col-12 col-md-6 text-md-end">
+                        <a href="{{ order.invoice.file.url }}" target="_blank"
+                            class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-download me-1"></i> Baixar Nota Fiscal
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- OBSERVAÇÕES -->
+
         <!-- AÇÕES -->
         <div class="actions-bar">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
