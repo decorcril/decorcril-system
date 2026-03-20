@@ -31,7 +31,7 @@
         {% elif order.status == "invoiced" %}
         <span class="badge bg-secondary">Faturado</span>
         {% elif order.status == "shipped" %}
-        <span class="badge bg-dark">Em Trânsito</span>
+        <span class="badge" style="background-color:#0284c7;">Enviado</span>
         {% elif order.status == "delivered" %}
         <span class="badge bg-success">Entregue</span>
         {% elif order.status == "canceled" %}
@@ -53,22 +53,20 @@
 
     <!-- Ações -->
     <td class="text-center align-middle">
-        <button type="button"
-            class="btn btn-sm btn-outline-secondary action-menu-btn"
-            data-id="{{ order.pk }}"
-            data-number="{{ order.number }}"
-            data-status="{{ order.status }}"
+        <button type="button" class="btn btn-sm btn-outline-secondary action-menu-btn" data-id="{{ order.pk }}"
+            data-number="{{ order.number }}" data-status="{{ order.status }}"
             data-pdf-url="{% url 'vendas:order_pdf' order.pk %}"
             data-prod-url="{% url 'vendas:order_production_pdf' order.pk %}"
             data-can-delete="{% if order.status == 'open' or order.status == 'canceled' %}true{% else %}false{% endif %}"
             data-can-cancel="{% if order.status != 'canceled' and order.status != 'delivered' %}true{% else %}false{% endif %}"
-            data-has-invoice="{% if order.invoice %}true{% else %}false{% endif %}"
-            {% if order.invoice %}
+            data-has-invoice="{% if order.invoice %}true{% else %}false{% endif %}" {% if order.invoice %}
             data-invoice-number="{{ order.invoice.number }}"
             data-invoice-date="{{ order.invoice.issued_at|date:'d/m/Y' }}"
-            data-invoice-url="{{ order.invoice.file.url }}"
-            {% endif %}
-            title="Ações">
+            data-invoice-url="{{ order.invoice.file.url }}" {% endif %}
+            data-has-shipment="{% if order.shipment %}true{% else %}false{% endif %}" {% if order.shipment %}
+            data-shipment-carrier="{{ order.shipment.carrier }}" data-shipment-tracking="{{ order.shipment.tracking }}"
+            data-shipment-date="{{ order.shipment.created_at|date:'d/m/Y H:i' }}"
+            data-shipment-url="{{ order.shipment.file.url }}" {% endif %} title="Ações">
             <i class="bi bi-three-dots-vertical"></i>
         </button>
     </td>

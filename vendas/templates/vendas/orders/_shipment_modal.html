@@ -1,0 +1,82 @@
+<!-- MODAL ENVIO -->
+<div class="modal fade" id="shipmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-truck me-2"></i>
+                    Registrar Envio — Pedido <span id="shipment-order-number"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <!-- Envio já registrado -->
+                <div id="shipment-existing" class="d-none">
+                    <div class="alert alert-dark">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="small text-muted">Transportadora</div>
+                                <div class="fw-semibold" id="shipment-existing-carrier">—</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="small text-muted">Código de Rastreio</div>
+                                <div class="fw-semibold font-monospace" id="shipment-existing-tracking">—</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="small text-muted">Registrado em</div>
+                                <div class="fw-semibold" id="shipment-existing-date">—</div>
+                            </div>
+                            <div class="col-6 d-flex align-items-end">
+                                <a id="shipment-existing-link" href="#" target="_blank"
+                                    class="btn btn-sm btn-outline-dark w-100">
+                                    <i class="bi bi-download me-1"></i> Comprovante
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-sm btn-outline-danger" id="shipment-delete-btn">
+                            <i class="bi bi-trash me-1"></i> Remover Comprovante
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Formulário de registro -->
+                <div id="shipment-form">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="shipment-carrier" class="form-label">Transportadora</label>
+                            <input type="text" class="form-control" id="shipment-carrier"
+                                placeholder="Ex: Correios, Jadlog...">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="shipment-tracking" class="form-label">Código de Rastreio</label>
+                            <input type="text" class="form-control" id="shipment-tracking"
+                                placeholder="Ex: BR123456789BR">
+                        </div>
+                        <div class="col-12">
+                            <label for="shipment-file" class="form-label">
+                                Comprovante de envio *
+                            </label>
+                            <input type="file" class="form-control" id="shipment-file"
+                                accept=".pdf,.jpg,.jpeg,.png">
+                            <div class="form-text">Aceito: PDF, JPG ou PNG</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-dark" id="shipment-submit-btn">
+                    <i class="bi bi-truck me-1"></i> Registrar Envio
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -46,7 +46,7 @@
                 {% if count_in_production %}<span class="badge bg-success">Produção: {{ count_in_production }}</span>{% endif %}
                 {% if count_picking %}<span class="badge bg-info text-dark">Separação: {{ count_picking }}</span>{% endif %}
                 {% if count_invoiced %}<span class="badge bg-secondary">Faturado: {{ count_invoiced }}</span>{% endif %}
-                {% if count_shipped %}<span class="badge bg-dark">Trânsito: {{ count_shipped }}</span>{% endif %}
+                {% if count_shipped %}<span class="badge bg-primary">Enviado: {{ count_shipped }}</span>{% endif %}
                 {% if count_delivered %}<span class="badge bg-success">Entregue: {{ count_delivered }}</span>{% endif %}
                 {% if count_canceled %}<span class="badge bg-danger">Cancelado: {{ count_canceled }}</span>{% endif %}
             </div>
@@ -135,6 +135,7 @@
 {% include "vendas/orders/_edit_modal.html" %}
 {% include "vendas/orders/_cancel.html" %}
 {% include "vendas/orders/_invoice_modal.html" %}
+{% include "vendas/orders/_shipment_modal.html" %}
 
 {% endblock %}
 
@@ -146,4 +147,5 @@
 <script src="{% static 'vendas/js/edit_order.js' %}"></script>
 <script src="{% static 'vendas/js/action_menu.js' %}"></script>
 <script src="{% static 'vendas/js/invoice.js' %}"></script>
+<script src="{% static 'vendas/js/shipment.js' %}"></script>
 {% endblock %}

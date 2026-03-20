@@ -18,9 +18,9 @@ class Order(models.Model):
     class Status(models.TextChoices):
         OPEN          = "open",          "Em aberto"
         IN_PRODUCTION = "in_production", "Em Produção"
-        PICKING       = "picking",       "Em Separação / Faturando"
-        INVOICED      = "invoiced",      "Faturado / NF emitida"
-        SHIPPED       = "shipped",       "Em Trânsito / Enviado"
+        PICKING       = "picking",       "Em Separação"
+        INVOICED      = "invoiced",      "Faturado"
+        SHIPPED       = "shipped",       "Enviado"
         DELIVERED     = "delivered",     "Entregue"
         CANCELED      = "canceled",      "Cancelado"
 

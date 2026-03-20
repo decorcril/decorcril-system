@@ -16,16 +16,19 @@
     let currentId = null;
 
     function buildMenu(btn) {
-        const id         = btn.dataset.id;
-        const number     = btn.dataset.number;
-        const pdfUrl     = btn.dataset.pdfUrl;
-        const prodUrl    = btn.dataset.prodUrl;
-        const canDelete  = btn.dataset.canDelete  === 'true';
-        const canCancel  = btn.dataset.canCancel  === 'true';
-        const hasInvoice = btn.dataset.hasInvoice === 'true';
+        const id          = btn.dataset.id;
+        const number      = btn.dataset.number;
+        const pdfUrl      = btn.dataset.pdfUrl;
+        const prodUrl     = btn.dataset.prodUrl;
+        const canDelete   = btn.dataset.canDelete   === 'true';
+        const canCancel   = btn.dataset.canCancel   === 'true';
+        const hasInvoice  = btn.dataset.hasInvoice  === 'true';
+        const hasShipment = btn.dataset.hasShipment === 'true';
 
-        const invoiceIcon  = hasInvoice ? 'text-success' : 'text-secondary';
-        const invoiceLabel = hasInvoice ? 'Ver Nota Fiscal' : 'Anexar Nota Fiscal';
+        const invoiceIcon   = hasInvoice  ? 'text-success' : 'text-secondary';
+        const invoiceLabel  = hasInvoice  ? 'Ver Nota Fiscal'  : 'Anexar Nota Fiscal';
+        const shipmentIcon  = hasShipment ? 'text-success' : 'text-secondary';
+        const shipmentLabel = hasShipment ? 'Ver Envio' : 'Registrar Envio';
 
         menuEl.innerHTML = `
             <li>
@@ -49,6 +52,18 @@
                     data-invoice-date="${btn.dataset.invoiceDate || ''}"
                     data-invoice-url="${btn.dataset.invoiceUrl || ''}">
                     <i class="bi bi-file-earmark-text me-2 ${invoiceIcon}"></i> ${invoiceLabel}
+                </button>
+            </li>
+            <li>
+                <button class="dropdown-item open-shipment-btn"
+                    data-id="${id}"
+                    data-number="${number}"
+                    data-has-shipment="${btn.dataset.hasShipment || 'false'}"
+                    data-shipment-carrier="${btn.dataset.shipmentCarrier || ''}"
+                    data-shipment-tracking="${btn.dataset.shipmentTracking || ''}"
+                    data-shipment-date="${btn.dataset.shipmentDate || ''}"
+                    data-shipment-url="${btn.dataset.shipmentUrl || ''}">
+                    <i class="bi bi-truck me-2 ${shipmentIcon}"></i> ${shipmentLabel}
                 </button>
             </li>` : ''}
 
@@ -162,11 +177,11 @@
         if (!cancelOrderPk) return;
 
         const btn = this;
-        btn.disabled = true;
+        btn.disabled  = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Cancelando...';
 
         fetch(`/vendas/orders/${cancelOrderPk}/cancel/`, {
-            method: 'POST',
+            method:  'POST',
             headers: {
                 'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? '',
             },
@@ -187,20 +202,20 @@
                 bootstrap.Modal.getInstance(cancelModalEl).hide();
             } else {
                 alert('Erro: ' + (data.error || 'Não foi possível cancelar o pedido.'));
-                btn.disabled = false;
+                btn.disabled  = false;
                 btn.innerHTML = '<i class="bi bi-x-circle me-1"></i> Cancelar Pedido';
             }
         })
         .catch(() => {
             alert('Erro inesperado. Tente novamente.');
-            btn.disabled = false;
+            btn.disabled  = false;
             btn.innerHTML = '<i class="bi bi-x-circle me-1"></i> Cancelar Pedido';
         });
     });
 
     cancelModalEl.addEventListener('hidden.bs.modal', function () {
         const btn = document.getElementById('cancelOrderBtn');
-        btn.disabled = false;
+        btn.disabled  = false;
         btn.innerHTML = '<i class="bi bi-x-circle me-1"></i> Cancelar Pedido';
         cancelOrderPk = null;
     });

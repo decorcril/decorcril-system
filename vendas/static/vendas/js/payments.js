@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 in_production: "bg-success",
                 picking:       "bg-info text-dark",
                 invoiced:      "bg-secondary",
-                shipped:       "bg-dark",
+                shipped: "bg-primary",
                 delivered:     "bg-success",
                 canceled:      "bg-danger",
             };
