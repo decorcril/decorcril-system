@@ -1,60 +1,58 @@
-<tr>
-    <!-- Nome -->
-    <td>
-        <strong>{{ category.name }}</strong>
-    </td>
+<tr class="align-middle">
 
-    <!-- Produtos -->
-    <td class="text-center">
-        <span class="badge bg-primary rounded-pill">
+    <!-- NOME -->
+    <td style="white-space: normal;">
+    <span class="badge bg-primary rounded-pill">
+        {{ category.name }}
+    </span>
+</td>
+
+    <!-- PRODUTOS (compacto) -->
+    <td class="text-center" style="width:10%;">
+        <span class="fw-bold">
             {{ category.products.count }}
         </span>
     </td>
 
-    <!-- Status -->
-    <td class="text-center">
+    <!-- STATUS -->
+    <td class="text-center" style="width:20%;">
         {% if category.is_active %}
-        <span class="badge bg-success">
-            <i class="bi bi-check-circle me-1"></i> Ativa
-        </span>
+        <span class="badge bg-success">Ativa</span>
         {% else %}
-        <span class="badge bg-secondary">
-            <i class="bi bi-x-circle me-1"></i> Inativa
-        </span>
+        <span class="badge bg-secondary">Inativa</span>
         {% endif %}
     </td>
 
-    <!-- Criada em -->
-    <td class="text-center">
+    <!-- DATA -->
+    <td class="text-center" style="width:15%;">
         <small class="text-muted">
             {{ category.created_at|date:"d/m/Y" }}
         </small>
     </td>
 
-    <!-- ✅ Ações (supervisor OU vendedor) -->
-    {% if is_supervisor or is_vendedor %}
-    <td class="text-end">
+    <!-- AÇÕES (sempre existe) -->
+    <td class="text-end" style="width:15%;">
         <div class="btn-group btn-group-sm">
 
-            <!-- 👁 Visualizar (todos) -->
-            <button class="btn btn-outline-info" data-bs-toggle="modal"
-                data-bs-target="#viewCategoryModal{{ category.pk }}" title="Visualizar">
-
+            <!-- VISUALIZAR (sempre) -->
+            <button class="btn btn-outline-info"
+                data-bs-toggle="modal"
+                data-bs-target="#viewCategoryModal{{ category.pk }}">
                 <i class="bi bi-eye"></i>
             </button>
 
-            <!-- ✏️ Apenas supervisor -->
             {% if is_supervisor %}
-            <button class="btn btn-outline-primary" data-bs-toggle="modal"
+            <!-- EDITAR -->
+            <button class="btn btn-outline-primary"
+                data-bs-toggle="modal"
                 data-bs-target="#editCategoryModal{{ category.pk }}">
                 <i class="bi bi-pencil"></i>
             </button>
-            {% endif %}
 
-            <!-- 🗑 Apenas supervisor -->
-            {% if is_supervisor %}
+            <!-- EXCLUIR -->
             {% if category.products.count == 0 %}
-            <button class="btn btn-outline-danger" data-bs-toggle="modal"
+            <button class="btn btn-outline-danger"
+                data-bs-toggle="modal"
                 data-bs-target="#deleteCategoryModal{{ category.pk }}">
                 <i class="bi bi-trash"></i>
             </button>
@@ -67,5 +65,5 @@
 
         </div>
     </td>
-    {% endif %}
+
 </tr>

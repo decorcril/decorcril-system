@@ -1,104 +1,84 @@
-<tr>
-    <!-- Foto -->
-    <td class="text-center">
-        {% if product.photo %}
-        <img src="{{ product.photo.url }}" class="img-thumbnail" style="width:60px;height:60px;object-fit:cover"
-            alt="{{ product.name }}">
-        {% else %}
-        <i class="bi bi-image text-muted fs-4"></i>
-        {% endif %}
+<tr class="align-middle">
+
+    <!-- CÓDIGO (mínimo possível) -->
+    <td style="white-space: nowrap; width:1%; padding-right: 4px;">
+        <span class="badge bg-secondary px-2 py-1" style="font-size: 0.75rem;">
+            {{ product.sku }}
+        </span>
     </td>
 
-    <!-- Nome e SKU -->
-    <td>
-        <div class="mb-1">
-            <span class="badge bg-dark me-2">{{ product.sku }}</span>
-            <strong>{{ product.name }}</strong>
-        </div>
+    <!-- PRODUTO (usa o resto do espaço) -->
+    <td style="white-space: normal;">
+        <strong>
+            {{ product.name }}
+        </strong>
     </td>
 
-    <!-- Categoria -->
-    <td class="text-center">
-        <span class="badge bg-info rounded-pill">
+    <!-- CATEGORIA -->
+    <td class="text-center" style="width:10%; white-space: nowrap;">
+        <span class="badge bg-info rounded-pill px-2 py-1" style="font-size: 0.75rem;">
             {{ product.category.name }}
         </span>
     </td>
 
-    <!-- Status -->
-    <td class="text-center">
-        {% if product.is_active %}
-        <span class="badge bg-success">
-            <i class="bi bi-check-circle me-1"></i> Ativo
-        </span>
-        {% else %}
-        <span class="badge bg-secondary">
-            <i class="bi bi-x-circle me-1"></i> Inativo
-        </span>
-        {% endif %}
+    <!-- STATUS -->
+    <td class="text-center" style="width:20%;">
+        <div class="d-flex flex-column align-items-center gap-1">
 
-        <br>
+            {% if product.is_active %}
+            <span class="badge bg-success">Ativo</span>
+            {% else %}
+            <span class="badge bg-secondary">Inativo</span>
+            {% endif %}
 
-        {% if product.is_kit %}
-        <div class="mt-1">
-            <span class="badge bg-warning text-dark">
-                <i class="bi bi-box-seam me-1"></i> Kit
-            </span>
+            {% if product.is_kit %}
+            <span class="badge bg-warning text-dark">Kit</span>
+
+            {% elif product.is_composite %}
+            <span class="badge bg-primary">Composto</span>
+
+            {% elif not product.is_sellable %}
+            <span class="badge bg-info">Componente</span>
+
+            {% else %}
+            <span class="badge bg-success text-dark">Individual</span>
+            {% endif %}
+
         </div>
-
-        {% elif product.is_composite %}
-        <div class="mt-1">
-            <span class="badge bg-primary">
-                <i class="bi bi-boxes me-1"></i> Produto Composto
-            </span>
-        </div>
-
-        {% elif not product.is_sellable %}
-        <span class="badge bg-info">
-            <i class="bi bi-box me-1"></i> Componente
-        </span>
-
-        {% else %}
-        <span class="badge bg-success text-dark">
-            <i class="bi bi-check2-circle me-1"></i> Produto Individual
-        </span>
-        {% endif %}
     </td>
 
-    <!-- Criado em -->
-    <td class="text-center">
+    <!-- DATA -->
+    <td class="text-center" style="width:12%;">
         <small class="text-muted">
             {{ product.created_at|date:"d/m/Y" }}
         </small>
     </td>
 
-    {% if is_supervisor or is_vendedor %}
-    <!-- Ações -->
-    <td class="text-end">
+    <!-- AÇÕES -->
+    <td class="text-end" style="width:12%;">
         <div class="btn-group btn-group-sm">
 
-            <!-- Visualizar (todos) -->
+            <!-- VISUALIZAR (sempre) -->
             <button class="btn btn-outline-info" data-bs-toggle="modal"
-                data-bs-target="#viewProductModal{% if product.is_composite or product.is_kit %}Composite{% endif %}{{ product.pk }}"
-                title="Visualizar">
+                data-bs-target="#viewProductModal{% if product.is_composite or product.is_kit %}Composite{% endif %}{{ product.pk }}">
                 <i class="bi bi-eye"></i>
             </button>
 
             {% if is_supervisor %}
-            <!-- Editar -->
+            <!-- EDITAR -->
             <button class="btn btn-outline-primary" data-bs-toggle="modal"
-                data-bs-target="#editProductModal{% if product.is_composite or product.is_kit %}Composite{% endif %}{{ product.pk }}"
-                title="Editar">
+                data-bs-target="#editProductModal{% if product.is_composite or product.is_kit %}Composite{% endif %}{{ product.pk }}">
                 <i class="bi bi-pencil"></i>
             </button>
 
-            <!-- Excluir -->
+            <!-- EXCLUIR -->
             {% if product.used_in_count == 0 %}
             <button class="btn btn-outline-danger" data-bs-toggle="modal"
-                data-bs-target="#deleteProductModal{{ product.pk }}" title="Excluir">
+                data-bs-target="#deleteProductModal{{ product.pk }}">
                 <i class="bi bi-trash"></i>
             </button>
             {% else %}
-            <button class="btn btn-outline-secondary" disabled title="Este produto compõe outro produto">
+            <button class="btn btn-outline-secondary" disabled>
                 <i class="bi bi-trash"></i>
             </button>
             {% endif %}
@@ -106,5 +86,5 @@
 
         </div>
     </td>
-    {% endif %}
+
 </tr>

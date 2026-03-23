@@ -26,7 +26,7 @@ class OrderListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        qs = Order.objects.select_related("client", "created_by", "assigned_to")
+        qs = Order.objects.select_related("client", "created_by", "assigned_to", "invoice", "shipment")
 
         if not (_is_supervisor(user) or _is_financeiro(user) or _is_pos_venda(user)):
             qs = qs.filter(created_by=user)
@@ -160,13 +160,12 @@ class OrderDeleteView(LoginRequiredMixin, View):
 # ATUALIZAÇÃO DE PEDIDO (JSON)
 # ==============================
 class OrderUpdateView(LoginRequiredMixin, View):
-    EDITABLE_STATUSES = {Order.Status.OPEN, Order.Status.IN_PRODUCTION}
+    EDITABLE_STATUSES = {Order.Status.OPEN}
 
     def post(self, request, pk):
         order = get_object_or_404(Order, pk=pk)
         user  = request.user
 
-        # Apenas supervisor ou criador do pedido pode editar
         if not (_is_supervisor(user) or order.created_by_id == user.pk):
             return JsonResponse({"success": False, "error": "Sem permissão para editar este pedido."}, status=403)
 
@@ -203,7 +202,7 @@ class OrderDetailView(LoginRequiredMixin, View):
         "in_production": "bg-success",
         "picking":       "bg-info text-dark",
         "invoiced":      "bg-secondary",
-        "shipped": "bg-primary",
+        "shipped":       "bg-primary",
         "delivered":     "bg-success",
         "canceled":      "bg-danger",
     }
@@ -257,6 +256,13 @@ class OrderItemListView(LoginRequiredMixin, View):
 class OrderItemCreateView(LoginRequiredMixin, View):
     def post(self, request, order_id):
         order = get_object_or_404(Order, pk=order_id)
+
+        if order.status != Order.Status.OPEN:
+            return JsonResponse({
+                "success": False,
+                "error": "Itens só podem ser adicionados quando o pedido está Em aberto."
+            }, status=400)
+
         try:
             OrderItemManager.create_or_update(order, request.POST)
             return JsonResponse({"success": True})
@@ -266,6 +272,14 @@ class OrderItemCreateView(LoginRequiredMixin, View):
 
 class OrderItemUpdateView(LoginRequiredMixin, View):
     def post(self, request, item_id):
+        item = get_object_or_404(OrderItem, pk=item_id)
+
+        if item.order.status != Order.Status.OPEN:
+            return JsonResponse({
+                "success": False,
+                "error": "Itens só podem ser editados quando o pedido está Em aberto."
+            }, status=400)
+
         try:
             OrderItemManager.create_or_update(None, request.POST, item_id=item_id)
             return JsonResponse({"success": True})
@@ -276,6 +290,13 @@ class OrderItemUpdateView(LoginRequiredMixin, View):
 class OrderItemDeleteView(LoginRequiredMixin, View):
     def post(self, request, item_id):
         item = get_object_or_404(OrderItem, pk=item_id)
+
+        if item.order.status != Order.Status.OPEN:
+            return JsonResponse({
+                "success": False,
+                "error": "Itens só podem ser removidos quando o pedido está Em aberto."
+            }, status=400)
+
         try:
             item.delete()
             return JsonResponse({"success": True})

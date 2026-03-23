@@ -12,6 +12,11 @@ SECRET_KEY = "django-insecure-xpzc(*q7&=e8b0a#xz---w21v4ta3(kv!x_a9yi64=+0j-b)nz
 
 DEBUG = True
 ALLOWED_HOSTS = ['*', 'felicita-incogitable-ichnographically.ngrok-free.dev']
+
+# Adicione isso logo abaixo:
+CSRF_TRUSTED_ORIGINS = [
+    'https://felicita-incogitable-ichnographically.ngrok-free.dev',
+]
 # Application definition
 INSTALLED_APPS = [
     "django.contrib.admin",

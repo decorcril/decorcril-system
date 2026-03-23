@@ -3,120 +3,108 @@
 {% block title %}Categorias - Decorcril System{% endblock %}
 {% block page_title %}Categorias{% endblock %}
 
-{% block breadcrumb %}
-<li class="breadcrumb-item active">Categorias</li>
-{% endblock %}
-
-{% block page_actions %}
-{% if is_supervisor %}
-<button class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#createCategoryModal">
-    <i class="bi bi-plus-circle me-1"></i>
-    Nova Categoria
-</button>
-{% endif %}
-{% endblock %}
-
 {% block content %}
 <div class="card shadow">
 
-    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+    <!-- HEADER -->
+    <div class="card-header d-flex justify-content-between align-items-center">
         <h6 class="m-0 fw-bold text-primary">
             <i class="bi bi-list-ul me-2"></i>
-            Todas as Categorias ({{ categories.count }})
+            Categorias ({{ categories.count }})
         </h6>
 
-        <button class="btn btn-sm btn-outline-secondary"
-                onclick="location.reload()"
-                title="Atualizar">
-            <i class="bi bi-arrow-clockwise"></i>
-        </button>
+        <div class="d-flex gap-2">
+            {% if is_supervisor %}
+            <button class="btn btn-sm btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#createCategoryModal">
+                <i class="bi bi-plus-circle"></i>
+            </button>
+            {% endif %}
+
+            <button class="btn btn-sm btn-outline-secondary"
+                onclick="location.reload()">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
     </div>
 
     <div class="card-body">
 
-        <!-- Pesquisa -->
-        <div class="mb-3 d-flex justify-content-end gap-2">
-            <form method="get" class="d-flex gap-2">
-                <input type="text"
-                       name="q"
-                       value="{{ query|default:'' }}"
-                       class="form-control form-control-sm"
-                       placeholder="Pesquisar Categorias."
-                       style="width: 250px;">
+        <!-- BUSCA -->
+        <form method="get" class="d-flex gap-2 mb-3 justify-content-end">
+            <input type="text"
+                   name="q"
+                   value="{{ query|default:'' }}"
+                   class="form-control form-control-sm"
+                   placeholder="Pesquisar categorias"
+                   style="max-width: 260px;">
 
-                <button type="submit" class="btn btn-sm btn-primary">
-                    Buscar
-                </button>
+            <button class="btn btn-sm btn-primary">Buscar</button>
 
-                {% if query %}
-                <a href="{% url 'category_list' %}"
-                   class="btn btn-sm btn-outline-secondary">
-                    Limpar
-                </a>
-                {% endif %}
-            </form>
-        </div>
+            {% if query %}
+            <a href="{% url 'category_list' %}"
+               class="btn btn-sm btn-outline-secondary">
+                Limpar
+            </a>
+            {% endif %}
+        </form>
 
         {% if categories %}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Nome</th>
-                            <th class="text-center">Produtos</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-center">Criada em</th>
+        <div class="table-responsive">
 
-                            <!-- ✅ Coluna agora para supervisor OU vendedor -->
-                            {% if is_supervisor or is_vendedor %}
-                            <th class="text-end">Ações</th>
-                            {% endif %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for category in categories %}
-                            {% include "catalogo/categories/_row.html" %}
-                            {% include "catalogo/categories/_view_modal.html" %}
+            <table class="table table-hover align-middle" style="table-layout: fixed;">
 
-                            <!-- Modais apenas para supervisor -->
-                            {% if is_supervisor %}
-                                {% include "catalogo/categories/_edit_modal.html" %}
-                                {% include "catalogo/categories/_delete_modal.html" %}
-                            {% endif %}
+                <thead class="table-light">
+                    <tr>
+                        <th>Categoria</th>
+                        <th class="text-center" style="width:10%;">Produtos</th>
+                        <th class="text-center" style="width:20%;">Status</th>
+                        <th class="text-center" style="width:15%;">Criada</th>
+                        <th class="text-end" style="width:15%;">Ações</th>
+                    </tr>
+                </thead>
 
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                <tbody>
+                    {% for category in categories %}
+
+                        {% include "catalogo/categories/_row.html" %}
+                        {% include "catalogo/categories/_view_modal.html" %}
+
+                        {% if is_supervisor %}
+                            {% include "catalogo/categories/_edit_modal.html" %}
+                            {% include "catalogo/categories/_delete_modal.html" %}
+                        {% endif %}
+
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
 
         {% else %}
-            {% if query %}
-                <div class="alert alert-warning text-center">
-                    <i class="bi bi-exclamation-triangle me-2"></i>
-                    Nenhuma categoria encontrada para
-                    "<strong>{{ query }}</strong>".
-                </div>
-            {% else %}
-                <div class="text-center py-5">
-                    <i class="bi bi-list-ul display-1 text-muted mb-3"></i>
-                    <h4 class="text-muted">Nenhuma categoria cadastrada</h4>
 
-                    {% if is_supervisor %}
-                        <p class="mt-3">
-                            Comece criando sua primeira categoria
-                        </p>
-                        <button type="button"
-                                class="btn btn-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#createCategoryModal">
-                            <i class="bi bi-plus-circle me-1"></i>
-                            Criar Primeira Categoria
-                        </button>
-                    {% endif %}
+            {% if query %}
+            <div class="alert alert-warning text-center">
+                Nenhuma categoria encontrada para "<strong>{{ query }}</strong>"
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                Nenhuma categoria cadastrada
+
+                {% if is_supervisor %}
+                <div class="mt-3">
+                    <button class="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#createCategoryModal">
+                        Criar categoria
+                    </button>
                 </div>
+                {% endif %}
+            </div>
             {% endif %}
+
         {% endif %}
 
     </div>
