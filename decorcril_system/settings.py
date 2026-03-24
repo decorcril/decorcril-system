@@ -2,20 +2,24 @@
 Django settings for decorcril_system project.
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-xpzc(*q7&=e8b0a#xz---w21v4ta3(kv!x_a9yi64=+0j-b)nz"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = True
-ALLOWED_HOSTS = ['*', 'felicita-incogitable-ichnographically.ngrok-free.dev']
+DEBUG = False
+ALLOWED_HOSTS = ['72.60.246.136']
 
 # Adicione isso logo abaixo:
 CSRF_TRUSTED_ORIGINS = [
-    'https://felicita-incogitable-ichnographically.ngrok-free.dev',
+   'http://72.60.246.136',
+   'http://72.60.246.136:8000',
 ]
 # Application definition
 INSTALLED_APPS = [
@@ -25,7 +29,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.humanize",  # <-- biblioteca para visualiazação
+    "django.contrib.humanize",
     "core",
     "catalogo",
     "clientes",
@@ -62,9 +66,13 @@ TEMPLATES = [
 WSGI_APPLICATION = "decorcril_system.wsgi.application"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
@@ -88,7 +96,6 @@ TIME_ZONE = "America/Sao_Paulo"
 
 USE_I18N = True
 USE_TZ = True
-USE_L10N = True
 
 USE_THOUSAND_SEPARATOR = True
 THOUSAND_SEPARATOR = "."
