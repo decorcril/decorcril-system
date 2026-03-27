@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block page_actions %}
-{% if is_supervisor or is_vendedor %}
+{% if is_supervisor or is_vendedor or is_financeiro %}
 <div class="d-flex gap-2 mb-2">
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createClientModal">
         <i class="bi bi-person-plus me-1"></i>
@@ -103,7 +103,7 @@
             <i class="bi bi-people display-1 text-muted mb-3"></i>
             <h4 class="text-muted">Nenhum cliente cadastrado</h4>
 
-            {% if is_supervisor or is_vendedor %}
+            {% if is_supervisor or is_vendedor or is_financeiro %}
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createClientModal">
                 <i class="bi bi-person-plus me-1"></i>
                 Criar Primeiro Cliente

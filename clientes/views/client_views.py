@@ -11,7 +11,7 @@ from ..forms.client_form import ClientForm, ClientFormSupervisor, ClientFormVend
 # =====================================================
 # LISTAGEM + CREATE
 # =====================================================
-@group_required("Supervisor", "Vendedor")
+@group_required("Supervisor", "Vendedor", "Financeiro")
 def clients_list_view(request):
 
     if request.method == "POST":
@@ -28,15 +28,8 @@ def clients_list_view(request):
     query = request.GET.get("q", "").strip()
 
     clients = Client.objects.only(
-        "id",
-        "code",
-        "name",
-        "document",
-        "email",
-        "phone",
-        "city",
-        "state",
-        "created_at",
+        "id", "code", "name", "document", "email",
+        "phone", "city", "state", "created_at",
     )
 
     if query:
@@ -49,15 +42,17 @@ def clients_list_view(request):
     clients = clients.order_by("name")
 
     is_supervisor = request.user.groups.filter(name="Supervisor").exists()
-    is_vendedor = request.user.groups.filter(name="Vendedor").exists()
+    is_vendedor   = request.user.groups.filter(name="Vendedor").exists()
+    is_financeiro = request.user.groups.filter(name="Financeiro").exists()
 
     context = {
-        "clients": clients,
-        "form": form,
-        "query": query,
-        "page_title": "Clientes",
+        "clients":      clients,
+        "form":         form,
+        "query":        query,
+        "page_title":   "Clientes",
         "is_supervisor": is_supervisor,
-        "is_vendedor": is_vendedor,
+        "is_vendedor":   is_vendedor,
+        "is_financeiro": is_financeiro,
     }
 
     return render(request, "clientes/clients/list.html", context)
@@ -71,7 +66,7 @@ def client_update_view(request, pk):
     client = get_object_or_404(Client, pk=pk)
 
     is_supervisor = request.user.groups.filter(name="Supervisor").exists()
-    is_vendedor = request.user.groups.filter(name="Vendedor").exists()
+    is_vendedor   = request.user.groups.filter(name="Vendedor").exists()
     FormClass = ClientFormSupervisor if is_supervisor else ClientFormVendedor
 
     if request.method == "POST":
@@ -81,32 +76,28 @@ def client_update_view(request, pk):
             client = form.save()
 
             ctx = {
-                "client": client,
+                "client":       client,
                 "is_supervisor": is_supervisor,
-                "is_vendedor": is_vendedor,
+                "is_vendedor":   is_vendedor,
             }
 
             row_html = render(
                 request, "clientes/clients/_row.html", ctx
             ).content.decode("utf-8")
 
-            # HTML dos dois modais juntos — substitui o #client-modals-{pk} no DOM
             view_modal_html = render(
                 request, "clientes/clients/_view_modal.html", ctx
             ).content.decode("utf-8")
             edit_modal_html = render(
                 request, "clientes/clients/_edit_modal.html", ctx
             ).content.decode("utf-8")
-            modals_html = view_modal_html + edit_modal_html
 
-            return JsonResponse(
-                {
-                    "success": True,
-                    "client_id": client.pk,
-                    "row_html": row_html,
-                    "modals_html": modals_html,
-                }
-            )
+            return JsonResponse({
+                "success":    True,
+                "client_id":  client.pk,
+                "row_html":   row_html,
+                "modals_html": view_modal_html + edit_modal_html,
+            })
 
         html = render(
             request,
@@ -116,9 +107,7 @@ def client_update_view(request, pk):
 
         return JsonResponse({"success": False, "html": html})
 
-    # GET — retorna modal de edição para o AJAX carregar
     form = FormClass(instance=client)
-
     return render(
         request,
         "clientes/clients/_edit_modal.html",
@@ -132,12 +121,14 @@ def client_update_view(request, pk):
 @group_required("Supervisor", "Vendedor")
 def check_document_view(request):
     document = request.GET.get("document", "").strip()
-    digits = "".join(filter(str.isdigit, document))
+    digits   = "".join(filter(str.isdigit, document))
 
     if not digits:
         return JsonResponse({"exists": False})
 
-    client = Client.objects.filter(Q(document=document) | Q(document=digits)).first()
+    client = Client.objects.filter(
+        Q(document=document) | Q(document=digits)
+    ).first()
 
     if client:
         return JsonResponse({"exists": True, "name": client.name})

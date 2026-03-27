@@ -69,7 +69,7 @@
         <span class="fw-medium">{{ client.created_at|date:"d/m/Y" }}</span>
     </td>
 
-    {% if is_supervisor or is_vendedor %}
+    {% if is_supervisor or is_vendedor or is_financeiro %}
     <!-- Ações -->
     <td class="text-center">
         <div class="btn-group btn-group-sm">

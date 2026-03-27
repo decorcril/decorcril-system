@@ -26,6 +26,7 @@ class Order(models.Model):
 
     class SaleType(models.TextChoices):
         DIRECT      = "direct",      "Venda direta"
+        REPLACEMENT = "replacement", "Reposição"
         EXCHANGE    = "exchange",    "Troca"
         MAINTENANCE = "maintenance", "Manutenção"
         ADVERTISING = "advertising", "Publicidade"

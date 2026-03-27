@@ -14,7 +14,7 @@
 <!-- ========================= -->
 <div class="row mb-4">
 
-    {% if is_supervisor or is_vendedor %}
+    {% if is_supervisor or is_vendedor or is_financeiro %}
     <!-- Categorias -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-start-primary shadow h-100 py-2">
@@ -56,7 +56,7 @@
     {% endif %}
 
     <!-- Pedidos -->
-    {% if is_supervisor or is_vendedor or is_pos_venda %}
+    {% if is_supervisor or is_vendedor or is_financeiro %}
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-start-warning shadow h-100 py-2">
             <div class="card-body d-flex justify-content-between align-items-center">
@@ -101,7 +101,7 @@
             <div class="card-body">
                 <div class="row g-3">
 
-                    {% if is_supervisor or is_vendedor %}
+                    {% if is_supervisor or is_vendedor or is_financeiro %}
                     <div class="col-md-3">
                         <a href="{% url 'category_list' %}" class="btn btn-outline-primary w-100 py-3">
                             <i class="bi bi-list-ul fs-1 d-block mb-2"></i>
@@ -124,7 +124,7 @@
                     </div>
                     {% endif %}
 
-                    {% if is_supervisor or is_vendedor or is_pos_venda %}
+                    {% if is_supervisor or is_vendedor or is_financeiro %}
                     <div class="col-md-3">
                         <a href="{% url 'vendas:order_list' %}" class="btn btn-outline-warning w-100 py-3">
                             <i class="bi bi-cart-check fs-1 d-block mb-2"></i>
