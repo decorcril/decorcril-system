@@ -8,9 +8,4 @@ class Migration(migrations.Migration):
         ("vendas", "0016_alter_orderitem_discount"),
     ]
 
-    operations = [
-        migrations.RemoveField(
-            model_name="order",
-            name="discount",
-        ),
-    ]
+    operations = []

@@ -13,14 +13,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = False
-ALLOWED_HOSTS = ['72.60.246.136']
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-# Adicione isso logo abaixo:
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+
 CSRF_TRUSTED_ORIGINS = [
-   'http://72.60.246.136',
-   'http://72.60.246.136:8000',
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://72.60.246.136",
+    "http://72.60.246.136:8000",
 ]
+
 # Application definition
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -65,16 +68,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "decorcril_system.wsgi.application"
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+# ── BANCO DE DADOS ────────────────────────────────────────────────────────────
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME"),
+            "USER": os.getenv("DB_USER"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST"),
+            "PORT": os.getenv("DB_PORT"),
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -114,6 +126,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # Media files
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
 # Upload limits (20MB)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 20971520
 FILE_UPLOAD_MAX_MEMORY_SIZE = 20971520
