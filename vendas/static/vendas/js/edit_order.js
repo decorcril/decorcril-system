@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("edit-order-number").textContent = "...";
         document.getElementById("edit-locked-alert").classList.add("d-none");
         document.getElementById("edit-form-body").classList.remove("d-none");
-        itemsBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Carregando...</td></tr>`;
+        itemsBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Carregando...</td>;</table>`;
 
         fetch(`/vendas/orders/${pk}/detail/`)
             .then(r => r.json())
@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 renderItems(data.items);
             })
             .catch(() => {
-                itemsBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Erro ao carregar pedido.</td></tr>`;
+                itemsBody.innerHTML = `<td><td colspan="6" class="text-center text-danger">Erro ao carregar pedido.</td>;</table>`;
             });
     };
 
@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ================= RENDERIZAR ITENS =================
     const renderItems = items => {
         if (!items.length) {
-            itemsBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Nenhum item.</td></tr>`;
+            itemsBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Nenhum item.</td>;</table>`;
             recalcTotal();
             return;
         }
@@ -107,17 +107,17 @@ document.addEventListener("DOMContentLoaded", function () {
                     style="width:70px; margin:auto;">
             </td>
             <td class="text-center">
-                <input type="number" min="0" max="100" step="0.01" value="${fmt(discountPct).replace(',', '.')}"
+                <input type="number" min="0" max="100" step="0.01" value="${discountPct.toFixed(2).replace('.', ',')}"
                     class="form-control form-control-sm text-center item-disc"
                     style="width:80px; margin:auto;">
-            </td>
+             </td>
             <td class="text-end fw-semibold item-subtotal">R$ ${fmt(subtotal)}</td>
             <td class="text-center">
                 <button type="button" class="btn btn-sm btn-outline-danger btn-remove-item" title="Remover item">
                     <i class="bi bi-trash"></i>
                 </button>
-            </td>
-        </tr>`;
+             </td>
+         </tr>`;
     };
 
     // ================= RECALC TOTAL =================
@@ -126,12 +126,12 @@ document.addEventListener("DOMContentLoaded", function () {
         itemsBody.querySelectorAll("tr[data-item-id]").forEach(row => {
             const price = parseFloat(row.dataset.unitPrice || 0);
             const qty   = parseInt(row.querySelector(".item-qty")?.value || 1);
-            const disc  = parseFloat(row.querySelector(".item-disc")?.value || 0);
+            const disc  = parseFloat(row.querySelector(".item-disc")?.value?.replace(',', '.') || 0);
             const sub   = price * qty * (1 - disc / 100);
             row.querySelector(".item-subtotal").textContent = `R$ ${fmt(sub)}`;
             total += sub;
         });
-        const freight = parseFloat(document.getElementById("edit-freight")?.value || 0);
+        const freight = parseFloat(document.getElementById("edit-freight")?.value?.replace(',', '.') || 0);
         totalEl.textContent = fmt(total + freight);
     };
 
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", function () {
             row.remove();
             recalcTotal();
             if (!itemsBody.querySelector("tr[data-item-id]")) {
-                itemsBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Nenhum item.</td></tr>`;
+                itemsBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Nenhum item.</td>;</table>`;
             }
         } else {
             alert("Erro ao remover item: " + (data.error || ""));
@@ -239,12 +239,16 @@ document.addEventListener("DOMContentLoaded", function () {
             const itemId = row.dataset.itemId;
             const price  = parseFloat(row.dataset.unitPrice);
             const qty    = row.querySelector(".item-qty").value;
-            const disc   = row.querySelector(".item-disc").value;
+            const disc   = row.querySelector(".item-disc").value.replace(',', '.');
 
             await fetch(`/vendas/orders/items/${itemId}/edit/`, {
                 method: "POST",
                 headers: { "X-CSRFToken": getCsrf(), "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams({ unit_price: price, quantity: qty, discount: disc }),
+                body: new URLSearchParams({ 
+                    unit_price: price, 
+                    quantity: qty, 
+                    discount: disc  // Envia percentual, backend converte para valor total
+                }),
             });
         }
 
@@ -255,8 +259,8 @@ document.addEventListener("DOMContentLoaded", function () {
             customer_order:      document.getElementById("edit-customer-order").value,
             payment_terms:       document.getElementById("edit-payment-terms").value,
             carrier:             document.getElementById("edit-carrier").value,
-            freight:             document.getElementById("edit-freight").value,
-            down_payment_percent:document.getElementById("edit-down-payment").value,
+            freight:             document.getElementById("edit-freight").value?.replace(',', '.') || "0",
+            down_payment_percent: document.getElementById("edit-down-payment").value,
             notes:               document.getElementById("edit-notes").value,
             internal_notes:      document.getElementById("edit-internal-notes").value,
         });

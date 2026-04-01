@@ -344,23 +344,29 @@ class OrderItemManager:
             return default
 
     @classmethod
-    def calculate_discount(cls, unit_price: Decimal, percent: Decimal) -> Decimal:
-        if not unit_price or not percent:
+    def calculate_discount_total(cls, unit_price: Decimal, quantity: int, percent: Decimal) -> Decimal:
+        """Calcula o desconto total baseado no percentual sobre o valor total do item"""
+        if not unit_price or not percent or not quantity:
             return Decimal("0.00")
-        return (unit_price * percent / Decimal("100")).quantize(Decimal("0.01"))
+        total_value = unit_price * quantity
+        return (total_value * percent / Decimal("100")).quantize(Decimal("0.01"))
 
     @classmethod
-    def discount_to_percent(cls, unit_price: Decimal, discount_value: Decimal) -> Decimal:
-        if not unit_price or not discount_value:
+    def discount_to_percent(cls, unit_price: Decimal, quantity: int, discount_value: Decimal) -> Decimal:
+        """Converte o desconto total para percentual"""
+        if not unit_price or not discount_value or not quantity:
             return Decimal("0.00")
-        return (discount_value / unit_price * Decimal("100")).quantize(Decimal("0.01"))
+        total_value = unit_price * quantity
+        if total_value == 0:
+            return Decimal("0.00")
+        return (discount_value / total_value * Decimal("100")).quantize(Decimal("0.01"))
 
     @classmethod
     def create_or_update(cls, order, data, item_id=None) -> OrderItem:
-        unit_price       = cls.parse_decimal(data.get("unit_price"))
-        quantity         = int(data.get("quantity") or 1)
+        unit_price = cls.parse_decimal(data.get("unit_price"))
+        quantity = int(data.get("quantity") or 1)
         discount_percent = cls.parse_decimal(data.get("discount"))
-        discount_value   = cls.calculate_discount(unit_price, discount_percent)
+        discount_value = cls.calculate_discount_total(unit_price, quantity, discount_percent)
 
         product_id = data.get("product_id")
 
@@ -373,8 +379,8 @@ class OrderItemManager:
             item.product_id = int(product_id)
 
         item.unit_price = unit_price
-        item.quantity   = quantity
-        item.discount   = discount_value
+        item.quantity = quantity
+        item.discount = discount_value
         item.full_clean()
         item.save()
         return item
@@ -436,8 +442,12 @@ def _serialize_items(order) -> list:
         if not p:
             continue
 
-        subtotal     = (item.unit_price - item.discount) * item.quantity if item.unit_price else Decimal("0.00")
-        discount_pct = OrderItemManager.discount_to_percent(item.unit_price, item.discount)
+        subtotal = (item.unit_price * item.quantity) - item.discount
+        discount_pct = OrderItemManager.discount_to_percent(
+            item.unit_price, 
+            item.quantity, 
+            item.discount
+        )
 
         dims = []
         for attr, label in [

@@ -42,7 +42,8 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("view-status-badge").innerHTML = "";
         document.getElementById("view-free-sale-alert").classList.add("d-none");
         document.getElementById("view-items-body").innerHTML =
-            `<tr><td colspan="6" class="text-center text-muted py-3">Carregando...</td></tr>`;
+            `<tr><td colspan="6" class="text-center text-muted py-3">Carregando...</td>`;
+
         document.getElementById("view-payments-list").innerHTML =
             `<p class="text-muted text-center small py-2">Carregando...</p>`;
 
@@ -51,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(renderOrder)
             .catch(() => {
                 document.getElementById("view-items-body").innerHTML =
-                    `<tr><td colspan="6" class="text-center text-danger">Erro ao carregar pedido.</td></tr>`;
+                    `<td colspan="6" class="text-center text-danger">Erro ao carregar pedido.</td>`;
             });
     };
 
@@ -104,7 +105,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // ── Itens ─────────────────────────────────────────────
         const tbody = document.getElementById("view-items-body");
         if (!data.items || !data.items.length) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Nenhum item neste pedido.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Nenhum item neste pedido.</td>`;
         } else {
             tbody.innerHTML = data.items.map(item => `
                 <tr>
@@ -112,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td class="text-center">${item.sku || ""}</td>
                     <td>${item.name || ""}</td>
                     <td class="text-end">R$ ${fmt(item.unit_price)}</td>
-                    <td class="text-center">${item.discount ? fmt(item.discount) : 0}%</td>
+                    <td class="text-center">${item.discount ? item.discount + '%' : '0%'}</td>
                     <td class="text-end fw-semibold">R$ ${fmt(item.subtotal)}</td>
                 </tr>
             `).join("");

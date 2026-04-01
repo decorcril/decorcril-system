@@ -250,7 +250,7 @@
                     product_id: i.product_id,
                     unit_price: i.unit_price,
                     quantity:   i.quantity,
-                    discount:   i.discount,
+                    discount:   Math.min(100, Math.max(0, i.discount)),
                 }))
             );
         };
@@ -259,7 +259,7 @@
             update: (i, field, value) => {
                 items[i][field] = field === "quantity"
                     ? Math.max(1, parseInt(value) || 1)
-                    : parseFloat(value) || 0;
+                    : Math.min(100, Math.max(0, parseFloat(value) || 0));
                 renderTable();
             },
             remove: i => {

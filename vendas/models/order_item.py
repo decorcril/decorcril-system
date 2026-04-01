@@ -51,7 +51,7 @@ class OrderItem(models.Model):
         max_digits=10,
         decimal_places=2,
         default=Decimal("0.00"),
-        verbose_name="Desconto por unidade (R$)",
+        verbose_name="Desconto total (R$)",
     )
 
     class Meta:
@@ -83,7 +83,7 @@ class OrderItem(models.Model):
             errors["quantity"] = "Quantidade mínima é 1."
 
         if self.discount < 0 or (
-            self.unit_price is not None and self.discount > self.unit_price
+            self.unit_price is not None and self.discount > self.unit_price * self.quantity
         ):
             errors["discount"] = "Desconto inválido."
 
@@ -97,7 +97,7 @@ class OrderItem(models.Model):
     @property
     def subtotal(self) -> Decimal:
         return (
-            (self.unit_price - self.discount) * self.quantity
+            (self.unit_price * self.quantity) - self.discount
         ).quantize(TWO, rounding=ROUND_HALF_UP)
 
     # ---------------------------------------------------------
@@ -188,7 +188,7 @@ class OrderItem(models.Model):
 
         agg = order.items.aggregate(
             total_products=Sum(F("unit_price") * F("quantity")),
-            total_discount=Sum(F("discount") * F("quantity")),
+            total_discount=Sum("discount"),
         )
 
         total_products = Decimal(str(agg["total_products"] or 0)).quantize(TWO)
