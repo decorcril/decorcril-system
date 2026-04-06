@@ -14,6 +14,8 @@ from vendas.forms.order_forms import OrderForm
 from vendas.models.order import Order
 from vendas.models.order_item import OrderItem
 
+TWO = Decimal("0.01")
+
 
 # ==============================
 # LISTAGEM DE PEDIDOS
@@ -37,9 +39,9 @@ class OrderListView(LoginRequiredMixin, ListView):
             matched_status = next((v for k, v in status_map.items() if q.lower() in k), None)
             status_filter = Q(status=matched_status) if matched_status else Q()
             qs = qs.filter(
-                Q(client__name__icontains=q)  |
-                Q(number__icontains=q)        |
-                Q(customer_order__icontains=q)|
+                Q(client__name__icontains=q)   |
+                Q(number__icontains=q)          |
+                Q(customer_order__icontains=q)  |
                 status_filter
             )
         return qs.order_by("-created_at")
@@ -96,8 +98,23 @@ class OrderCreateView(LoginRequiredMixin, View):
             with transaction.atomic():
                 form.instance.created_by = request.user
                 order = form.save()
+
                 for item_data in items:
                     OrderItemManager.create_or_update(order, item_data)
+
+                order.refresh_from_db()
+
+                # Reposição: desconto automático = total dos produtos (sem cobrança)
+                if order.sale_type == "replacement":
+                    order.total_discount = order.total_products
+                else:
+                    order.total_discount = _parse_decimal(request.POST.get("total_discount"), "0")
+
+                order.total_amount = (
+                    order.total_products - order.total_discount + order.freight
+                ).quantize(TWO)
+                order.save(update_fields=["total_discount", "total_amount"])
+
         except Exception as e:
             return _json_error({"__all__": [str(e)]})
 
@@ -120,7 +137,7 @@ class OrderConfirmView(LoginRequiredMixin, View):
         if order.status not in self.CONFIRMABLE_STATUSES:
             return JsonResponse({
                 "success": False,
-                "error": f"Pedido não pode ser confirmado no status {order.get_status_display()}."
+                "error":   f"Pedido não pode ser confirmado no status {order.get_status_display()}."
             }, status=400)
 
         order.status = Order.Status.IN_PRODUCTION
@@ -183,10 +200,20 @@ class OrderUpdateView(LoginRequiredMixin, View):
         order.notes                = p.get("notes",                order.notes)
         order.internal_notes       = p.get("internal_notes",       order.internal_notes)
 
+        # Reposição: desconto automático = total dos produtos (sem cobrança)
+        if order.sale_type == "replacement":
+            order.total_discount = order.total_products
+        else:
+            order.total_discount = _parse_decimal(p.get("total_discount"), "0")
+
+        order.total_amount = (
+            order.total_products - order.total_discount + order.freight
+        ).quantize(TWO)
+
         order.save(update_fields=[
             "sale_type", "contact", "customer_order", "payment_terms",
-            "carrier", "freight", "down_payment_percent",
-            "notes", "internal_notes", "updated_at",
+            "carrier", "freight", "down_payment_percent", "total_discount",
+            "total_amount", "notes", "internal_notes", "updated_at",
         ])
         order.sync_payment_status()
         return JsonResponse({"success": True})
@@ -230,11 +257,14 @@ class OrderDetailView(LoginRequiredMixin, View):
             "freight":              str(order.freight),
             "down_payment_percent": str(order.down_payment_percent),
             "down_payment_value":   str(order.down_payment_value),
+            "total_discount":       str(order.total_discount),
             "notes":                order.notes or "—",
             "internal_notes":       order.internal_notes or "—",
+            "total_products":       str(order.total_products),
             "total_amount":         str(order.total_amount),
             "total_paid":           str(order.total_paid),
             "remaining":            str(order.remaining),
+            "is_replacement":       order.sale_type == "replacement",
             "client":               _serialize_client(order.client),
             "items":                _serialize_items(order),
             "payments":             _serialize_payments(order, Payment),
@@ -248,7 +278,7 @@ class OrderItemListView(LoginRequiredMixin, View):
     def get(self, request, order_id):
         order = get_object_or_404(Order, pk=order_id)
         items = list(order.items.select_related("product").values(
-            "id", "product__name", "product__sku", "quantity", "unit_price", "discount"
+            "id", "product__name", "product__sku", "quantity", "unit_price"
         ))
         return JsonResponse({"items": items})
 
@@ -260,7 +290,7 @@ class OrderItemCreateView(LoginRequiredMixin, View):
         if order.status != Order.Status.OPEN:
             return JsonResponse({
                 "success": False,
-                "error": "Itens só podem ser adicionados quando o pedido está Em aberto."
+                "error":   "Itens só podem ser adicionados quando o pedido está Em aberto."
             }, status=400)
 
         try:
@@ -277,7 +307,7 @@ class OrderItemUpdateView(LoginRequiredMixin, View):
         if item.order.status != Order.Status.OPEN:
             return JsonResponse({
                 "success": False,
-                "error": "Itens só podem ser editados quando o pedido está Em aberto."
+                "error":   "Itens só podem ser editados quando o pedido está Em aberto."
             }, status=400)
 
         try:
@@ -294,7 +324,7 @@ class OrderItemDeleteView(LoginRequiredMixin, View):
         if item.order.status != Order.Status.OPEN:
             return JsonResponse({
                 "success": False,
-                "error": "Itens só podem ser removidos quando o pedido está Em aberto."
+                "error":   "Itens só podem ser removidos quando o pedido está Em aberto."
             }, status=400)
 
         try:
@@ -317,7 +347,7 @@ class OrderCancelView(LoginRequiredMixin, View):
         if order.status in (Order.Status.DELIVERED, Order.Status.CANCELED):
             return JsonResponse({
                 "success": False,
-                "error": f'Pedido com status "{order.get_status_display()}" não pode ser cancelado.'
+                "error":   f'Pedido com status "{order.get_status_display()}" não pode ser cancelado.'
             })
 
         order.status = Order.Status.CANCELED
@@ -339,35 +369,14 @@ class OrderItemManager:
         if value is None:
             return default
         try:
-            return Decimal(str(value).replace("%", "").replace(",", ".").strip())
+            return Decimal(str(value).replace(",", ".").strip())
         except (InvalidOperation, ValueError, TypeError):
             return default
 
     @classmethod
-    def calculate_discount_total(cls, unit_price: Decimal, quantity: int, percent: Decimal) -> Decimal:
-        """Calcula o desconto total baseado no percentual sobre o valor total do item"""
-        if not unit_price or not percent or not quantity:
-            return Decimal("0.00")
-        total_value = unit_price * quantity
-        return (total_value * percent / Decimal("100")).quantize(Decimal("0.01"))
-
-    @classmethod
-    def discount_to_percent(cls, unit_price: Decimal, quantity: int, discount_value: Decimal) -> Decimal:
-        """Converte o desconto total para percentual"""
-        if not unit_price or not discount_value or not quantity:
-            return Decimal("0.00")
-        total_value = unit_price * quantity
-        if total_value == 0:
-            return Decimal("0.00")
-        return (discount_value / total_value * Decimal("100")).quantize(Decimal("0.01"))
-
-    @classmethod
     def create_or_update(cls, order, data, item_id=None) -> OrderItem:
         unit_price = cls.parse_decimal(data.get("unit_price"))
-        quantity = int(data.get("quantity") or 1)
-        discount_percent = cls.parse_decimal(data.get("discount"))
-        discount_value = cls.calculate_discount_total(unit_price, quantity, discount_percent)
-
+        quantity   = int(data.get("quantity") or 1)
         product_id = data.get("product_id")
 
         if item_id:
@@ -375,12 +384,11 @@ class OrderItemManager:
         else:
             if not product_id:
                 raise ValueError("product_id é obrigatório.")
-            item = OrderItem(order=order)
+            item            = OrderItem(order=order)
             item.product_id = int(product_id)
 
         item.unit_price = unit_price
-        item.quantity = quantity
-        item.discount = discount_value
+        item.quantity   = quantity
         item.full_clean()
         item.save()
         return item
@@ -423,14 +431,14 @@ def _serialize_client(c) -> dict:
         getattr(c, "state",        ""),
     ]))
     return {
-        "name":     c.name,
-        "document": getattr(c, "document", "") or "—",
-        "type":     c.get_person_type_display() if hasattr(c, "get_person_type_display") else "—",
-        "phone":    getattr(c, "phone",  "") or "—",
-        "email":    getattr(c, "email",  "") or "—",
-        "address":  address or "—",
+        "name":      c.name,
+        "document":  getattr(c, "document", "") or "—",
+        "type":      c.get_person_type_display() if hasattr(c, "get_person_type_display") else "—",
+        "phone":     c.phone_display if getattr(c, "phone", None) else "—",
+        "whatsapp":  c.whatsapp_display if getattr(c, "whatsapp", None) else "",
+        "email":     getattr(c, "email",  "") or "—",
+        "address":   address or "—",
     }
-
 
 def _serialize_items(order) -> list:
     items = []
@@ -441,13 +449,6 @@ def _serialize_items(order) -> list:
         p = item.product
         if not p:
             continue
-
-        subtotal = (item.unit_price * item.quantity) - item.discount
-        discount_pct = OrderItemManager.discount_to_percent(
-            item.unit_price, 
-            item.quantity, 
-            item.discount
-        )
 
         dims = []
         for attr, label in [
@@ -487,8 +488,7 @@ def _serialize_items(order) -> list:
             "sku":        p.sku or "",
             "quantity":   item.quantity,
             "unit_price": str(item.unit_price),
-            "discount":   str(discount_pct),
-            "subtotal":   f"{subtotal:.2f}",
+            "subtotal":   str(item.subtotal),
             "components": components,
             "thickness":  thickness,
             "color":      p.get_acrylic_color_display() if getattr(p, "acrylic_color", None) else "",

@@ -32,11 +32,11 @@ C_WHITE      = colors.white
 C_TOTAL_BG   = colors.HexColor('#E8E8E8')
 
 # ── CONSTANTES ───────────────────────────────────────────────
-NGROK_URL  = "https://felicita-incogitable-ichnographically.ngrok-free.dev"
+NGROK_URL      = "https://felicita-incogitable-ichnographically.ngrok-free.dev"
 PAGE_W, PAGE_H = A4
-MARGIN     = 6 * mm
-CONTENT_W  = PAGE_W - 2 * MARGIN
-HEADER_H   = 35 * mm
+MARGIN         = 6 * mm
+CONTENT_W      = PAGE_W - 2 * MARGIN
+HEADER_H       = 35 * mm
 
 _WM_PATHS = [
     os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'static', 'vendas', 'img', 'deco.png'),
@@ -54,6 +54,15 @@ def _get_watermark_path():
 
 def _fmt_brl(value) -> str:
     return f"R$ {value:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
+
+
+def _phone(client) -> str:
+    """Retorna phone_display ou whatsapp_display como fallback."""
+    phone = client.phone_display if getattr(client, 'phone', None) else ''
+    if phone:
+        return phone
+    whatsapp = client.whatsapp_display if getattr(client, 'whatsapp', None) else ''
+    return whatsapp or '—'
 
 
 def _build_qr(url: str, size_mm: float) -> RLImage:
@@ -119,11 +128,13 @@ def _build_invoice_section(order, col_lbl: float, content_w: float, s: dict) -> 
     elements.append(_section_title('Nota Fiscal', s))
     elements.append(Spacer(1, 2 * mm))
     elements.append(_info_grid([
-        [('Nº NF', invoice.number),
+        [('Nº NF',   invoice.number),
          ('Emissão', invoice.issued_at.strftime('%d/%m/%Y'))],
     ], [col_lbl_nf, col_val_nf, col_lbl_nf, col_val_nf], s))
     elements.append(Spacer(1, 4 * mm))
     return elements
+
+
 # ══════════════════════════════════════════════════════════════
 # ESTILOS
 # ══════════════════════════════════════════════════════════════
@@ -133,24 +144,29 @@ def _styles() -> dict:
         return ParagraphStyle(name, **kw)
 
     return {
-        'company':     s('company',     fontSize=18, textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=22),
-        'company_sub': s('company_sub', fontSize=9,  textColor=C_PRIMARY,    fontName='Helvetica',      leading=13),
-        'doc_number':  s('doc_number',  fontSize=20, textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=24, alignment=TA_RIGHT),
-        'doc_label':   s('doc_label',   fontSize=9,  textColor=C_PRIMARY,    fontName='Helvetica',      leading=13, alignment=TA_RIGHT),
-        'section':     s('section',     fontSize=10, textColor=C_PRIMARY,    fontName='Helvetica-Bold', spaceBefore=2, spaceAfter=4, leading=12),
-        'label':       ParagraphStyle('label', fontSize=10, textColor=colors.black, fontName='Helvetica-Bold', leading=11),
-        'value':       ParagraphStyle('value', fontSize=9,  textColor=colors.black, fontName='Helvetica',      leading=13),
-        'th':          s('th',          fontSize=9,  textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=12),
-        'td':          ParagraphStyle('td',     fontSize=9.5, textColor=colors.black, fontName='Helvetica',      leading=13),
-        'td_bold':     s('td_bold',     fontSize=9.5,textColor=colors.black, fontName='Helvetica-Bold', leading=13),
-        'total_label': s('total_label', fontSize=9,  textColor=colors.black, fontName='Helvetica',      leading=13, alignment=TA_RIGHT),
-        'total_value': s('total_value', fontSize=9,  textColor=colors.black, fontName='Helvetica-Bold', leading=13, alignment=TA_LEFT),
-        'grand_label': s('grand_label', fontSize=11, textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=15, alignment=TA_RIGHT),
-        'grand_value': s('grand_value', fontSize=11, textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=15, alignment=TA_LEFT),
-        'obs':         s('obs',         fontSize=8.5,textColor=colors.black, fontName='Helvetica',      leading=13),
-        'footer':      s('footer',      fontSize=7.5,textColor=C_PRIMARY,    fontName='Helvetica',      leading=10),
-        'qr_hint':     s('qr_hint',     fontSize=6.5,textColor=C_TEXT_MUTED, fontName='Helvetica',      leading=9,  alignment=TA_CENTER),
+        'company':     s('company',     fontSize=18,  textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=22),
+        'company_sub': s('company_sub', fontSize=9,   textColor=C_PRIMARY,    fontName='Helvetica',      leading=13),
+        'doc_number':  s('doc_number',  fontSize=20,  textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=24, alignment=TA_RIGHT),
+        'doc_label':   s('doc_label',   fontSize=9,   textColor=C_PRIMARY,    fontName='Helvetica',      leading=13, alignment=TA_RIGHT),
+        'section':     s('section',     fontSize=10,  textColor=C_PRIMARY,    fontName='Helvetica-Bold', spaceBefore=2, spaceAfter=4, leading=12),
+        'label':       ParagraphStyle('label',     fontSize=10,  textColor=colors.black, fontName='Helvetica-Bold', leading=11),
+        'value':       ParagraphStyle('value',     fontSize=9,   textColor=colors.black, fontName='Helvetica',      leading=13),
+        'th':          s('th',          fontSize=9,   textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=12),
+        'th_c':        ParagraphStyle('th_c',      fontSize=9,   textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=12, alignment=TA_CENTER),
+        'td':          ParagraphStyle('td',        fontSize=9.5, textColor=colors.black, fontName='Helvetica',      leading=13),
+        'td_c':        ParagraphStyle('td_c',      fontSize=9.5, textColor=colors.black, fontName='Helvetica',      leading=13, alignment=TA_CENTER),
+        'td_r':        ParagraphStyle('td_r',      fontSize=9.5, textColor=colors.black, fontName='Helvetica',      leading=13, alignment=TA_RIGHT),
+        'td_r_bold':   ParagraphStyle('td_r_bold', fontSize=9.5, textColor=colors.black, fontName='Helvetica-Bold', leading=13, alignment=TA_RIGHT),
+        'td_bold':     s('td_bold',     fontSize=9.5, textColor=colors.black, fontName='Helvetica-Bold', leading=13),
+        'total_label': s('total_label', fontSize=9,   textColor=colors.black, fontName='Helvetica',      leading=13, alignment=TA_RIGHT),
+        'total_value': s('total_value', fontSize=9,   textColor=colors.black, fontName='Helvetica-Bold', leading=13, alignment=TA_LEFT),
+        'grand_label': s('grand_label', fontSize=11,  textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=15, alignment=TA_RIGHT),
+        'grand_value': s('grand_value', fontSize=11,  textColor=C_PRIMARY,    fontName='Helvetica-Bold', leading=15, alignment=TA_LEFT),
+        'obs':         s('obs',         fontSize=8.5, textColor=colors.black, fontName='Helvetica',      leading=13),
+        'footer':      s('footer',      fontSize=7.5, textColor=C_PRIMARY,    fontName='Helvetica',      leading=10),
+        'qr_hint':     s('qr_hint',     fontSize=6.5, textColor=C_TEXT_MUTED, fontName='Helvetica',      leading=9,  alignment=TA_CENTER),
     }
+
 
 # ══════════════════════════════════════════════════════════════
 # COMPONENTES DE LAYOUT
@@ -220,28 +236,27 @@ def _build_compact_qr(order, qr_width: float, s: dict) -> Table:
 
 
 def _build_items_table(order, content_w: float, s: dict) -> list:
-    items_qs     = (
+    items_qs = (
         order.items
         .select_related('product__category')
         .prefetch_related('product__components__component')
         .all()
     )
-    has_discount = any(item.discount > 0 for item in items_qs)
 
     def _th(text):
         return Paragraph(text, s['th'])
 
     def _th_c(text):
-        return Paragraph(text, ParagraphStyle('thC', parent=s['th'], alignment=TA_CENTER))
+        return Paragraph(text, s['th_c'])
 
     def _td(text):
         return Paragraph(str(text), s['td'])
 
     def _td_c(text):
-        return Paragraph(str(text), ParagraphStyle('tdC', parent=s['td'], alignment=TA_CENTER))
+        return Paragraph(str(text), s['td_c'])
 
     def _td_r(text, bold=False):
-        return Paragraph(str(text), ParagraphStyle('tdR', parent=s['td_bold'] if bold else s['td'], alignment=TA_RIGHT))
+        return Paragraph(str(text), s['td_r_bold'] if bold else s['td_r'])
 
     def _single_measures(p) -> str:
         cm_vals = [
@@ -274,34 +289,32 @@ def _build_items_table(order, content_w: float, s: dict) -> list:
             return '<br/>'.join(lines) if lines else '—'
         return _single_measures(p) or '—'
 
-    COL_QTD   = 8  * mm
-    COL_SKU   = 20 * mm
+    # ── Colunas ───────────────────────────────────────────────
+    COL_QTD   = 14 * mm  # aumentado para não quebrar
+    COL_SKU   = 22 * mm
     COL_PRICE = 26 * mm
-    COL_DISC  = 20 * mm if has_discount else 0
-    COL_TOTAL = 24 * mm
-    COL_DESC  = content_w - COL_QTD - COL_SKU - COL_PRICE - COL_DISC - COL_TOTAL
+    COL_TOTAL = 26 * mm
+    COL_DESC  = content_w - COL_QTD - COL_SKU - COL_PRICE - COL_TOTAL
 
-    header_row = [_th_c('Qtd'), _th('Cod'), _th('Produto'), _th_c('Vlr. Unit.')]
-    col_widths  = [COL_QTD, COL_SKU, COL_DESC, COL_PRICE]
-    if has_discount:
-        header_row.append(_th_c('Desconto'))
-        col_widths.append(COL_DISC)
-    header_row.append(_th_c('Total'))
-    col_widths.append(COL_TOTAL)
+    header_row = [
+        _th_c('Qtd'),
+        _th('Código'),
+        _th('Produto'),
+        _th_c('Vlr. Unit.'),
+        _th_c('Total'),
+    ]
+    col_widths = [COL_QTD, COL_SKU, COL_DESC, COL_PRICE, COL_TOTAL]
 
     rows = [header_row]
     for item in items_qs:
-        p   = item.product
-        row = [
+        p = item.product
+        rows.append([
             _td_c(item.quantity),
-            _td(p.sku),
+            _td(p.sku or '—'),
             _td(p.name),
             _td_r(_fmt_brl(item.unit_price)),
-        ]
-        if has_discount:
-            row.append(_td_r(_fmt_brl(item.discount) if item.discount > 0 else '—'))
-        row.append(_td_r(_fmt_brl(item.subtotal), bold=True))
-        rows.append(row)
+            _td_r(_fmt_brl(item.subtotal), bold=True),
+        ])
 
     t = Table(rows, colWidths=col_widths, repeatRows=1)
     t.setStyle(TableStyle([
@@ -311,8 +324,8 @@ def _build_items_table(order, content_w: float, s: dict) -> list:
         ('ROWBACKGROUNDS', (0, 1),  (-1, -1), [C_WHITE, C_LIGHT_BG]),
         ('GRID',           (0, 0),  (-1, -1), 0.4, C_BORDER),
         ('VALIGN',         (0, 0),  (-1, -1), 'TOP'),
-        ('ALIGN',          (0, 1),  (0, -1),  'CENTER'),
-        ('ALIGN',          (3, 1),  (-1, -1), 'RIGHT'),
+        ('ALIGN',          (0, 0),  (0, -1),  'CENTER'),
+        ('ALIGN',          (3, 0),  (-1, -1), 'RIGHT'),
         ('LEFTPADDING',    (0, 0),  (-1, -1), 4),
         ('RIGHTPADDING',   (0, 0),  (-1, -1), 4),
         ('TOPPADDING',     (0, 1),  (-1, -1), 5),
@@ -328,8 +341,8 @@ def _build_totals_table(order, content_w: float, s: dict) -> Table:
 
     rows = []
     if order.total_discount > 0:
-        rows.append(('Total Bruto:',   _fmt_brl(order.total_products), False))
-        rows.append(('(-) Descontos:', _fmt_brl(order.total_discount), False))
+        rows.append(('Total Bruto:',  _fmt_brl(order.total_products), False))
+        rows.append(('(-) Desconto:', _fmt_brl(order.total_discount), False))
 
     rows += [
         ('Total Produtos:', _fmt_brl(order.total_products - order.total_discount), False),
@@ -386,7 +399,6 @@ def _make_canvas_class(wm_path):
                 self.__dict__.update(state)
 
                 if page_num == 1:
-                    # Página 1: desenha o logo no cabeçalho normalmente
                     if wm_path:
                         self.saveState()
                         from PIL import Image as PILImage
@@ -402,19 +414,15 @@ def _make_canvas_class(wm_path):
                         )
                         self.restoreState()
                 else:
-                    # Páginas seguintes: cabeçalho simples com nome e número do pedido
                     self.saveState()
                     self.setFont('Helvetica-Bold', 9)
                     self.setFillColor(C_PRIMARY)
-                    # Extrai número do pedido do título do doc (guardado no estado)
-                    doc_title = self._doc.title if hasattr(self, '_doc') else ''
                     self.drawString(MARGIN, PAGE_H - MARGIN + 1 * mm, "DECORCRIL — Pedido de Venda")
                     self.setLineWidth(0.4)
                     self.setStrokeColor(C_BORDER)
                     self.line(MARGIN, PAGE_H - MARGIN - 1 * mm, PAGE_W - MARGIN, PAGE_H - MARGIN - 1 * mm)
                     self.restoreState()
 
-                # Numeração em todas as páginas
                 self.saveState()
                 self.setFont('Helvetica', 7.5)
                 self.setFillColor(colors.HexColor('#64748B'))
@@ -428,15 +436,16 @@ def _make_canvas_class(wm_path):
 
     return WatermarkCanvas
 
+
 # ══════════════════════════════════════════════════════════════
 # VIEW PRINCIPAL
 # ══════════════════════════════════════════════════════════════
 
 def order_pdf(request, pk):
     order = get_object_or_404(
-    Order.objects.select_related('client', 'created_by', 'invoice'),
-    pk=pk
-)
+        Order.objects.select_related('client', 'created_by', 'invoice'),
+        pk=pk,
+    )
     client = order.client
     s      = _styles()
     now    = datetime.now(tz=zoneinfo.ZoneInfo("America/Sao_Paulo")).strftime('%d/%m/%Y  %H:%M')
@@ -453,7 +462,7 @@ def order_pdf(request, pk):
         title=f"Pedido #{order.number}", author='Decorcril',
     )
 
-    el = []  # elements
+    el = []
 
     # ── Cabeçalho ─────────────────────────────────────────────
     left_col = [
@@ -465,10 +474,10 @@ def order_pdf(request, pk):
         Paragraph("WhatsApp  (11)97899-9091",                  s['company_sub']),
     ]
     right_col = [
-        Paragraph("PEDIDO DE VENDA",     s['doc_label']),
-        Paragraph(f"Nº {order.number}",  s['doc_number']),
+        Paragraph("PEDIDO DE VENDA",    s['doc_label']),
+        Paragraph(f"Nº {order.number}", s['doc_number']),
         Spacer(1, 2 * mm),
-        Paragraph(f"Emissão: {now}",     s['doc_label']),
+        Paragraph(f"Emissão: {now}",    s['doc_label']),
     ]
     header = Table(
         [[left_col, right_col]],
@@ -489,15 +498,17 @@ def order_pdf(request, pk):
     el.append(_section_title('Dados do Cliente', s))
     el.append(Spacer(1, 2 * mm))
     el.append(_info_grid([
-        [('Cliente',    client.name),
-         ('Pedido Nº',  order.number)],
-        [('CNPJ / CPF', client.document_display),
-         ('Data',       order.created_at.strftime('%d/%m/%Y'))],
-        [('Telefone',   client.phone_display),
-         ('Situação',   order.get_status_display())],
-        [('E-mail',     getattr(client, 'email',          None)),
-         ('Contato',    getattr(client, 'contact_person', None))],
-    ], cw, s))
+    [('Cliente',    client.name),
+     ('Pedido Nº',  order.number)],
+    [('CNPJ / CPF', client.document_display),
+     ('Data',       order.created_at.strftime('%d/%m/%Y'))],
+    [('Telefone',   client.phone_display or '—'),
+     ('WhatsApp',   client.whatsapp_display or '—')],
+    [('Situação',   order.get_status_display()),
+     ('Contato',    getattr(client, 'contact_person', None))],
+    [('E-mail',     getattr(client, 'email', None)),
+     ('', '')],
+], cw, s))
     el.append(_full_width_row('Endereço', _build_address(client), col_lbl, CONTENT_W, s, bg=C_LIGHT_BG))
     el.append(Spacer(1, 4 * mm))
 
@@ -536,14 +547,13 @@ def order_pdf(request, pk):
         el.append(obs)
         el.append(Spacer(1, 4 * mm))
 
-    # ── Resumo Financeiro + QR Code ───────────────────────────
-    el.append(_section_title('Resumo Financeiro', s))
-    el.append(Spacer(1, 2 * mm))
     # ── Nota Fiscal ───────────────────────────────────────────
     el += _build_invoice_section(order, col_lbl, CONTENT_W, s)
 
     # ── Resumo Financeiro + QR Code ───────────────────────────
     el.append(_section_title('Resumo Financeiro', s))
+    el.append(Spacer(1, 2 * mm))
+
     qr_width     = 35 * mm
     totals_width = CONTENT_W - qr_width - 5 * mm
 

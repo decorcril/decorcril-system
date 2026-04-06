@@ -7,7 +7,7 @@ from clientes.models import Client
 TWO = Decimal("0.01")
 
 # Tipos de venda que não exigem pagamento para entrar em produção
-FREE_SALE_TYPES = {"exchange", "maintenance", "advertising"}
+FREE_SALE_TYPES = {"exchange", "maintenance", "advertising", "replacement"}
 
 
 class Order(models.Model):

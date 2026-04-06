@@ -39,13 +39,36 @@
                 <h6 class="text-muted fw-semibold text-uppercase small mb-2">
                     <i class="bi bi-person me-1"></i> Cliente
                 </h6>
+                <!-- CLIENTE -->
                 <div class="row g-3 small mb-3">
-                    <div class="col-md-6 col-lg-4"><div class="text-muted">Nome</div><div class="fw-semibold" id="view-client-name">—</div></div>
-                    <div class="col-md-6 col-lg-4"><div class="text-muted">Documento</div><div id="view-client-document">—</div></div>
-                    <div class="col-md-6 col-lg-4"><div class="text-muted">Tipo</div><div id="view-client-type">—</div></div>
-                    <div class="col-md-6 col-lg-4"><div class="text-muted">Telefone</div><div id="view-client-phone">—</div></div>
-                    <div class="col-md-6 col-lg-4"><div class="text-muted">E-mail</div><div id="view-client-email">—</div></div>
-                    <div class="col-md-12 col-lg-4"><div class="text-muted">Endereço</div><div id="view-client-address">—</div></div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="text-muted">Nome</div>
+                        <div class="fw-semibold" id="view-client-name">—</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="text-muted">Documento</div>
+                        <div id="view-client-document">—</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="text-muted">Tipo</div>
+                        <div id="view-client-type">—</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="text-muted">Telefone</div>
+                        <div id="view-client-phone">—</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="text-muted">WhatsApp</div>
+                        <div id="view-client-whatsapp">—</div>
+                    </div>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="text-muted">E-mail</div>
+                        <div id="view-client-email">—</div>
+                    </div>
+                    <div class="col-md-12 col-lg-4">
+                        <div class="text-muted">Endereço</div>
+                        <div id="view-client-address">—</div>
+                    </div>
                 </div>
 
                 <hr>
@@ -55,14 +78,38 @@
                     <i class="bi bi-briefcase me-1"></i> Informações Comerciais
                 </h6>
                 <div class="row g-3 small mb-3">
-                    <div class="col-md-6 col-lg-3"><div class="text-muted">Tipo de venda</div><div id="view-sale-type">—</div></div>
-                    <div class="col-md-6 col-lg-3"><div class="text-muted">Contato</div><div id="view-contact">—</div></div>
-                    <div class="col-md-6 col-lg-3"><div class="text-muted">Pedido do cliente</div><div id="view-customer-order">—</div></div>
-                    <div class="col-md-6 col-lg-3"><div class="text-muted">Condição de pagamento</div><div id="view-payment-terms">—</div></div>
-                    <div class="col-md-6 col-lg-3"><div class="text-muted">Transportadora</div><div id="view-carrier">—</div></div>
-                    <div class="col-md-6 col-lg-3"><div class="text-muted">Frete</div><div id="view-freight">—</div></div>
-                    <div class="col-md-6 col-lg-3"><div class="text-muted">Sinal (%)</div><div id="view-down-payment-pct">—</div></div>
-                    <div class="col-md-6 col-lg-3"><div class="text-muted">Valor do sinal</div><div id="view-down-payment-val">—</div></div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="text-muted">Tipo de venda</div>
+                        <div id="view-sale-type">—</div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="text-muted">Contato</div>
+                        <div id="view-contact">—</div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="text-muted">Pedido do cliente</div>
+                        <div id="view-customer-order">—</div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="text-muted">Condição de pagamento</div>
+                        <div id="view-payment-terms">—</div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="text-muted">Transportadora</div>
+                        <div id="view-carrier">—</div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="text-muted">Frete</div>
+                        <div id="view-freight">—</div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="text-muted">Sinal (%)</div>
+                        <div id="view-down-payment-pct">—</div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="text-muted">Valor do sinal</div>
+                        <div id="view-down-payment-val">—</div>
+                    </div>
                 </div>
 
                 <hr>
@@ -78,13 +125,14 @@
                                 <th class="text-center" style="width:80px;">Qtd</th>
                                 <th class="text-center" style="width:120px;">Código</th>
                                 <th>Produto</th>
-                                <th class="text-end" style="width:120px;">Preço</th>
-                                <th class="text-center" style="width:80px;">Desc</th>
+                                <th class="text-end" style="width:120px;">Preço unit.</th>
                                 <th class="text-end" style="width:130px;">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody id="view-items-body">
-                            <tr><td colspan="6" class="text-center text-muted py-3">Carregando...</td></tr>
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-3">Carregando...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -93,10 +141,30 @@
                 <div class="row justify-content-end mb-3">
                     <div class="col-md-4 col-lg-3">
                         <table class="table table-sm small mb-0">
-                            <tr><td class="text-muted">Frete</td><td class="text-end fw-semibold" id="view-total-freight">R$ 0,00</td></tr>
-                            <tr class="table-light"><td class="fw-bold">Total</td><td class="text-end fw-bold text-primary fs-6" id="view-total-amount">R$ 0,00</td></tr>
-                            <tr><td class="text-muted">Total pago</td><td class="text-end fw-semibold text-success" id="view-total-paid">R$ 0,00</td></tr>
-                            <tr><td class="text-muted">Saldo restante</td><td class="text-end fw-semibold text-danger" id="view-remaining">R$ 0,00</td></tr>
+                            <tr>
+                                <td class="text-muted">Subtotal produtos</td>
+                                <td class="text-end fw-semibold" id="view-total-products">R$ 0,00</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Desconto</td>
+                                <td class="text-end fw-semibold text-danger" id="view-total-discount">R$ 0,00</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Frete</td>
+                                <td class="text-end fw-semibold" id="view-total-freight">R$ 0,00</td>
+                            </tr>
+                            <tr class="table-light">
+                                <td class="fw-bold">Total</td>
+                                <td class="text-end fw-bold text-primary fs-6" id="view-total-amount">R$ 0,00</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Total pago</td>
+                                <td class="text-end fw-semibold text-success" id="view-total-paid">R$ 0,00</td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Saldo restante</td>
+                                <td class="text-end fw-semibold text-danger" id="view-remaining">R$ 0,00</td>
+                            </tr>
                         </table>
                     </div>
                 </div>
