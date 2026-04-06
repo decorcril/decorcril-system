@@ -82,11 +82,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 setFmt("edit-freight",  data.freight);
                 setFmt("edit-discount", data.total_discount);
 
-                // Bloqueia desconto para reposição (automático)
+                // Bloqueia desconto para vendas sem cobrança (automático)
                 const discountInput = document.getElementById("edit-discount");
-                if (data.is_replacement) {
+                if (data.is_free_sale) {
                     discountInput.disabled = true;
-                    discountInput.title    = "Desconto automático para Reposição";
+                    discountInput.title    = "Desconto automático para este tipo de venda";
                 } else {
                     discountInput.disabled = false;
                     discountInput.title    = "";

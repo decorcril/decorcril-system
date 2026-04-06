@@ -11,7 +11,7 @@ from django.views import View
 from django.views.generic import ListView
 
 from vendas.forms.order_forms import OrderForm
-from vendas.models.order import Order
+from vendas.models.order import Order, FREE_SALE_TYPES
 from vendas.models.order_item import OrderItem
 
 TWO = Decimal("0.01")
@@ -104,8 +104,8 @@ class OrderCreateView(LoginRequiredMixin, View):
 
                 order.refresh_from_db()
 
-                # Reposição: desconto automático = total dos produtos (sem cobrança)
-                if order.sale_type == "replacement":
+                # Vendas sem cobrança: desconto automático = total dos produtos
+                if order.sale_type in FREE_SALE_TYPES:
                     order.total_discount = order.total_products
                 else:
                     order.total_discount = _parse_decimal(request.POST.get("total_discount"), "0")
@@ -200,8 +200,8 @@ class OrderUpdateView(LoginRequiredMixin, View):
         order.notes                = p.get("notes",                order.notes)
         order.internal_notes       = p.get("internal_notes",       order.internal_notes)
 
-        # Reposição: desconto automático = total dos produtos (sem cobrança)
-        if order.sale_type == "replacement":
+        # Vendas sem cobrança: desconto automático = total dos produtos
+        if order.sale_type in FREE_SALE_TYPES:
             order.total_discount = order.total_products
         else:
             order.total_discount = _parse_decimal(p.get("total_discount"), "0")
@@ -264,7 +264,7 @@ class OrderDetailView(LoginRequiredMixin, View):
             "total_amount":         str(order.total_amount),
             "total_paid":           str(order.total_paid),
             "remaining":            str(order.remaining),
-            "is_replacement":       order.sale_type == "replacement",
+            "is_free_sale":         order.sale_type in FREE_SALE_TYPES,
             "client":               _serialize_client(order.client),
             "items":                _serialize_items(order),
             "payments":             _serialize_payments(order, Payment),
@@ -431,14 +431,15 @@ def _serialize_client(c) -> dict:
         getattr(c, "state",        ""),
     ]))
     return {
-        "name":      c.name,
-        "document":  getattr(c, "document", "") or "—",
-        "type":      c.get_person_type_display() if hasattr(c, "get_person_type_display") else "—",
-        "phone":     c.phone_display if getattr(c, "phone", None) else "—",
-        "whatsapp":  c.whatsapp_display if getattr(c, "whatsapp", None) else "",
-        "email":     getattr(c, "email",  "") or "—",
-        "address":   address or "—",
+        "name":     c.name,
+        "document": getattr(c, "document", "") or "—",
+        "type":     c.get_person_type_display() if hasattr(c, "get_person_type_display") else "—",
+        "phone":    c.phone_display if getattr(c, "phone", None) else "—",
+        "whatsapp": c.whatsapp_display if getattr(c, "whatsapp", None) else "—",
+        "email":    getattr(c, "email",  "") or "—",
+        "address":  address or "—",
     }
+
 
 def _serialize_items(order) -> list:
     items = []
