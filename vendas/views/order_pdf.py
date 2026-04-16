@@ -190,12 +190,13 @@ def _info_grid(rows: list, col_widths: list, s: dict) -> Table:
 
     t = Table(table_rows, colWidths=col_widths)
     t.setStyle(TableStyle([
-        ('VALIGN',        (0, 0), (-1, -1), 'TOP'),
-        ('TOPPADDING',    (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('LEFTPADDING',   (0, 0), (-1, -1), 5),
-        ('RIGHTPADDING',  (0, 0), (-1, -1), 5),
-        *[('BACKGROUND', (0, i), (-1, i), C_LIGHT_BG) for i in range(0, len(table_rows), 2)],
+    ('VALIGN',        (0, 0), (-1, -1), 'TOP'),
+    ('TOPPADDING',    (0, 0), (-1, -1), 4),
+    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    ('LEFTPADDING',   (0, 0), (-1, -1), 5),
+    ('RIGHTPADDING',  (0, 0), (-1, -1), 5),
+    ('GRID',          (0, 0), (-1, -1), 0.5, colors.HexColor('#94a3b8')),
+    *[('BACKGROUND', (0, i), (-1, i), C_LIGHT_BG) for i in range(0, len(table_rows), 2)],
     ]))
     return t
 
@@ -206,11 +207,13 @@ def _full_width_row(label: str, value: str, col_lbl: float, content_w: float, s:
         colWidths=[col_lbl, content_w - col_lbl],
     )
     style = [
-        ('VALIGN',        (0, 0), (-1, -1), 'TOP'),
-        ('TOPPADDING',    (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        ('LEFTPADDING',   (0, 0), (-1, -1), 5),
-        ('RIGHTPADDING',  (0, 0), (-1, -1), 5),
+    ('VALIGN',        (0, 0), (-1, -1), 'TOP'),
+    ('TOPPADDING',    (0, 0), (-1, -1), 4),
+    ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+    ('LEFTPADDING',   (0, 0), (-1, -1), 5),
+    ('RIGHTPADDING',  (0, 0), (-1, -1), 5),
+    ('BOX',           (0, 0), (-1, -1), 0.5, colors.HexColor('#94a3b8')),
+    ('INNERGRID',     (0, 0), (-1, -1), 0.5, colors.HexColor('#94a3b8')),
     ]
     if bg:
         style.append(('BACKGROUND', (0, 0), (-1, -1), bg))
@@ -322,7 +325,7 @@ def _build_items_table(order, content_w: float, s: dict) -> list:
         ('TOPPADDING',     (0, 0),  (-1, 0),  5),
         ('BOTTOMPADDING',  (0, 0),  (-1, 0),  5),
         ('ROWBACKGROUNDS', (0, 1),  (-1, -1), [C_WHITE, C_LIGHT_BG]),
-        ('GRID',           (0, 0),  (-1, -1), 0.4, C_BORDER),
+        ('GRID',           (0, 0),  (-1, -1), 0.8, colors.HexColor('#94a3b8')),
         ('VALIGN',         (0, 0),  (-1, -1), 'TOP'),
         ('ALIGN',          (0, 0),  (0, -1),  'CENTER'),
         ('ALIGN',          (3, 0),  (-1, -1), 'RIGHT'),
@@ -368,7 +371,7 @@ def _build_totals_table(order, content_w: float, s: dict) -> Table:
         ('TOPPADDING',    (0, 0),           (-1, -1),           2),
         ('BOTTOMPADDING', (0, 0),           (-1, -1),           2),
         ('RIGHTPADDING',  (1, 0),           (1, -1),            2),
-        ('LEFTPADDING',   (2, 0),           (2, -1),            4),
+        ('GRID',          (1, 0),           (-1, -1),            0.5, colors.HexColor('#94a3b8')),
         ('BACKGROUND',    (1, grand_idx),   (2, grand_idx),     C_TOTAL_BG),
         ('LINEABOVE',     (1, grand_idx),   (2, grand_idx),     0.7, C_ACCENT),
         ('LINEBELOW',     (1, grand_idx),   (2, grand_idx),     0.7, C_ACCENT),
