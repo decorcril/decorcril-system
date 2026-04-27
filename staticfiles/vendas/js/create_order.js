@@ -57,6 +57,7 @@
         };
 
         applyBrlMask($("order_freight_field"));
+        applyBrlMask($("order_discount_field"));
 
         // ── Reset ─────────────────────────────────────────────
         const reset = () => {
@@ -67,6 +68,7 @@
             $("order_product_input").value      = "";
             $("order_down_payment_field").value = "0";
             $("order_freight_field").value      = "0,00";
+            $("order_discount_field").value     = "0,00";
             $("client_results").classList.add("d-none");
             $("order_product_results").classList.add("d-none");
             $("client_info_card").classList.add("d-none");
@@ -189,7 +191,6 @@
                 name:       selectedProduct.text,
                 unit_price: parseFloat(selectedProduct.price) || 0,
                 quantity:   1,
-                discount:   0,
             });
 
             selectedProduct = null;
@@ -203,11 +204,11 @@
             tbody.innerHTML = "";
 
             if (!items.length) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">
                     Nenhum produto adicionado</td></tr>`;
             } else {
                 items.forEach((item, i) => {
-                    const subtotal = item.unit_price * (1 - item.discount / 100) * item.quantity;
+                    const subtotal = item.unit_price * item.quantity;
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
                         <td>${item.name}</td>
@@ -216,15 +217,6 @@
                             <input type="number" min="1" value="${item.quantity}"
                                 class="form-control form-control-sm"
                                 onchange="window._order.update(${i}, 'quantity', this.value)">
-                        </td>
-                        <td>
-                            <div class="input-group input-group-sm">
-                                <input type="number" step="0.01" min="0" max="100"
-                                    value="${item.discount}"
-                                    class="form-control form-control-sm"
-                                    onchange="window._order.update(${i}, 'discount', this.value)">
-                                <span class="input-group-text">%</span>
-                            </div>
                         </td>
                         <td class="fw-semibold">R$ ${fmt(subtotal)}</td>
                         <td>
@@ -236,12 +228,14 @@
             }
 
             const subtotal = items.reduce(
-                (acc, i) => acc + i.unit_price * (1 - i.discount / 100) * i.quantity, 0
+                (acc, i) => acc + i.unit_price * i.quantity, 0
             );
-            const freight = parseBrl($("order_freight_field").value);
-            const total   = subtotal + freight;
-            const downPct = parseFloat($("order_down_payment_field").value) || 0;
+            const discount = parseBrl($("order_discount_field").value);
+            const freight  = parseBrl($("order_freight_field").value);
+            const total    = subtotal - discount + freight;
+            const downPct  = parseFloat($("order_down_payment_field").value) || 0;
 
+            $("order_subtotal").textContent           = fmt(subtotal);
             $("order_total").textContent              = fmt(total);
             $("order_down_payment_value").textContent = fmt(total * downPct / 100);
 
@@ -250,7 +244,6 @@
                     product_id: i.product_id,
                     unit_price: i.unit_price,
                     quantity:   i.quantity,
-                    discount:   i.discount,
                 }))
             );
         };
@@ -275,11 +268,16 @@
             if (!$("client_id").value) return alert("Selecione um cliente.");
             if (!items.length)         return alert("Adicione ao menos um produto.");
 
-            const freightInput = $("order_freight_field");
-            freightInput.value = parseBrl(freightInput.value).toFixed(2);
+            const freightInput  = $("order_freight_field");
+            const discountInput = $("order_discount_field");
+
+            freightInput.value  = parseBrl(freightInput.value).toFixed(2);
+            discountInput.value = parseBrl(discountInput.value).toFixed(2);
 
             const formData = new FormData(this);
-            const btn      = this.querySelector("[type=submit]");
+            formData.set("total_discount", discountInput.value);
+
+            const btn       = this.querySelector("[type=submit]");
             btn.disabled    = true;
             btn.textContent = "Salvando...";
 
@@ -300,12 +298,14 @@
                 .finally(() => {
                     btn.disabled    = false;
                     btn.textContent = "Criar Pedido";
-                    freightInput.value = fmt(parseBrl(freightInput.value));
+                    freightInput.value  = fmt(parseBrl(freightInput.value));
+                    discountInput.value = fmt(parseBrl(discountInput.value));
                 });
         });
 
         // ── Eventos extras ────────────────────────────────────
         $("order_freight_field").addEventListener("input", renderTable);
+        $("order_discount_field").addEventListener("input", renderTable);
         $("order_down_payment_field").addEventListener("input", renderTable);
         modal.addEventListener("hidden.bs.modal", reset);
         document.querySelectorAll('[data-bs-target="#createOrderModal"]')

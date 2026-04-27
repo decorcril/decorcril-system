@@ -203,25 +203,27 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // ================= AUTOCOMPLETE PRODUTO =================
     const searchProducts = query => {
-        const url = productInput.dataset.url;
-        if (!url || query.length < 2) { productResults.classList.add("d-none"); return; }
-        fetch(`${url}?q=${encodeURIComponent(query)}`)
-            .then(r => r.json())
-            .then(data => {
-                if (!data.results?.length) { productResults.classList.add("d-none"); return; }
-                productResults.innerHTML = data.results.map(p =>
-                    `<button type="button" class="list-group-item list-group-item-action"
-                        data-id="${p.id}" data-name="${p.name}" data-sku="${p.sku || ''}"
-                        data-price="${p.price}">
-                        <span class="fw-semibold">${p.name}</span>
-                        ${p.sku ? `<small class="text-muted ms-2 font-monospace">${p.sku}</small>` : ""}
-                        <span class="float-end text-success small">R$ ${fmt(p.price)}</span>
-                    </button>`
-                ).join("");
-                productResults.classList.remove("d-none");
-            });
-    };
-
+    const url = productInput.dataset.url;
+    if (!url || query.length < 2) { productResults.classList.add("d-none"); return; }
+    fetch(`${url}?q=${encodeURIComponent(query)}`)
+        .then(r => r.json())
+        .then(data => {
+            const results = Array.isArray(data) ? data : (data.results || []);
+            if (!results.length) { productResults.classList.add("d-none"); return; }
+            productResults.innerHTML = results.map(p =>
+                `<button type="button" class="list-group-item list-group-item-action"
+                    data-id="${p.product_id || p.id}"
+                    data-name="${p.text || p.name}"
+                    data-sku="${p.sku || ''}"
+                    data-price="${p.price}">
+                    <span class="fw-semibold">${p.text || p.name}</span>
+                    ${p.sku ? `<small class="text-muted ms-2 font-monospace">${p.sku}</small>` : ""}
+                    <span class="float-end text-success small">R$ ${fmt(p.price)}</span>
+                </button>`
+            ).join("");
+            productResults.classList.remove("d-none");
+        });
+};
     productInput?.addEventListener("input", e => searchProducts(e.target.value));
     document.getElementById("edit-btn-search-product")?.addEventListener("click", () => searchProducts(productInput.value));
 
