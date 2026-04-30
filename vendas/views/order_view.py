@@ -44,6 +44,14 @@ class OrderListView(LoginRequiredMixin, ListView):
                 Q(customer_order__icontains=q)  |
                 status_filter
             )
+
+        date_from = self.request.GET.get("date_from", "").strip()
+        date_to   = self.request.GET.get("date_to",   "").strip()
+        if date_from:
+            qs = qs.filter(created_at__date__gte=date_from)
+        if date_to:
+            qs = qs.filter(created_at__date__lte=date_to)
+
         return qs.order_by("-created_at")
 
     def get_context_data(self, **kwargs):

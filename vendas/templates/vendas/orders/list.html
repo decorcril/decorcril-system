@@ -59,15 +59,25 @@
 
         <!-- PESQUISA -->
         <div class="px-3 pt-3 pb-2">
-            <form method="get" class="d-flex gap-2 justify-content-end">
+            <form method="get" class="d-flex gap-2 justify-content-end flex-wrap">
                 <input type="text" name="q" value="{{ request.GET.q|default:'' }}"
                        class="form-control form-control-sm"
                        placeholder="Pesquisar por número, cliente ou status..."
-                       style="max-width:400px;">
+                       style="max-width:300px;">
+                <input type="date" name="date_from"
+                       value="{{ request.GET.date_from|default:'' }}"
+                       class="form-control form-control-sm"
+                       style="max-width:150px;"
+                       title="Data início">
+                <input type="date" name="date_to"
+                       value="{{ request.GET.date_to|default:'' }}"
+                       class="form-control form-control-sm"
+                       style="max-width:150px;"
+                       title="Data fim">
                 <button type="submit" class="btn btn-sm btn-primary">
                     <i class="bi bi-search me-1"></i>Buscar
                 </button>
-                {% if request.GET.q %}
+                {% if request.GET.q or request.GET.date_from or request.GET.date_to %}
                 <a href="{% url 'vendas:order_list' %}" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-x me-1"></i>Limpar
                 </a>
@@ -108,7 +118,7 @@
                 <ul class="pagination pagination-sm mb-0">
                     {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                        <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.date_from %}date_from={{ request.GET.date_from }}&{% endif %}{% if request.GET.date_to %}date_to={{ request.GET.date_to }}&{% endif %}page={{ page_obj.previous_page_number }}">
                             <i class="bi bi-chevron-left"></i>
                         </a>
                     </li>
@@ -121,14 +131,14 @@
                         </li>
                         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                         <li class="page-item">
-                            <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ num }}">{{ num }}</a>
+                            <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.date_from %}date_from={{ request.GET.date_from }}&{% endif %}{% if request.GET.date_to %}date_to={{ request.GET.date_to }}&{% endif %}page={{ num }}">{{ num }}</a>
                         </li>
                         {% endif %}
                     {% endfor %}
 
                     {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.next_page_number }}">
+                        <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.date_from %}date_from={{ request.GET.date_from }}&{% endif %}{% if request.GET.date_to %}date_to={{ request.GET.date_to }}&{% endif %}page={{ page_obj.next_page_number }}">
                             <i class="bi bi-chevron-right"></i>
                         </a>
                     </li>
@@ -141,10 +151,10 @@
         {% else %}
         <div class="text-center py-5">
             <i class="bi bi-cart display-1 text-muted mb-3"></i>
-            {% if request.GET.q %}
+            {% if request.GET.q or request.GET.date_from or request.GET.date_to %}
                 <div class="alert alert-warning text-center mx-3 mb-3">
                     <i class="bi bi-exclamation-triangle me-2"></i>
-                    Nenhum pedido encontrado para "<strong>{{ request.GET.q }}</strong>".
+                    Nenhum pedido encontrado para os filtros aplicados.
                 </div>
                 <a href="{% url 'vendas:order_list' %}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left me-1"></i> Ver todos os pedidos
