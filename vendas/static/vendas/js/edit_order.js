@@ -224,6 +224,7 @@ document.addEventListener("DOMContentLoaded", function () {
             productResults.classList.remove("d-none");
         });
 };
+
     productInput?.addEventListener("input", e => searchProducts(e.target.value));
     document.getElementById("edit-btn-search-product")?.addEventListener("click", () => searchProducts(productInput.value));
 
