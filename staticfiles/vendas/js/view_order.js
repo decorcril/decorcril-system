@@ -2,30 +2,18 @@ document.addEventListener("DOMContentLoaded", function () {
     const modalEl = document.getElementById("viewOrderModal");
     if (!modalEl) return;
 
-    const fmt = v => parseFloat(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+    const fmt     = v => parseFloat(v || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
     const setText = (id, val) => {
         const el = document.getElementById(id);
         if (el) el.textContent = val;
     };
 
-    const FREE_SALE_TYPES  = ["exchange", "maintenance", "advertising"];
-    const FREE_SALE_LABELS = { exchange: "Troca", maintenance: "Manutenção", advertising: "Publicidade" };
-
-    // ── Máscaras ──────────────────────────────────────────────
-    const fmtDoc = doc => {
-        if (!doc) return "—";
-        const d = doc.replace(/\D/g, "");
-        if (d.length === 11) return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-        if (d.length === 14) return d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
-        return doc;
-    };
-
-    const fmtPhone = v => {
-        if (!v) return "—";
-        const d = v.replace(/\D/g, "");
-        if (d.length === 11) return d.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
-        if (d.length === 10) return d.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
-        return v;
+    const FREE_SALE_TYPES  = ["exchange", "maintenance", "advertising", "replacement"];
+    const FREE_SALE_LABELS = {
+        exchange:    "Troca",
+        maintenance: "Manutenção",
+        advertising: "Publicidade",
+        replacement: "Reposição",
     };
 
     // ── Abrir modal ───────────────────────────────────────────
@@ -42,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("view-status-badge").innerHTML = "";
         document.getElementById("view-free-sale-alert").classList.add("d-none");
         document.getElementById("view-items-body").innerHTML =
-            `<tr><td colspan="6" class="text-center text-muted py-3">Carregando...</td></tr>`;
+            `<tr><td colspan="5" class="text-center text-muted py-3">Carregando...</td></tr>`;
         document.getElementById("view-payments-list").innerHTML =
             `<p class="text-muted text-center small py-2">Carregando...</p>`;
 
@@ -51,12 +39,13 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(renderOrder)
             .catch(() => {
                 document.getElementById("view-items-body").innerHTML =
-                    `<tr><td colspan="6" class="text-center text-danger">Erro ao carregar pedido.</td></tr>`;
+                    `<tr><td colspan="5" class="text-center text-danger">Erro ao carregar pedido.</td></tr>`;
             });
     };
 
     // ── Renderizar pedido ─────────────────────────────────────
     const renderOrder = data => {
+
         // Cabeçalho
         setText("view-order-number", data.number);
         document.getElementById("view-status-badge").innerHTML =
@@ -73,29 +62,32 @@ document.addEventListener("DOMContentLoaded", function () {
             alertEl.classList.add("d-none");
         }
 
-        // Cliente — com máscaras
-        setText("view-client-name",     data.client.name);
-        setText("view-client-document", fmtDoc(data.client.document)   || "—");
-        setText("view-client-type",     data.client.type                || "—");
-        setText("view-client-phone",    fmtPhone(data.client.phone)     || "—");
-        setText("view-client-email",    data.client.email               || "—");
-        setText("view-client-address",  data.client.address             || "—");
+        // Cliente
+        setText("view-client-name",      data.client.name      || "—");
+        setText("view-client-document",  data.client.document  || "—");
+        setText("view-client-type",      data.client.type      || "—");
+        setText("view-client-phone",     data.client.phone     || "—");
+        setText("view-client-whatsapp",  data.client.whatsapp  || "—");
+        setText("view-client-email",     data.client.email     || "—");
+        setText("view-client-address",   data.client.address   || "—");
 
         // Comercial
-        setText("view-sale-type",      data.sale_type      || "—");
-        setText("view-contact",        data.contact        || "—");
-        setText("view-customer-order", data.customer_order || "—");
-        setText("view-payment-terms",  data.payment_terms  || "—");
-        setText("view-carrier",        data.carrier        || "—");
-        setText("view-freight",        data.freight ? `R$ ${fmt(data.freight)}` : "R$ 0,00");
+        setText("view-sale-type",        data.sale_type      || "—");
+        setText("view-contact",          data.contact        || "—");
+        setText("view-customer-order",   data.customer_order || "—");
+        setText("view-payment-terms",    data.payment_terms  || "—");
+        setText("view-carrier",          data.carrier        || "—");
+        setText("view-freight",          `R$ ${fmt(data.freight)}`);
         setText("view-down-payment-pct", data.down_payment_percent ? `${fmt(data.down_payment_percent)}%` : "—");
-        setText("view-down-payment-val", data.down_payment_value   ? `R$ ${fmt(data.down_payment_value)}` : "R$ 0,00");
+        setText("view-down-payment-val", `R$ ${fmt(data.down_payment_value)}`);
 
         // Totais
-        setText("view-total-freight", `R$ ${fmt(data.freight)}`);
-        setText("view-total-amount",  `R$ ${fmt(data.total_amount)}`);
-        setText("view-total-paid",    `R$ ${fmt(data.total_paid)}`);
-        setText("view-remaining",     `R$ ${fmt(data.remaining)}`);
+        setText("view-total-products", `R$ ${fmt(data.total_products)}`);
+        setText("view-total-discount", `R$ ${fmt(data.total_discount)}`);
+        setText("view-total-freight",  `R$ ${fmt(data.freight)}`);
+        setText("view-total-amount",   `R$ ${fmt(data.total_amount)}`);
+        setText("view-total-paid",     `R$ ${fmt(data.total_paid)}`);
+        setText("view-remaining",      `R$ ${fmt(data.remaining)}`);
 
         // Observações
         setText("view-notes",          data.notes          || "—");
@@ -104,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // ── Itens ─────────────────────────────────────────────
         const tbody = document.getElementById("view-items-body");
         if (!data.items || !data.items.length) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-3">Nenhum item neste pedido.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Nenhum item neste pedido.</td></tr>`;
         } else {
             tbody.innerHTML = data.items.map(item => `
                 <tr>
@@ -112,7 +104,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     <td class="text-center">${item.sku || ""}</td>
                     <td>${item.name || ""}</td>
                     <td class="text-end">R$ ${fmt(item.unit_price)}</td>
-                    <td class="text-center">${item.discount ? fmt(item.discount) : 0}%</td>
                     <td class="text-end fw-semibold">R$ ${fmt(item.subtotal)}</td>
                 </tr>
             `).join("");
