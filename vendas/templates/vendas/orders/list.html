@@ -33,13 +33,11 @@
 
     <!-- HEADER -->
     <div class="card-header py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-
         <div class="d-flex align-items-center flex-wrap gap-2">
             <h6 class="m-0 fw-bold text-primary">
                 <i class="bi bi-cart me-2"></i>
                 Pedidos
             </h6>
-
             <div class="d-flex flex-wrap gap-1 small">
                 <span class="badge bg-secondary">Total: {{ count_total }}</span>
                 {% if count_open %}<span class="badge bg-primary">Em aberto: {{ count_open }}</span>{% endif %}
@@ -51,11 +49,9 @@
                 {% if count_canceled %}<span class="badge bg-danger">Cancelado: {{ count_canceled }}</span>{% endif %}
             </div>
         </div>
-
         <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()" title="Atualizar">
             <i class="bi bi-arrow-clockwise"></i>
         </button>
-
     </div>
 
     <!-- BODY -->
@@ -100,6 +96,48 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- PAGINAÇÃO -->
+        {% if is_paginated %}
+        <div class="d-flex justify-content-between align-items-center px-3 py-3">
+            <small class="text-muted">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                ({{ page_obj.paginator.count }} pedidos)
+            </small>
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}page={{ page_obj.next_page_number }}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
         {% else %}
         <div class="text-center py-5">
             <i class="bi bi-cart display-1 text-muted mb-3"></i>
