@@ -13,10 +13,11 @@ from ..decorators import group_required
 # =========================
 # Listagem de Produtos
 # =========================
+from django.core.paginator import Paginator
+
 @group_required("Supervisor", "Vendedor")
 def product_list(request):
 
-    # 🔹 Base queryset com contagem de uso em composições
     products = (
         SinglePiece.objects.annotate(used_in_count=Count("used_in_compositions"))
         .select_related("category")
@@ -25,36 +26,38 @@ def product_list(request):
 
     categories = Category.objects.filter(is_active=True)
 
-    # 🔎 Filtro de pesquisa
     q = request.GET.get("q", "").strip()
     if q:
         products = products.filter(
             Q(name__icontains=q) | Q(sku__icontains=q) | Q(category__name__icontains=q)
         )
 
+    # Paginação
+    paginator = Paginator(products, 30)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
     form = SinglePieceForm()
 
-    # 🔹 Produtos disponíveis para serem componentes
     available_products = SinglePiece.objects.filter(
         is_active=True, components__isnull=True
     ).order_by("sku")
 
-    # 🔹 Todas as estruturas já cadastradas
     all_components = ProductComponent.objects.select_related("component", "parent")
 
     context = {
-        "products": products,
-        "categories": categories,
-        "form": form,
-        "is_supervisor": request.user.groups.filter(name="Supervisor").exists(),
-        "is_vendedor": request.user.groups.filter(name="Vendedor").exists(),
-        "query": q,
-        "single_pieces": SinglePiece.objects.filter(is_active=True).order_by("sku"),
-        "simple_and_composite_products": SinglePiece.objects.filter(
-            is_active=True
-        ).order_by("sku"),
+        "products":        page_obj,
+        "page_obj":        page_obj,
+        "is_paginated":    page_obj.has_other_pages(),
+        "categories":      categories,
+        "form":            form,
+        "is_supervisor":   request.user.groups.filter(name="Supervisor").exists(),
+        "is_vendedor":     request.user.groups.filter(name="Vendedor").exists(),
+        "query":           q,
+        "single_pieces":   SinglePiece.objects.filter(is_active=True).order_by("sku"),
+        "simple_and_composite_products": SinglePiece.objects.filter(is_active=True).order_by("sku"),
         "available_products": available_products,
-        "all_components": all_components,
+        "all_components":  all_components,
     }
 
     return render(request, "catalogo/products/list.html", context)

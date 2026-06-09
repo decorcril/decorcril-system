@@ -3,6 +3,7 @@ from django.http import JsonResponse, HttpResponse
 from django.db.models import Q
 from django.contrib import messages
 from catalogo.decorators import group_required
+from django.core.paginator import Paginator
 
 from ..models.client import Client
 from ..forms.client_form import ClientForm, ClientFormSupervisor, ClientFormVendedor
@@ -41,22 +42,28 @@ def clients_list_view(request):
 
     clients = clients.order_by("name")
 
+    # Paginação
+    paginator  = Paginator(clients, 30)
+    page_number = request.GET.get("page")
+    page_obj   = paginator.get_page(page_number)
+
     is_supervisor = request.user.groups.filter(name="Supervisor").exists()
     is_vendedor   = request.user.groups.filter(name="Vendedor").exists()
     is_financeiro = request.user.groups.filter(name="Financeiro").exists()
 
     context = {
-        "clients":      clients,
-        "form":         form,
-        "query":        query,
-        "page_title":   "Clientes",
+        "clients":       page_obj,
+        "page_obj":      page_obj,
+        "is_paginated":  page_obj.has_other_pages(),
+        "form":          form,
+        "query":         query,
+        "page_title":    "Clientes",
         "is_supervisor": is_supervisor,
         "is_vendedor":   is_vendedor,
         "is_financeiro": is_financeiro,
     }
 
     return render(request, "clientes/clients/list.html", context)
-
 
 # =====================================================
 # UPDATE (MODAL AJAX)
